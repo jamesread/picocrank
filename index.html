@@ -1,0 +1,20 @@
+<html>
+	<head>
+		<title>PicoCrank</title>
+	</head>
+
+	<body>
+        <slot id = "app" />
+	</body>
+	
+	<script type = "module">
+		import 'femtocrank/style.css';
+		import { createApp } from 'vue';
+		import App from './vue/views/App.vue';
+		import router from './router.js';
+
+		const app = createApp(App)
+		app.use(router)
+		app.mount('#app');
+	</script>
+</html>
