@@ -1,19 +1,18 @@
 <template>
-	<Header />
+	<Header username = "Guest" breadcrumbs />
+		<div id = "layout">
+			<Sidebar ref = "sidebar" />
 
-	<div id = "layout">
-		<Sidebar ref = "sidebar" />
-
-		<main>
 			<div id = "content">
-				<router-view />
+				<main>
+					<router-view />
+				</main>
 
 				<footer>
 					<span>PicoCrank</span>
 				</footer>
 			</div>
-		</main>
-	</div>
+		</div>
 </template>
 
 <script setup>
@@ -24,9 +23,16 @@
 
 	onMounted(() => {
 		sidebar.value.addNavigationLink({
+		    id: 'welcome',
 			title: "Welcome",
 			path: "/",
 		})
+		sidebar.value.addNavigationLink({
+		    id: 'table-example',
+			title: "Table Example",
+			path: "/table-example",
+		})	
+
 		sidebar.value.open();
 		sidebar.value.stick();
 	});
