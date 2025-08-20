@@ -35,6 +35,7 @@
 
 <script setup>
 	import { ref, computed, onMounted, watch } from 'vue';
+	import Pagination from './Pagination.vue';
 
     const sortBy = ref(null);
 	const sortDir = ref('asc');
