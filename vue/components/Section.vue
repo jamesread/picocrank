@@ -1,7 +1,12 @@
 <template>
 	<section class = "with-header-and-content">
-		<div class = "section-header">
-			<h2>{{ title }}</h2>
+		<div class = "section-header flex-row">
+			<div class = "fg1">
+			<h2 :title = "subtitle">{{ title }}</h2>
+			</div>
+			<div role = "toolbar">
+				<slot name="toolbar" />
+			</div>
 		</div>
 		<div :class = "padding ? 'section-content padding' : 'section-content'">
 			<slot />
@@ -19,6 +24,10 @@ const props = defineProps({
 	padding: {
 		type: Boolean,
 		default: true,
+	},
+	subtitle: {
+		type: String,
+		default: "",
 	},
 });
 </script>

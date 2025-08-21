@@ -4,9 +4,11 @@
 			<th v-for="(header, index) in visibleHeaders" :key="index" @click="toggleSort(header)" :class="{ sortable: header.sortable }">
 				{{ header.label }}
 
-				<span v-if="header.sortable && sortBy === header.key">
-					<span v-if="sortDir === 'asc'">▲</span>
-					<span v-else>▼</span>
+				<span v-if="header.sortable" style:= "width: 1.5em; display: inline-block; text-align: center;">
+					<span v-if="sortBy === header.key">
+						<span v-if="sortDir === 'asc'">▲</span>
+						<span v-else-if="sortDir === 'desc'">▼</span>
+					</span>
 				</span>
 			</th>
 		</thead>
@@ -42,7 +44,22 @@
     const page = ref(1);
 	const pageSize = ref(10);
 
-	const items = ref([])
+	const props = defineProps({
+	    headers: {
+			type: Array,
+			default: () => ['id'],
+		},
+		data: {
+			type: Array,
+			default: () => [],
+		},
+	});
+
+	const items = computed(() => {
+	    const arr = [...props.data];
+
+		return arr;
+	})
 
     const sortedItems = computed(() => {
 		if (!sortBy.value) return [...items.value];
@@ -89,18 +106,9 @@
 		}));
 	});
 
-	const props = defineProps({
-	    headers: {
-			type: Array,
-			default: () => ['id'],
-		},
-		data: {
-			type: Array,
-			default: () => [],
-		},
-	});
-
 	function toggleSort(header) {
+		if (!header.sortable) return;
+
 		if (sortBy.value === header.key) {
 		    sortDir.value = sortDir.value === 'asc' ? 'desc' : 'asc';
 		} else {
@@ -110,14 +118,10 @@
 
 		console.log(`Sorting by ${sortBy.value} in ${sortDir.value} order`);
 	}
-
-	onMounted(() => {
-	    items.value = props.data;
-	})
 </script>
 
 <style scoped>
-table thead th:hover {
+table thead th.sortable:hover {
 	cursor: pointer;
 	color: #0366d6;
 }
