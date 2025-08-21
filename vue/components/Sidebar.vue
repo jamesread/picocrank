@@ -170,13 +170,7 @@ li {
 	align-items: center;
 	gap: 0.75rem;
 	padding: .75em;
-	color: #333;
-}
-
-.navigation-links a:hover,
-.supplemental-links a:hover {
-	background: #f8f9fa;
-	color: #007bff;
+	border-radius: 0;
 }
 
 .icon {
@@ -196,11 +190,6 @@ li {
 	color: #f8f9fa;
   }
 
-  .navigation-links a:hover,
-  .supplemental-links a:hover {
-	background: #343a40;
-	color: #007bff;
-  }
 
   .supplemental-links {
 	border-top: 1px solid #444;

@@ -5,6 +5,9 @@
 		<link rel = "shortcut icon" href = "logo.png" type = "image/png" />
 
 		<meta name = "viewport" content = "width=device-width, initial-scale=1.0, user-scalable=no" />
+
+		<link rel = "stylesheet" href = "node_modules/femtocrank/style.css" />
+		<link rel = "stylesheet" href = "node_modules/femtocrank/dark.css" media = "(prefers-color-scheme: dark)" />
 	</head>
 
 	<body>
@@ -12,7 +15,6 @@
 	</body>
 	
 	<script type = "module">
-		import 'femtocrank/style.css';
 		import { createApp } from 'vue';
 		import App from './vue/views/App.vue';
 		import router from './router.js';
