@@ -12,6 +12,17 @@
 			 :data = "data" 
 			 :headers = "headers" 
 			 >
+			 <template #cell-name="{ row, value }">
+				 <router-link :to="{ name: 'ViewItem', params: { id: row.name } }">
+					 {{ value }}
+				 </router-link>
+			 </template>
+
+			 <template #cell-city="{ row, value }">
+				 <span class = "subtle">
+				 {{ value }}
+				 </span>
+			 </template>
 		</Table>
 	</Section>
 </template>
@@ -20,24 +31,16 @@
 	import { ref, onMounted } from 'vue'
 
 	const headers = ref([
-		{ key: "name", label: "Name", sortable: true, hidden: true, linkFunc: getLink },
-		{ key: "age", label: "Age", sortable: false, hidden: false, linkFunc: null },
-		{ key: "city", label: "City", sortable: true, hidden: false, link: null },
+		{ key: "name", label: "Name", sortable: true, hidden: false, width: "20%" },
+		{ key: "age", label: "Age", sortable: false },
+		{ key: "city", label: "City", sortable: true, width: "200px" },
 	])
-
-
-	function getLink(row) {
-		return {	
-			name: "ViewItem",
-			params: { id: row.name.toLowerCase() }
-		}
-	}
 
 	const data = ref([])
 
 	onMounted(() => {
 		data.value = [
-			{ name: "Alice", age: 30, city: "New York" },
+			{ name: "Alice", age: 30, city: "New York", foo: "bar" },
 			{ name: "Bob", age: 25, city: "Los Angeles" },
 			{ name: "Charlie", age: 35, city: "Chicago" },
 			{ name: "David", age: 28, city: "Houston" },

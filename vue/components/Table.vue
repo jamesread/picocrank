@@ -1,8 +1,8 @@
 <template>
 	<table class = "row-hover">
 		<thead>
-			<th v-for="(header, index) in visibleHeaders" :key="index" @click="toggleSort(header)" :class="{ sortable: header.sortable }">
-				{{ header.label }}
+			<th v-for="(header, index) in visibleHeaders" :key="index" @click="toggleSort(header)" :class="{ sortable: header.sortable }" :style="{ width: header.width || 'auto' }">
+				{{ header.label || header.key }}
 
 				<span v-if="header.sortable" style:= "width: 1.5em; display: inline-block; text-align: center;">
 					<span v-if="sortBy === header.key">
@@ -16,15 +16,18 @@
 			<tr v-if="pagedItems.length === 0">
 				<td :colspan="visibleHeaders.length">No items found</td>
 			</tr>
-			<tr v-else v-for="(item, index) in pagedItems" :key="index">
+			<tr v-else v-for="(row, index) in pagedItems" :key="index">
 				<td v-for="(header, index) in visibleHeaders" :key="index" :class="{ hidden: header.hidden }">
-					<span v-if = "header.linkFunc">
-						<router-link :to="header.linkFunc(item)" class = "link">
-							{{ item[header.key] }}
-						</router-link>
-					</span>
+					<component 
+					    v-if="slotFor(header.key)" 
+						:is="slotFor(header.key)" 
+						:class="{ hidden: header.hidden }"
+						:row="row" 
+						:value="row[header.key]"
+						:key="index" 
+					    />
 					<span v-else>
-						{{ item[header.key] }}
+						{{ row[header.key] }}
 					</span>
 				</td>
 			</tr>
@@ -36,7 +39,7 @@
 </template>
 
 <script setup>
-	import { ref, computed, onMounted, watch } from 'vue';
+	import { ref, computed, onMounted, watch, useSlots } from 'vue';
 	import Pagination from './Pagination.vue';
 
     const sortBy = ref(null);
@@ -54,6 +57,14 @@
 			default: () => [],
 		},
 	});
+
+	const slots = useSlots()
+
+	function slotFor(key) {
+	    let s = slots[`cell-${key}`];
+
+	    return s || slots.cell || null;
+	}
 
 	const items = computed(() => {
 	    const arr = [...props.data];
@@ -100,10 +111,7 @@
 	const totalPages = computed(() => Math.ceil(total.value / pageSize.value));
 
     const visibleHeaders = computed(() => {
-		return props.headers.map(header => ({
-			...header,
-			hidden: header.hidden === true,
-		}));
+		return props.headers.filter(h => !h.hidden);
 	});
 
 	function toggleSort(header) {
