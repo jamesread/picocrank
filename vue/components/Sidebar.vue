@@ -151,6 +151,10 @@ defineExpose({
 
 <style scoped>
 
+h2 {
+    padding: .75em;
+}
+
 .active {
 	text-decoration: underline;
 }
@@ -164,10 +168,8 @@ li {
 	display: flex;
 	align-items: center;
 	gap: 0.75rem;
-	padding: 0.75rem 1rem;
+	padding: .75em;
 	color: #333;
-	transition: background-color 0.2s ease;
-	border-left: 3px solid transparent;
 }
 
 .navigation-links a:hover,
