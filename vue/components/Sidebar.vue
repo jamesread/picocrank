@@ -163,6 +163,7 @@ li {
 	margin: 0;
 	padding: 0;
 }
+
 .navigation-links a,
 .supplemental-links a {
 	display: flex;
@@ -187,6 +188,23 @@ li {
 .supplemental-links {
 	border-top: 1px solid #eee;
 	margin-top: 1rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  .navigation-links a,
+  .supplemental-links a {
+	color: #f8f9fa;
+  }
+
+  .navigation-links a:hover,
+  .supplemental-links a:hover {
+	background: #343a40;
+	color: #007bff;
+  }
+
+  .supplemental-links {
+	border-top: 1px solid #444;
+  }
 }
 
 @media (max-width: 768px) {
