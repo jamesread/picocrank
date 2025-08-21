@@ -1,8 +1,8 @@
 <template>
 	<header>
 		<div class = "image-and-title flex-row" id = "sidebar-button" @click = "emit('toggleSidebar')">
-			<img src = "/logo.png" alt = "Logo" class = "logo" />
-			<h1>PicoCrank</h1>
+			<img :src = "logoUrl" alt = "Logo" class = "logo" />
+			<h1>{{ title }}</h1>
 
 			<div class = "fg1" />
 
@@ -35,6 +35,14 @@
 		username: {
 			type: String,
 			default: "",
+		},
+		title: {
+			type: String,
+			default: "Untitled",
+		},
+		logoUrl: {
+			type: String,
+			default: "/logo.png",
 		},
 	});
 </script>

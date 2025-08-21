@@ -1,5 +1,5 @@
 <template>
-	<Header username = "Guest" breadcrumbs @toggleSidebar="toggleSidebar" />
+	<Header username = "Guest" breadcrumbs @toggleSidebar="toggleSidebar" title = "PicoCrank" />
 		<div id = "layout">
 			<Sidebar ref = "sidebar" />
 
