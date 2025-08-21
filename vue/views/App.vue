@@ -1,5 +1,5 @@
 <template>
-	<Header username = "Guest" breadcrumbs />
+	<Header username = "Guest" breadcrumbs @toggleSidebar="toggleSidebar" />
 		<div id = "layout">
 			<Sidebar ref = "sidebar" />
 
@@ -20,6 +20,12 @@
 	import { onMounted } from 'vue';
 
 	const sidebar = ref(null);
+
+	function toggleSidebar() {
+		if (sidebar.value) {
+			sidebar.value.toggle();
+		}
+	}
 
 	onMounted(() => {
 		sidebar.value.addNavigationLink({

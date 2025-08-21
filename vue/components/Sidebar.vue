@@ -209,7 +209,6 @@ li {
 
 @media (max-width: 768px) {
   .sidebar {
-	  width: 100%;
 	  left: -100%;
   }
 
