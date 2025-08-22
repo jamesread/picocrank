@@ -25,6 +25,8 @@
 	import { HugeiconsIcon } from "@hugeicons/vue";
 	import { Menu01Icon } from "@hugeicons/core-free-icons";
 
+	import Breadcrumbs from "./Breadcrumbs.vue";
+
 	const emit = defineEmits(["toggleSidebar"]);
 
 	const props = defineProps({
