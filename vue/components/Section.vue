@@ -1,8 +1,8 @@
 <template>
-	<section class = "with-header-and-content">
+	<section :class = "'with-header-and-content ' + classes" :id = "id">
 		<div class = "section-header flex-row">
 			<div class = "fg1">
-			<h2 :title = "subtitle">{{ title }}</h2>
+				<h2 :title = "subtitle">{{ title }}</h2>
 			</div>
 			<div role = "toolbar">
 				<slot name="toolbar" />
@@ -26,6 +26,14 @@ const props = defineProps({
 		default: true,
 	},
 	subtitle: {
+		type: String,
+		default: "",
+	},
+	id: {
+		type: String,
+		default: "",
+	},
+	classes: {
 		type: String,
 		default: "",
 	},
