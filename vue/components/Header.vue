@@ -12,6 +12,8 @@
 		</div>
 
 		<Breadcrumbs v-if="breadcrumbs" />
+
+		<slot name="toolbar" />
 		
 		<div class = "fg1"></div>
 

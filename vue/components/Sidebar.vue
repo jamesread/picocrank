@@ -15,17 +15,11 @@
 
 			<nav class="mainnav">
 				<ul class="navigation-links">
-					<li v-for="link in navigationLinks" :key="link.id" :title="link.title">
-						<router-link :to="link.path" :class="{ active: isActive(link.path) }">
-							<HugeiconsIcon :icon="link.icon" />
-							<span>{{ link.title }}</span>
-						</router-link>
-					</li>
-				</ul>
-
-				<ul class="supplemental-links">
-					<li v-for="link in supplementalLinks" :key="link.id" :title="link.title">
-						<router-link :to="link.path" :class="{ active: isActive(link.path) }">
+					<li v-for="link in navigationLinks" :key="link.name" :title="link.title">
+						<!-- Render separator if link is a separator -->
+						<div v-if="link.type === 'separator'" class="separator"></div>
+						<!-- Render regular link if not a separator -->
+						<router-link v-else :to="link.path" :class="{ active: isActive(link.path) }">
 							<HugeiconsIcon :icon="link.icon" />
 							<span>{{ link.title }}</span>
 						</router-link>
@@ -36,12 +30,9 @@
 </template>
 
 <script setup>
-	import { ref, onMounted, getCurrentInstance } from 'vue'
-import { useRoute } from 'vue-router'
+import { ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { HugeiconsIcon } from '@hugeicons/vue'
-import { DashboardSquare01Icon } from '@hugeicons/core-free-icons'
-import { LeftToRightListDashIcon } from '@hugeicons/core-free-icons'
-import { Wrench01Icon } from '@hugeicons/core-free-icons'
 import { Pin02Icon } from '@hugeicons/core-free-icons'
 import { PinIcon } from '@hugeicons/core-free-icons'
 
@@ -49,9 +40,54 @@ const isOpen = ref(false)
 const isStuck = ref(false)
 const navigationLinks = ref([])
 
-const supplementalLinks = ref([])
-
 const route = useRoute()
+const router = useRouter()
+
+function addRouterLink(link) {
+	const route = router.getRoutes().find(r => r.name === link)
+
+	if (route) {
+		const routeLink = {
+			name: link,
+			title: route.meta.title || route.name,
+			path: route.path,
+			icon: route.meta.icon || PinIcon,
+			type: 'route'
+		}
+
+		addNavigationLink(routeLink)
+	}
+}
+
+function addNavigationLink(link) {
+  const existingIndex = navigationLinks.value.findIndex(l => l.name === link.name)
+  if (existingIndex >= 0) {
+	navigationLinks.value[existingIndex] = { ...link }
+  } else {
+	navigationLinks.value.push({ ...link })
+  }
+}
+
+function addSeparator(id) {
+  const separator = {
+    name: id || `nav-separator-${Date.now()}`,
+    type: 'separator',
+    title: 'Separator'
+  }
+  addNavigationLink(separator)
+}
+
+function removeNavigationLink(linkId) {
+  navigationLinks.value = navigationLinks.value.filter(link => link.id !== linkId)
+}
+
+function clearNavigationLinks() {
+  navigationLinks.value = []
+}
+
+function getNavigationLinks() {
+  return [...navigationLinks.value]
+}
 
 function toggleStick() {
   isStuck.value = !isStuck.value
@@ -83,54 +119,9 @@ function isActive(path) {
   return route.path === path
 }
 
-function addNavigationLink(link) {
-  link.icon = DashboardSquare01Icon
-
-  const existingIndex = navigationLinks.value.findIndex(l => l.id === link.id)
-  if (existingIndex >= 0) {
-	navigationLinks.value[existingIndex] = { ...link }
-  } else {
-	navigationLinks.value.push({ ...link })
-  }
-}
-
-function addSupplementalLink(link) {
-  const existingIndex = supplementalLinks.value.findIndex(l => l.id === link.id)
-  if (existingIndex >= 0) {
-	supplementalLinks.value[existingIndex] = { ...link }
-  } else {
-	supplementalLinks.value.push({ ...link })
-  }
-}
-
-function removeNavigationLink(linkId) {
-  navigationLinks.value = navigationLinks.value.filter(link => link.id !== linkId)
-}
-
-function removeSupplementalLink(linkId) {
-  supplementalLinks.value = supplementalLinks.value.filter(link => link.id !== linkId)
-}
-
-function clearNavigationLinks() {
-  navigationLinks.value = []
-}
-
-function clearSupplementalLinks() {
-  supplementalLinks.value = []
-}
-
-function getNavigationLinks() {
-  return [...navigationLinks.value]
-}
-
-function getSupplementalLinks() {
-  return [...supplementalLinks.value]
-}
-
 defineExpose({
   isOpen,
   navigationLinks,
-  supplementalLinks,
   stick,
   unstick,
   toggleStick,
@@ -139,13 +130,11 @@ defineExpose({
   close,
   isActive,
   addNavigationLink,
-  addSupplementalLink,
+  addRouterLink,
+  addSeparator,
   removeNavigationLink,
-  removeSupplementalLink,
   clearNavigationLinks,
-  clearSupplementalLinks,
   getNavigationLinks,
-  getSupplementalLinks
 })
 </script>
 
@@ -164,13 +153,18 @@ li {
 	padding: 0;
 }
 
-.navigation-links a,
-.supplemental-links a {
+.navigation-links a {
 	display: flex;
 	align-items: center;
 	gap: 0.75rem;
 	padding: .75em;
 	border-radius: 0;
+}
+
+.separator {
+	height: 1px;
+	background-color: #eee;
+	margin: 0.5rem 0.75rem;
 }
 
 .icon {
@@ -179,17 +173,14 @@ li {
 	text-align: center;
 }
 
-.supplemental-links {
-	border-top: 1px solid #eee;
-	margin-top: 1rem;
-}
-
 @media (prefers-color-scheme: dark) {
-  .navigation-links a,
-  .supplemental-links a {
+  .navigation-links a {
 	color: #f8f9fa;
   }
 
+  .separator {
+	background-color: #444;
+  }
 
   .supplemental-links {
 	border-top: 1px solid #444;

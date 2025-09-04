@@ -1,23 +1,48 @@
 import { createRouter, createWebHistory } from 'vue-router';
 
-import Welcome from './vue/views/Welcome.vue';
+import { HomeIcon } from '@hugeicons/core-free-icons';
+import { TableIcon } from '@hugeicons/core-free-icons';
+import { ViewIcon } from '@hugeicons/core-free-icons';
+import { SecurityValidationIcon } from '@hugeicons/core-free-icons';
 
 const routes = [
   {
-    path: '/',
     name: 'Welcome',
-    component: Welcome,
+    path: '/',
+    component: () => import('./vue/views/Welcome.vue'),
+    meta: {
+      title: 'Welcome',
+      icon: HomeIcon,
+    }
   },
   {
-    path: '/table-example',
     name: 'TableExample',
-    component: () => import('./vue/examples/TableExample.vue'),
+    path: '/table-example',
+    title: 'Table Example',
+    component: () => import('./vue/views/TableExample.vue'),
+    meta: {
+      title: 'Table Example',
+      icon: TableIcon,
+    }
   },
   {
-    path: '/view-item/:id',
     name: 'ViewItem',
-    component: () => import('./vue/examples/ViewItem.vue'),
+    path: '/view-item/:id',
+    component: () => import('./vue/views/ViewItem.vue'),
     props: true,
+    meta: {
+      title: 'View Item',
+      icon: ViewIcon,
+    }
+  },
+  {
+    name: 'Admin',
+    path: '/admin',
+    component: () => import('./vue/views/Admin.vue'),
+    meta: {
+      title: 'Admin',
+      icon: SecurityValidationIcon,
+    }
   }
 ];
 
