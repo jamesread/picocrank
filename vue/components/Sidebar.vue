@@ -18,7 +18,12 @@
 					<li v-for="link in navigationLinks" :key="link.name" :title="link.title">
 						<!-- Render separator if link is a separator -->
 						<div v-if="link.type === 'separator'" class="separator"></div>
-						<!-- Render regular link if not a separator -->
+						<div v-else-if="link.type === 'callback'">
+							<a href="#" @click.prevent="link.callback()">
+								<HugeiconsIcon :icon="link.icon" />
+								<span>{{ link.title }}</span>
+							</a>
+						</div>
 						<router-link v-else :to="link.path" :class="{ active: isActive(link.path) }">
 							<HugeiconsIcon :icon="link.icon" />
 							<span>{{ link.title }}</span>
@@ -66,6 +71,18 @@ function addNavigationLink(link) {
   } else {
 	navigationLinks.value.push({ ...link })
   }
+}
+
+function addCallback(title, callback, options = {}) {
+  const callbackLink = {
+	name: options.name || title.toLowerCase().replace(/\s+/g, '-'),
+	type: 'callback',
+	icon: options.icon || PinIcon,
+	callback: callback || (() => {}),
+	title: title
+  }
+
+  addNavigationLink(callbackLink)
 }
 
 function addSeparator(id) {
@@ -131,6 +148,7 @@ defineExpose({
   isActive,
   addNavigationLink,
   addRouterLink,
+  addCallback,
   addSeparator,
   removeNavigationLink,
   clearNavigationLinks,

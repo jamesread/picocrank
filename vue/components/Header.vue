@@ -17,9 +17,11 @@
 		
 		<div class = "fg1"></div>
 
-		<div class = "user-info">
-			<span v-if="username">{{ username }}</span>
-		</div>
+		<slot name = "user-info">
+			<div class = "user-info">
+				<span v-if="username">{{ username }}</span>
+			</div>
+		</slot>
 	</header>
 </template>
 

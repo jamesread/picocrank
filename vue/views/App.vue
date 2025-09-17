@@ -28,6 +28,7 @@
 <script setup>
 	import { ref, onMounted } from 'vue';
 	import { useRouter } from 'vue-router';
+	import { Pin02Icon } from '@hugeicons/core-free-icons'
 
 	import QuickSearch from './../components/QuickSearch.vue'
 
@@ -47,6 +48,8 @@
 		sidebar.value.addSeparator('separator-1');
 		sidebar.value.addRouterLink('ViewItem', { id: 1 })
 		sidebar.value.addSeparator('separator-2');
+		sidebar.value.addCallback('Hello World', helloWorld, { icon: Pin02Icon })
+		sidebar.value.addSeparator('separator-3');
 		sidebar.value.addRouterLink('Admin')
 		sidebar.value.open();
 		sidebar.value.stick();
