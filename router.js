@@ -4,6 +4,7 @@ import { HomeIcon } from '@hugeicons/core-free-icons';
 import { TableIcon } from '@hugeicons/core-free-icons';
 import { ViewIcon } from '@hugeicons/core-free-icons';
 import { SecurityValidationIcon } from '@hugeicons/core-free-icons';
+import { CalendarIcon } from '@hugeicons/core-free-icons';
 
 const routes = [
   {
@@ -42,6 +43,16 @@ const routes = [
     meta: {
       title: 'Admin',
       icon: SecurityValidationIcon,
+    }
+  },
+  {
+    name: 'CalendarExample',
+    path: '/calendar-example',
+    component: () => import('./vue/views/CalendarExample.vue'),
+    props: true,
+    meta: {
+      title: 'Calendar Example',
+      icon: CalendarIcon,
     }
   }
 ];

@@ -45,6 +45,7 @@
 	onMounted(() => {
 		sidebar.value.addRouterLink('Welcome')
 		sidebar.value.addRouterLink('TableExample')
+		sidebar.value.addRouterLink('CalendarExample')
 		sidebar.value.addSeparator('separator-1');
 		sidebar.value.addRouterLink('ViewItem', { id: 1 })
 		sidebar.value.addSeparator('separator-2');
