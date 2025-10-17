@@ -628,5 +628,69 @@ function handleContextMenu(event: CalendarEvent, mouseEvent: MouseEvent) {
     padding: 0.25rem 0.5rem;
   }
 }
-</style>
 
+@media (prefers-color-scheme: dark) {
+  .calendar-container {
+    background: #565656;
+    border-color: #374151;
+    border: 1px solid #565656;
+  }
+
+  .calendar-day.today {
+    background: #646c70;
+  }
+
+  .calendar-day.weekend {
+    background: #444;
+  }
+
+  .calendar-day.weekend:hover {
+    background: #1a1a1a;
+  }
+
+  .calendar-day.next-month,
+  .calendar-day.prev-month {
+    background: #1a1a1a !important;
+  }
+  
+  .calendar-day.next-month:hover,
+  .calendar-day.prev-month:hover {
+    background: #374151;
+  }
+
+  .calendar-day.today:hover {
+    background: #374151;
+  }
+
+  .calendar-day {
+    border: 1px solid #3b3b3b;
+  }
+
+  .day-number {
+    color: #f9fafb;
+  }
+
+  .day-header {
+    color: #f9fafb;
+    background: #444 !important;
+    border: 1px solid #374151;
+    border-color: #374151;
+  }
+
+  .day-content:hover .day-number.clickable {
+    color: #f9fafb;
+  }
+
+  .calendar-day:hover {
+    background-color: #374151;
+  }
+
+  .calendar-day.today:hover {
+    background: #374151;
+  }
+
+  .calendar-day.weekend:hover {
+    background: #374151;
+  }
+}
+</style>

@@ -2,71 +2,7 @@
   <div class="pagination">
     <div class="pagination-info">
       <span class="pagination-text">
-        Showing {{ startItem + 1 }}-{{ endItem }} of {{ total }} {{ itemTitle }}
-      </span>
-    </div>
-    
-    <div class="pagination-controls">
-      <button 
-        class="pagination-btn"
-        :disabled="currentPage === 1"
-        @click="goToPage(currentPage - 1)"
-        title="Previous page"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24">
-          <path fill="currentColor" d="M15.41 7.41L14 6l-6 6l6 6l1.41-1.41L10.83 12z"/>
-        </svg>
-      </button>
-
-      
-      <div class="pagination-pages">
-        <button 
-          v-if="showFirstPage"
-          class="pagination-btn"
-          :class="{ active: currentPage === 1 }"
-          @click="goToPage(1)"
-        >
-          1
-        </button>
-        
-        <span v-if="showFirstEllipsis" class="pagination-ellipsis">...</span>
-        
-        <button 
-          v-for="page in visiblePages" 
-          :key="page"
-          class="pagination-btn"
-          :class="{ active: currentPage === page }"
-          @click="goToPage(page)"
-        >
-          {{ page }}
-        </button>
-        
-        <span v-if="showLastEllipsis" class="pagination-ellipsis">...</span>
-        
-        <button 
-          v-if="showLastPage"
-          class="pagination-btn"
-          :class="{ active: currentPage === totalPages }"
-          @click="goToPage(totalPages)"
-        >
-          {{ totalPages }}
-        </button>
-      </div>
-      
-      <button 
-        class="pagination-btn"
-        :disabled="currentPage === totalPages"
-        @click="goToPage(currentPage + 1)"
-        title="Next page"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24">
-          <path fill="currentColor" d="M8.59 16.59L10 18l6-6l-6-6L8.59 7.41L13.17 12z"/>
-        </svg>
-      </button>
-    </div>
-    
-    <div class="pagination-size" v-if="canChangePageSize">
-      <label for="page-size">Items per page:</label>
+      Page size:
       <select 
         id="page-size" 
         v-model="localPageSize" 
@@ -78,6 +14,66 @@
         <option value="50">50</option>
         <option value="100">100</option>
       </select>
+
+      Showing {{ startItem + 1 }}-{{ endItem }} of {{ total }} {{ itemTitle }}
+      </span>
+    </div>
+    
+    <div class="pagination-controls">
+      <button 
+        class="button"
+        :disabled="currentPageValue === 1"
+        @click="goToPage(currentPageValue - 1)"
+        title="Previous page"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M15.41 7.41L14 6l-6 6l6 6l1.41-1.41L10.83 12z"/>
+        </svg>
+      </button>
+
+      
+        <button 
+          v-if="showFirstPage"
+          class="button"
+          :class="{ active: currentPageValue === 1 }"
+          @click="goToPage(1)"
+        >
+          1
+        </button>
+        
+        <span v-if="showFirstEllipsis" class="pagination-ellipsis">...</span>
+        
+        <button 
+          v-for="page in visiblePages" 
+          :key="page"
+          class="button"
+          :class="{ active: currentPageValue === page }"
+          @click="goToPage(page)"
+        >
+          {{ page }}
+        </button>
+        
+        <span v-if="showLastEllipsis" class="pagination-ellipsis">...</span>
+        
+        <button 
+          v-if="showLastPage"
+          class="button"
+          :class="{ active: currentPageValue === totalPages }"
+          @click="goToPage(totalPages)"
+        >
+        {{ totalPages }}
+      </button>
+      
+      <button 
+        class="button"
+        :disabled="currentPageValue === totalPages"
+        @click="goToPage(currentPageValue + 1)"
+        title="Next page"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M8.59 16.59L10 18l6-6l-6-6L8.59 7.41L13.17 12z"/>
+        </svg>
+      </button>
     </div>
   </div>
 </template>
@@ -86,10 +82,6 @@
 import { ref, computed, watch } from 'vue'
 
 const props = defineProps({
-  pageSize: {
-    type: Number,
-    default: 25
-  },
   total: {
     type: Number,
     required: true
@@ -100,30 +92,46 @@ const props = defineProps({
   },
   canChangePageSize: {
     type: Boolean,
-    default: false
+    default: true,
   },
   itemTitle: {
     type: String,
     default: 'items'
+  },
+  // Support for v-model binding
+  page: {
+    type: Number,
+    default: 1
+  },
+  pageSize: {
+    type: Number,
+    default: 25
   }
 })
 
-const emit = defineEmits(['page-change', 'page-size-change'])
+const emit = defineEmits(['page-change', 'page-size-change', 'update:page', 'update:pageSize'])
 
 const localPageSize = ref(props.pageSize)
 const localCurrentPage = ref(props.currentPage)
 
+// Computed property to get the current page value (supports both v-model and regular props)
+const currentPageValue = computed(() => {
+  // When using v-model, the page prop will be reactive and change
+  // When using regular props, currentPage will be reactive
+  return props.page
+})
+
 const totalPages = computed(() => Math.ceil(props.total / localPageSize.value))
 
-const startItem = computed(() => (localCurrentPage.value - 1) * localPageSize.value)
-const endItem = computed(() => Math.min(localCurrentPage.value * localPageSize.value, props.total))
+const startItem = computed(() => (currentPageValue.value - 1) * localPageSize.value)
+const endItem = computed(() => Math.min(currentPageValue.value * localPageSize.value, props.total))
 
 const maxVisiblePages = 5
 const visiblePages = computed(() => {
   const pages = []
   const halfVisible = Math.floor(maxVisiblePages / 2)
   
-  let start = Math.max(1, localCurrentPage.value - halfVisible)
+  let start = Math.max(1, currentPageValue.value - halfVisible)
   let end = Math.min(totalPages.value, start + maxVisiblePages - 1)
   
   if (end - start < maxVisiblePages - 1) {
@@ -143,19 +151,26 @@ const showFirstEllipsis = computed(() => visiblePages.value[0] > 2)
 const showLastEllipsis = computed(() => visiblePages.value[visiblePages.value.length - 1] < totalPages.value - 1)
 
 function goToPage(page) {
-  if (page >= 1 && page <= totalPages.value && page !== localCurrentPage.value) {
+  if (page >= 1 && page <= totalPages.value && page !== currentPageValue.value) {
     localCurrentPage.value = page
     emit('page-change', page)
+    emit('update:page', page)
   }
 }
 
 function handlePageSizeChange() {
   localCurrentPage.value = 1
   emit('page-size-change', localPageSize.value)
+  emit('update:pageSize', localPageSize.value)
   emit('page-change', 1)
+  emit('update:page', 1)
 }
 
 watch(() => props.currentPage, (newPage) => {
+  localCurrentPage.value = newPage
+})
+
+watch(() => props.page, (newPage) => {
   localCurrentPage.value = newPage
 })
 
@@ -187,43 +202,23 @@ watch(() => props.pageSize, (newSize) => {
   gap: 0.5rem;
 }
 
-.pagination-pages {
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-}
-
-.pagination-btn {
+.button {
   display: flex;
   align-items: center;
   justify-content: center;
   min-width: 2.5rem;
   height: 2.5rem;
-  padding: 0.5rem;
-  border: 1px solid #dee2e6;
-  background: #fff;
-  color: #495057;
-  text-decoration: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-size: 0.875rem;
 }
 
-.pagination-btn:hover:not(:disabled) {
-  background: #e9ecef;
-  border-color: #adb5bd;
-  color: #495057;
-}
-
-.pagination-btn.active {
-  background: #c6d0d7;
-  color: #333;
-}
-
-.pagination-btn:disabled {
+.button:disabled {
   opacity: 0.5;
+  background: transparent;
   cursor: not-allowed;
+}
+
+.button.active {
+  background: #545f69;
+  color: #fff;
 }
 
 .pagination-ellipsis {
@@ -232,26 +227,14 @@ watch(() => props.pageSize, (newSize) => {
   font-size: 0.875rem;
 }
 
-.pagination-size {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.875rem;
-  color: #6c757d;
+#page-size {
+  background: transparent;
+  margin-left: 0.5rem;
+  margin-right: 0.5rem;
 }
 
-.page-size-select {
-  padding: 0.25rem 0.5rem;
-  border: 1px solid #dee2e6;
-  border-radius: 4px;
-  background: #fff;
-  font-size: 0.875rem;
-}
-
-.page-size-select:focus {
-  outline: none;
-  border-color: #5681af;
-  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+option {
+  background: #545f69;
 }
 
 /* Responsive design */
