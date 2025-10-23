@@ -39,3 +39,35 @@ const props = defineProps({
 	},
 });
 </script>
+
+<style scoped>
+:slotted(button):not(.good),
+:slotted(.button):not(.good)
+{
+	background-color: white;
+}
+
+:slotted(button:hover):not(.good),
+:slotted(.button:hover):not(.good)
+{
+	background-color: #f0f0f0;
+}
+
+@media (prefers-color-scheme: dark) {
+	:slotted(button):not(.good),
+	:slotted(.button):not(.good)
+	{
+		background-color: #111;
+		border: 1px solid #222;
+		color: #fff;
+	}
+
+	:slotted(button:hover):not(.good),
+	:slotted(.button:hover):not(.good)
+	{
+		background-color: #222;
+		border: 1px solid #333;
+		color: #fff;
+	}
+}
+</style>

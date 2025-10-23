@@ -51,6 +51,7 @@
 		sidebar.value.addSeparator('separator-2');
 		sidebar.value.addCallback('Hello World', helloWorld, { icon: Pin02Icon })
 		sidebar.value.addSeparator('separator-3');
+		sidebar.value.addHtml('<h2 style = "padding: 0.75em;">Administration</h2>', { name: 'admin-heading' })
 		sidebar.value.addRouterLink('Admin')
 		sidebar.value.open();
 		sidebar.value.stick();

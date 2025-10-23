@@ -7,7 +7,7 @@
 			<div class = "fg1" />
 
 			<button id = "sidebar-toggler-button" aria-label = "Open sidebar navigation" aria-pressed = "false" aria-haspopup = "menu" class = "neutral">
-				<HugeiconsIcon :icon = "Menu01Icon" width = "1em" height = "1em" />
+				<HugeiconsIcon :icon = "Menu01Icon" width = "1em" height = "1em" :strokeWidth = 3 />
 			</button>
 		</div>
 
@@ -55,6 +55,11 @@
 
 <style scoped>
 button {
-	color: #bbb;
+	border: 0;
+	color: #fff;
+}
+
+button:hover {
+	background-color: transparent;
 }
 </style>

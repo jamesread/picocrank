@@ -10,6 +10,14 @@
 	</Section>
 
 	<Section title = "Lorum" id = "lorem">
+		<template #toolbar>
+			<button>
+				<HugeiconsIcon :icon = "HighlighterIcon" width = "1em" height = "1em" />
+				Highlight</button>
+			<button>Quote</button>
+			<button class = "good">Add</button>
+		</template>
+
 		<p>
 			Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
 			Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
@@ -52,4 +60,6 @@
 
 <script setup>
 	import Section from '../components/Section.vue';
+	import { HugeiconsIcon } from '@hugeicons/vue';
+	import { HighlighterIcon } from '@hugeicons/core-free-icons';
 </script>

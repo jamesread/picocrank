@@ -5,10 +5,10 @@
 			<div class = "fg1" />
 				<button class="stick-toggle" :aria-pressed="isStuck" :title="isStuck ? 'Unstick sidebar' : 'Stick sidebar'"	@click="toggleStick">
 					<span v-if="isStuck">
-						<HugeiconsIcon :icon="Pin02Icon" width = "1em" height = "1em" />
+						<HugeiconsIcon :icon="Pin02Icon" width = "1em" height = "1em" :strokeWidth = 3 />
 					</span>
 					<span v-else>
-						<HugeiconsIcon :icon="PinIcon" width = "1em" height = "1em" />
+						<HugeiconsIcon :icon="PinIcon" width = "1em" height = "1em" :strokeWidth = 3 />
 					</span>
 				</button>
 			</div>
@@ -24,6 +24,7 @@
 								<span>{{ link.title }}</span>
 							</a>
 						</div>
+						<div v-else-if="link.type === 'html'" v-html="link.html"></div>
 						<router-link v-else :to="link.path" :class="{ active: isActive(link.path) }">
 							<HugeiconsIcon :icon="link.icon" />
 							<span>{{ link.title }}</span>
@@ -94,6 +95,16 @@ function addSeparator(id) {
   addNavigationLink(separator)
 }
 
+function addHtml(html, options = {}) {
+  const htmlLink = {
+    name: options.name || `html-item-${Date.now()}`,
+    type: 'html',
+    html: html,
+    title: options.title || 'HTML Item'
+  }
+  addNavigationLink(htmlLink)
+}
+
 function removeNavigationLink(linkId) {
   navigationLinks.value = navigationLinks.value.filter(link => link.id !== linkId)
 }
@@ -150,6 +161,7 @@ defineExpose({
   addRouterLink,
   addCallback,
   addSeparator,
+  addHtml,
   removeNavigationLink,
   clearNavigationLinks,
   getNavigationLinks,
@@ -169,6 +181,10 @@ h2 {
 li {
 	margin: 0;
 	padding: 0;
+}
+
+button {
+	border: 0;
 }
 
 .navigation-links a {
