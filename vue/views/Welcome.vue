@@ -18,6 +18,18 @@
 			<button class = "good">Add</button>
 		</template>
 
+		<div>
+			<button class = "neutral">
+				Neutral
+			</button>
+			<button class = "good">
+				Good
+			</button>
+			<button class = "bad">
+				Bad
+			</button>
+		</div>
+
 		<p>
 			Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
 			Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
