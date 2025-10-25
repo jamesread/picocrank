@@ -5,7 +5,21 @@ import Components from 'unplugin-vue-components/vite'
 export default defineConfig({
   base: '/picocrank/',
   build: {
-    outDir: 'dist'
+    outDir: 'dist',
+    rollupOptions: {
+      external: [],
+      output: {
+        assetFileNames: (assetInfo) => {
+          if (assetInfo.name === 'style.css') {
+            return 'assets/femtocrank-[hash].css'
+          }
+          if (assetInfo.name === 'dark.css') {
+            return 'assets/femtocrank-dark-[hash].css'
+          }
+          return 'assets/[name]-[hash].[ext]'
+        }
+      }
+    }
   },
   server: {
     proxy: {
