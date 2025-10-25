@@ -31,7 +31,7 @@
 	import { Pin02Icon } from '@hugeicons/core-free-icons'
 
 	import QuickSearch from './../components/QuickSearch.vue'
-	import '../../src/styles.css'
+	import '../../styles.css'
 	import logoUrl from '/logo.png';
 
 	const quickSearchRef = ref(null)
