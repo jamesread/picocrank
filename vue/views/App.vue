@@ -19,7 +19,7 @@
 			</main>
 
 			<footer>
-				<span>PicoCrank</span>
+				<span><a href = "https://github.com/jamesread/picocrank">PicoCrank</a></span>
 			</footer>
 		</div>
 	</div>
