@@ -44,37 +44,48 @@ const currentMonth = ref('?')
 const currentMonthIndex = ref(new Date().getMonth())
 const currentYear = ref(new Date().getFullYear())
 
+// Cache events by month/year key (e.g., "2024-10")
+const eventsCache = new Map()
+
 // Date picker state - using native HTML5 month input
 const selectedDate = ref('')
 
-// Generate dummy events for the current month
-function generateDummyEvents() {
-	const now = new Date()
-	const currentMonth = now.getMonth()
-	const currentYear = now.getFullYear()
-	
-	// Get the number of days in the current month
-	const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate()
+// Simple seeded random number generator for consistent event generation
+function seededRandom(seed) {
+	let value = seed
+	return function() {
+		value = (value * 9301 + 49297) % 233280
+		return value / 233280
+	}
+}
+
+// Generate dummy events for a specific month
+function generateDummyEventsForMonth(monthIndex, year) {
+	// Get the number of days in the month
+	const daysInMonth = new Date(year, monthIndex + 1, 0).getDate()
 	
 	const dummyEvents = []
 	
+	// Create a seeded random generator for consistent events per month
+	const random = seededRandom(year * 12 + monthIndex)
+	
 	// Add some recurring events
 	for (let day = 1; day <= daysInMonth; day++) {
-		const date = new Date(currentYear, currentMonth, day)
+		const date = new Date(year, monthIndex, day)
 		const dayOfWeek = date.getDay()
 		
 		// Add weekend events (Saturday and Sunday)
 		if (dayOfWeek === 0 || dayOfWeek === 6) {
 			dummyEvents.push({
-				id: `weekend-${day}`,
+				id: `weekend-${year}-${monthIndex}-${day}`,
 				title: 'Weekend Activity',
-				date: new Date(currentYear, currentMonth, day, 10, 0),
+				date: new Date(year, monthIndex, day, 10, 0),
 				description: 'Relaxing weekend activity'
 			})
 		}
 		
 		// Add some random events
-		if (Math.random() > 0.7) {
+		if (random() > 0.7) {
 			const eventTypes = [
 				{ title: 'Team Meeting', time: [9, 0], duration: 1 },
 				{ title: 'Client Call', time: [14, 30], duration: 0.5 },
@@ -83,13 +94,13 @@ function generateDummyEvents() {
 				{ title: 'Code Review', time: [10, 0], duration: 1.5 }
 			]
 			
-			const eventType = eventTypes[Math.floor(Math.random() * eventTypes.length)]
+			const eventType = eventTypes[Math.floor(random() * eventTypes.length)]
 			const [hours, minutes] = eventType.time
 			
 			dummyEvents.push({
-				id: `event-${day}-${Math.random().toString(36).substr(2, 9)}`,
+				id: `event-${year}-${monthIndex}-${day}-${Math.random().toString(36).substr(2, 9)}`,
 				title: eventType.title,
-				date: new Date(currentYear, currentMonth, day, hours, minutes),
+				date: new Date(year, monthIndex, day, hours, minutes),
 				description: `Scheduled ${eventType.title.toLowerCase()}`
 			})
 		}
@@ -97,34 +108,34 @@ function generateDummyEvents() {
 	
 	// Add some multi-day events
 	dummyEvents.push({
-		id: 'conference-1',
+		id: `conference-${year}-${monthIndex}`,
 		title: 'Tech Conference',
-		startDate: new Date(currentYear, currentMonth, 5, 9, 0),
-		endDate: new Date(currentYear, currentMonth, 7, 17, 0),
+		startDate: new Date(year, monthIndex, 5, 9, 0),
+		endDate: new Date(year, monthIndex, 7, 17, 0),
 		description: 'Annual technology conference'
 	})
 	
 	dummyEvents.push({
-		id: 'vacation-1',
+		id: `vacation-${year}-${monthIndex}`,
 		title: 'Vacation',
-		startDate: new Date(currentYear, currentMonth, 15, 0, 0),
-		endDate: new Date(currentYear, currentMonth, 18, 23, 59),
+		startDate: new Date(year, monthIndex, 15, 0, 0),
+		endDate: new Date(year, monthIndex, 18, 23, 59),
 		description: 'Family vacation time'
 	})
 	
 	// Add some all-day events
 	dummyEvents.push({
-		id: 'holiday-1',
+		id: `holiday-${year}-${monthIndex}`,
 		title: 'Public Holiday',
-		date: new Date(currentYear, currentMonth, 1, 0, 0),
+		date: new Date(year, monthIndex, 1, 0, 0),
 		description: 'National holiday - office closed'
 	})
 	
 	if (daysInMonth >= 25) {
 		dummyEvents.push({
-			id: 'deadline-1',
+			id: `deadline-${year}-${monthIndex}`,
 			title: 'Project Deadline',
-			date: new Date(currentYear, currentMonth, 25, 0, 0),
+			date: new Date(year, monthIndex, 25, 0, 0),
 			description: 'Important project deadline'
 		})
 	}
@@ -132,9 +143,47 @@ function generateDummyEvents() {
 	return dummyEvents
 }
 
+// Get or generate events for a specific month/year
+function getEventsForMonth(monthIndex, year) {
+	const cacheKey = `${year}-${monthIndex}`
+	
+	// Return cached events if available
+	if (eventsCache.has(cacheKey)) {
+		return eventsCache.get(cacheKey)
+	}
+	
+	// Generate new events for this month
+	const dummyEvents = generateDummyEventsForMonth(monthIndex, year)
+	
+	// Cache the events
+	eventsCache.set(cacheKey, dummyEvents)
+	
+	return dummyEvents
+}
+
+// Merge events for previous, current, and next months so overflow days show events
+function getEventsForSurroundingMonths(monthIndex, year) {
+	const prevMonthIndex = monthIndex === 0 ? 11 : monthIndex - 1
+	const prevYear = monthIndex === 0 ? year - 1 : year
+	const nextMonthIndex = monthIndex === 11 ? 0 : monthIndex + 1
+	const nextYear = monthIndex === 11 ? year + 1 : year
+
+	return [
+		...getEventsForMonth(prevMonthIndex, prevYear),
+		...getEventsForMonth(monthIndex, year),
+		...getEventsForMonth(nextMonthIndex, nextYear)
+	]
+}
+
+// Generate dummy events for the current month (backward compatibility wrapper)
+function generateDummyEvents() {
+    const now = new Date()
+    return getEventsForMonth(now.getMonth(), now.getFullYear())
+}
+
 function handleEventClick(event) {
-	console.log('Event clicked:', event)
-	alert(`Event: ${event.title}\nDescription: ${event.description || 'No description'}`)
+    console.log('Event clicked:', event)
+    alert(`Event: ${event.title}\nDescription: ${event.description || 'No description'}`)
 }
 
 function handleDateClick(date) {
@@ -166,6 +215,9 @@ function previousMonth() {
 	
 	// Update date picker
 	updateDatePicker(newMonth, newYear)
+
+	// Update events for surrounding months
+	events.value = getEventsForSurroundingMonths(newMonth, newYear)
 }
 
 function nextMonth() {
@@ -185,6 +237,9 @@ function nextMonth() {
 	
 	// Update date picker
 	updateDatePicker(newMonth, newYear)
+
+	// Update events for surrounding months
+	events.value = getEventsForSurroundingMonths(newMonth, newYear)
 }
 
 function goToToday() {
@@ -204,6 +259,9 @@ function goToToday() {
 	
 	// Update date picker
 	updateDatePicker(newMonth, newYear)
+
+	// Update events for surrounding months
+	events.value = getEventsForSurroundingMonths(newMonth, newYear)
 }
 
 function goToSelectedDate() {
@@ -223,6 +281,9 @@ function goToSelectedDate() {
 		month: 'long', 
 		year: 'numeric' 
 	})
+
+	// Update events for surrounding months
+	events.value = getEventsForSurroundingMonths(monthIndex, year)
 }
 
 function handleMonthChange(month, year) {
@@ -245,18 +306,20 @@ function handleMonthChange(month, year) {
 	updateDatePicker(month, year)
 	
 	setTimeout(() => {
-		// Simulate loading delay
-		events.value = generateDummyEvents()
+		// Load events for surrounding months (will use cache if available)
+		events.value = getEventsForSurroundingMonths(month, year)
 		loading.value = false
 	}, 500)
 }
 
 onMounted(() => {
-	// Generate initial events for current month
-	events.value = generateDummyEvents()
+	// Generate initial events for current, previous, and next months
+	const now = new Date()
+	const initMonth = now.getMonth()
+	const initYear = now.getFullYear()
+	events.value = getEventsForSurroundingMonths(initMonth, initYear)
 	
 	// Set initial month title using native JavaScript
-	const now = new Date()
 	currentMonthIndex.value = now.getMonth()
 	currentYear.value = now.getFullYear()
 	currentMonth.value = now.toLocaleDateString('en-US', { 

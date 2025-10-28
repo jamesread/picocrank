@@ -57,6 +57,21 @@ const currentDate = computed(() => {
 const currentMonth = computed(() => currentDate.value.getMonth())
 const currentYear = computed(() => currentDate.value.getFullYear())
 
+// Compute the first visible day (Monday) for the current month view
+function getStartOfGrid(date: Date): Date {
+  const firstOfMonth = new Date(date.getFullYear(), date.getMonth(), 1)
+  const dayOfWeek = (firstOfMonth.getDay() + 6) % 7 // Monday=0
+  const start = new Date(firstOfMonth)
+  start.setDate(firstOfMonth.getDate() - dayOfWeek)
+  start.setHours(0, 0, 0, 0)
+  return start
+}
+
+// Anchor date for the 6x7 grid; we will shift this by weeks without re-rendering the grid structure
+const gridStartDate = ref<Date>(getStartOfGrid(currentDate.value))
+// Track if we're actively scrolling to prevent watcher from resetting grid anchor
+const isScrolling = ref(false)
+
 // Helper function to check if a time is midnight (00:00)
 function isMidnight(dateValue: any): boolean {
   if (!dateValue) return false
@@ -70,6 +85,15 @@ function formatTimeOrNoTime(dateValue: any): string {
   if (isMidnight(dateValue)) return 'No time'
   const date = new Date(dateValue)
   return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+}
+
+// Determine if a date is in the past (before today)
+function isPastDay(date: Date): boolean {
+  const day = new Date(date)
+  day.setHours(0, 0, 0, 0)
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  return day.getTime() < today.getTime()
 }
 
 // Get event date range
@@ -179,55 +203,18 @@ function formatEventTimeDefault(event: CalendarEvent, date: Date): string {
   return 'All day'
 }
 
-// Calendar generation
+// Calendar generation from persistent grid start
 const calendarDays = computed(() => {
-  const year = currentYear.value
-  const month = currentMonth.value
-
-  const firstDay = new Date(year, month, 1)
-  const lastDay = new Date(year, month + 1, 0)
-  const daysInMonth = lastDay.getDate()
-
-  // Get starting day of week (Monday as first day)
-  const startDay = (firstDay.getDay() + 6) % 7
-
-  const days = []
-
-  // Add days from previous month to fill the first row
-  const prevMonth = month === 0 ? 11 : month - 1
-  const prevYear = month === 0 ? year - 1 : year
-  const prevMonthLastDay = new Date(prevYear, prevMonth + 1, 0).getDate()
-
-  for (let i = 0; i < startDay; i++) {
-    const day = prevMonthLastDay - startDay + i + 1
-    const date = new Date(prevYear, prevMonth, day)
+  const days = [] as { date: Date; events: CalendarEvent[] }[]
+  const start = gridStartDate.value
+  for (let i = 0; i < 42; i++) {
+    const date = new Date(start)
+    date.setDate(start.getDate() + i)
     days.push({
       date,
       events: getEventsForDate(date)
     })
   }
-
-  // Add days of the month
-  for (let day = 1; day <= daysInMonth; day++) {
-    const date = new Date(year, month, day)
-    days.push({
-      date,
-      events: getEventsForDate(date)
-    })
-  }
-
-  // Add days from next month to complete the last row
-  const totalCells = 42
-  const remainingCells = totalCells - days.length
-
-  for (let day = 1; day <= remainingCells; day++) {
-    const date = new Date(year, month + 1, day)
-    days.push({
-      date,
-      events: getEventsForDate(date)
-    })
-  }
-
   return days
 })
 
@@ -237,8 +224,11 @@ function previousMonth() {
     const newMonth = currentMonth.value === 0 ? 11 : currentMonth.value - 1
     const newYear = currentMonth.value === 0 ? currentYear.value - 1 : currentYear.value
     emit('month-change', newMonth, newYear)
+    // Optimistically update grid anchor for smooth transition
+    gridStartDate.value = getStartOfGrid(new Date(newYear, newMonth, 1))
   } else {
     internalCurrentDate.value = new Date(currentYear.value, currentMonth.value - 1, 1)
+    gridStartDate.value = getStartOfGrid(internalCurrentDate.value)
   }
 }
 
@@ -247,8 +237,10 @@ function nextMonth() {
     const newMonth = currentMonth.value === 11 ? 0 : currentMonth.value + 1
     const newYear = currentMonth.value === 11 ? currentYear.value + 1 : currentYear.value
     emit('month-change', newMonth, newYear)
+    gridStartDate.value = getStartOfGrid(new Date(newYear, newMonth, 1))
   } else {
     internalCurrentDate.value = new Date(currentYear.value, currentMonth.value + 1, 1)
+    gridStartDate.value = getStartOfGrid(internalCurrentDate.value)
   }
 }
 
@@ -256,9 +248,51 @@ function goToToday() {
   if (props.currentMonth !== undefined && props.currentYear !== undefined) {
     const today = new Date()
     emit('month-change', today.getMonth(), today.getFullYear())
+    gridStartDate.value = getStartOfGrid(today)
   } else {
     internalCurrentDate.value = new Date()
+    gridStartDate.value = getStartOfGrid(internalCurrentDate.value)
   }
+}
+
+// Week navigation (mouse wheel)
+const lastWheelAt = ref(0)
+const wheelThrottleMs = 180
+function getVisibleMonthYear(start: Date): { month: number; year: number } {
+  const mid = new Date(start)
+  mid.setDate(start.getDate() + 21) // middle of 6x7 grid
+  return { month: mid.getMonth(), year: mid.getFullYear() }
+}
+
+function adjustByWeeks(weeks: number): void {
+  const newStart = new Date(gridStartDate.value)
+  newStart.setDate(newStart.getDate() + weeks * 7)
+  gridStartDate.value = newStart
+
+  if (props.currentMonth !== undefined && props.currentYear !== undefined) {
+    const { month, year } = getVisibleMonthYear(newStart)
+    if (month !== currentMonth.value || year !== currentYear.value) {
+      emit('month-change', month, year)
+      // Set flag to prevent watcher from resetting our scroll position
+      isScrolling.value = true
+      // Clear the flag after a short delay to allow future prop-driven updates
+      setTimeout(() => { isScrolling.value = false }, 100)
+    }
+  } else {
+    // Keep internal anchor and current date roughly aligned (set to first of visible month)
+    const { month, year } = getVisibleMonthYear(newStart)
+    internalCurrentDate.value = new Date(year, month, 1)
+  }
+}
+
+function handleWheel(event: WheelEvent): void {
+  // Prevent page scrolling while using calendar scroll
+  event.preventDefault()
+  const now = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now()
+  if (now - lastWheelAt.value < wheelThrottleMs) return
+  lastWheelAt.value = now
+  const direction = event.deltaY > 0 ? 1 : -1
+  adjustByWeeks(direction)
 }
 
 // Event handlers
@@ -275,6 +309,15 @@ function handleContextMenu(event: CalendarEvent, mouseEvent: MouseEvent) {
   mouseEvent.stopPropagation()
   emit('event-context-menu', event, mouseEvent)
 }
+import { watch } from 'vue'
+
+// Sync grid start when controlled month/year props change (but not during scrolling)
+watch([currentMonth, currentYear], () => {
+  if (isScrolling.value) return
+  const anchor = new Date(currentYear.value, currentMonth.value, 1)
+  gridStartDate.value = getStartOfGrid(anchor)
+})
+
 </script>
 
 <template>
@@ -290,10 +333,10 @@ function handleContextMenu(event: CalendarEvent, mouseEvent: MouseEvent) {
       </div>
     </div>
 
-    <div v-if="error" class="calendar-error">{{ error }}</div>
-    <div v-else-if="loading" class="calendar-loading">Loading…</div>
-    <div v-else class="calendar-container">
-      <div class="calendar-grid">
+    <div class="calendar-container">
+      <div v-if="error" class="calendar-error">{{ error }}</div>
+      <div v-if="loading" class="calendar-loading-overlay">Loading…</div>
+      <div class="calendar-grid" @wheel.prevent="handleWheel">
         <!-- Day headers -->
         <div v-for="day in dayNames" :key="day" class="day-header">{{ day }}</div>
 
@@ -306,7 +349,8 @@ function handleContextMenu(event: CalendarEvent, mouseEvent: MouseEvent) {
             'today': day && day.date.toDateString() === new Date().toDateString(),
             'weekend': day && (day.date.getDay() === 0 || day.date.getDay() === 6),
             'prev-month': day && day.date.getMonth() !== currentMonth && day.date.getMonth() !== (currentMonth + 1) % 12,
-            'next-month': day && day.date.getMonth() !== currentMonth && day.date.getMonth() === (currentMonth + 1) % 12
+            'next-month': day && day.date.getMonth() !== currentMonth && day.date.getMonth() === (currentMonth + 1) % 12,
+            'past': day && isPastDay(day.date)
           }"
         >
           <div v-if="day" class="day-content" @click="handleDateClick(day.date)">
@@ -397,11 +441,23 @@ function handleContextMenu(event: CalendarEvent, mouseEvent: MouseEvent) {
   text-align: center;
 }
 
+.calendar-loading-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.6);
+  z-index: 1;
+  font-weight: 600;
+}
+
 .calendar-container {
   background: white;
   border: 1px solid #e0e0e0;
   overflow: hidden;
   border-radius: 8px;
+  position: relative;
 }
 
 .calendar-grid {
@@ -427,10 +483,11 @@ function handleContextMenu(event: CalendarEvent, mouseEvent: MouseEvent) {
 .calendar-day {
   border-right: 1px solid #e0e0e0;
   border-bottom: 1px solid #e0e0e0;
-  min-height: 120px;
+  height: 160px;
   position: relative;
   transition: background-color 0.2s ease;
   cursor: pointer;
+  overflow: hidden;
 }
 
 .calendar-day:hover {
@@ -452,12 +509,18 @@ function handleContextMenu(event: CalendarEvent, mouseEvent: MouseEvent) {
 .calendar-day.next-month,
 .calendar-day.prev-month {
   background: #f8f9fa;
-  opacity: 0.6;
 }
 
 .calendar-day.next-month:hover,
 .calendar-day.prev-month:hover {
   background: #e9ecef;
+}
+
+.calendar-day.past {
+  opacity: 0.6;
+}
+
+.calendar-day.past:hover {
   opacity: 0.8;
 }
 
@@ -503,7 +566,7 @@ function handleContextMenu(event: CalendarEvent, mouseEvent: MouseEvent) {
 
 .day-events {
   flex: 1;
-  overflow: hidden;
+  overflow: auto;
 }
 
 .calendar-event {
@@ -587,7 +650,7 @@ function handleContextMenu(event: CalendarEvent, mouseEvent: MouseEvent) {
   }
 
   .calendar-day {
-    min-height: 80px;
+    height: 80px;
   }
 
   .day-number {
@@ -609,7 +672,7 @@ function handleContextMenu(event: CalendarEvent, mouseEvent: MouseEvent) {
   }
 
   .calendar-day {
-    min-height: 60px;
+    height: 60px;
   }
 
   .day-header {
@@ -691,6 +754,14 @@ function handleContextMenu(event: CalendarEvent, mouseEvent: MouseEvent) {
 
   .calendar-day.weekend:hover {
     background: #374151;
+  }
+
+  .calendar-day.past {
+    opacity: 0.6;
+  }
+
+  .calendar-day.past:hover {
+    opacity: 0.8;
   }
 }
 </style>
