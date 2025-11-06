@@ -1,12 +1,12 @@
 <template>
 	<header>
-		<div class = "image-and-title flex-row" id = "sidebar-button" @click = "emit('toggleSidebar')">
+		<div class = "image-and-title flex-row" :id = "sidebarEnabled ? 'sidebar-button' : null" @click = "sidebarEnabled && emit('toggleSidebar')">
 			<img :src = "logoUrl" alt = "Logo" class = "logo" />
 			<h1>{{ title }}</h1>
 
 			<div class = "fg1" />
 
-			<button id = "sidebar-toggler-button" aria-label = "Open sidebar navigation" aria-pressed = "false" aria-haspopup = "menu" class = "neutral">
+			<button v-if="sidebarEnabled" id = "sidebar-toggler-button" aria-label = "Open sidebar navigation" aria-pressed = "false" aria-haspopup = "menu" class = "neutral">
 				<HugeiconsIcon :icon = "Menu01Icon" width = "1em" height = "1em" :strokeWidth = 3 />
 			</button>
 		</div>
@@ -49,6 +49,10 @@
 		logoUrl: {
 			type: String,
 			default: "/logo.png",
+		},
+		sidebarEnabled: {
+			type: Boolean,
+			default: true,
 		},
 	});
 </script>

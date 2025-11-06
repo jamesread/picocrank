@@ -1,5 +1,11 @@
 <template>
 	<Section title = "Welcome" classes = "">
+		<template #toolbar>
+			<button @click="toggleSidebarEnabled" :class="sidebarEnabled ? 'neutral' : 'good'">
+				<HugeiconsIcon :icon="Menu01Icon" width="1em" height="1em" />
+				{{ sidebarEnabled ? 'Disable Sidebar' : 'Enable Sidebar' }}
+			</button>
+		</template>
 		<p>
 			Welcome to Femtocrank, a web-based tool for analyzing and visualizing the performance of your code.
 			To get started, you can either upload a file or paste your code directly into the editor.
@@ -71,7 +77,13 @@
 </template>
 
 <script setup>
+	import { inject } from 'vue';
 	import Section from '../components/Section.vue';
 	import { HugeiconsIcon } from '@hugeicons/vue';
 	import { HighlighterIcon } from '@hugeicons/core-free-icons';
+	import { Menu01Icon } from '@hugeicons/core-free-icons';
+
+	// Inject sidebar state and toggle function from App.vue
+	const sidebarEnabled = inject('sidebarEnabled');
+	const toggleSidebarEnabled = inject('toggleSidebarEnabled');
 </script>
