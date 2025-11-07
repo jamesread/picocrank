@@ -49,13 +49,15 @@ const navigationLinks = ref([])
 const route = useRoute()
 const router = useRouter()
 
-function addRouterLink(link) {
+function addRouterLink(link, altTitle = null) {
 	const route = router.getRoutes().find(r => r.name === link)
+
+	const title = altTitle || route.meta.title || route.name
 
 	if (route) {
 		const routeLink = {
 			name: link,
-			title: route.meta.title || route.name,
+			title: title,
 			path: route.path,
 			icon: route.meta.icon || PinIcon,
 			type: 'route'
