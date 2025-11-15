@@ -28,7 +28,7 @@
     "vue-router": "^4.6.3"
   },
   "devDependencies": {
-    "semantic-release": "^24.2.9"
+    "semantic-release": "^25.0.2"
   },
   "homepage": "https://github.com/jamesread/picocrank#readme"
 }
