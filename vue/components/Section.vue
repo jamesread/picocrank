@@ -39,36 +39,3 @@ const props = defineProps({
 	},
 });
 </script>
-
-<style scoped>
-:slotted(.section-header button).neutral,
-:slotted(.section-header .button).neutral
-{
-	background-color: white;
-	color: #000;
-}
-
-:slotted(.section-header .button:hover).neutral,
-:slotted(.section-header .button:hover).neutral
-{
-	background-color: #f0f0f0;
-}
-
-@media (prefers-color-scheme: dark) {
-	:slotted(.section-header button).neutral,
-	:slotted(.section-header .button).neutral
-	{
-		background-color: #111;
-		border: 1px solid #222;
-		color: #fff;
-	}
-
-	:slotted(.section-header button:hover).neutral,
-	:slotted(.section-header .button:hover).neutral
-	{
-		background-color: #222;
-		border: 1px solid #333;
-		color: #fff;
-	}
-}
-</style>
