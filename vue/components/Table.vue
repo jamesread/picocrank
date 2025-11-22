@@ -80,7 +80,6 @@
 		return [...items.value].sort((a, b) => {
 		    const av = a[col];
 			const bv = b[col];
-			console.log("sort values", col, av, bv)
 
             if (av === bv) return 0;
 			if (av === null || av === undefined) return 1;
@@ -123,8 +122,6 @@
 		    sortBy.value = header.key;
 		    sortDir.value = 'asc';
 		}
-
-		console.log(`Sorting by ${sortBy.value} in ${sortDir.value} order`);
 	}
 </script>
 
