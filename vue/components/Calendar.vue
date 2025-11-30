@@ -203,6 +203,22 @@ function formatEventTimeDefault(event: CalendarEvent, date: Date): string {
   return 'All day'
 }
 
+// Get ordinal suffix for a number (1st, 2nd, 3rd, 4th, etc.)
+function getOrdinalSuffix(day: number): string {
+  const j = day % 10
+  const k = day % 100
+  if (j === 1 && k !== 11) {
+    return 'st'
+  }
+  if (j === 2 && k !== 12) {
+    return 'nd'
+  }
+  if (j === 3 && k !== 13) {
+    return 'rd'
+  }
+  return 'th'
+}
+
 // Calendar generation from persistent grid start
 const calendarDays = computed(() => {
   const days = [] as { date: Date; events: CalendarEvent[] }[]
@@ -355,7 +371,7 @@ watch([currentMonth, currentYear], () => {
         >
           <div v-if="day" class="day-content" @click="handleDateClick(day.date)">
             <div class="day-number clickable">
-              {{ day.date.getDate() }}
+              {{ day.date.getDate() }}<span class="day-month">{{ getOrdinalSuffix(day.date.getDate()) }} {{ monthNames[day.date.getMonth()].substring(0, 3) }}</span>
             </div>
             <div class="day-events">
               <div
@@ -494,6 +510,10 @@ watch([currentMonth, currentYear], () => {
   background-color: #f0f8ff;
 }
 
+.calendar-day:hover .day-number .day-month {
+  display: inline;
+}
+
 .calendar-day:nth-child(7n) {
   border-right: none;
 }
@@ -558,6 +578,11 @@ watch([currentMonth, currentYear], () => {
   padding: 0.25rem;
   border-radius: 4px;
   transition: background-color 0.2s;
+}
+
+.day-number.clickable .day-month {
+  display: none;
+  font-size: small;
 }
 
 .day-content:hover .day-number.clickable {
