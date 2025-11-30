@@ -1,5 +1,5 @@
 <template>
-	<aside :class="{ 'shown': isOpen, 'stuck': isStuck }" class="sidebar">
+	<aside ref="sidebarRef" :class="{ 'shown': isOpen, 'stuck': isStuck }" class="sidebar">
 		<div class = "flex-row">
 			<h2>Navigation</h2>
 			<div class = "fg1" />
@@ -36,7 +36,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { HugeiconsIcon } from '@hugeicons/vue'
 import { Pin02Icon } from '@hugeicons/core-free-icons'
@@ -45,6 +45,7 @@ import { PinIcon } from '@hugeicons/core-free-icons'
 const isOpen = ref(false)
 const isStuck = ref(false)
 const navigationLinks = ref([])
+const sidebarRef = ref(null)
 
 const route = useRoute()
 const router = useRouter()
@@ -205,6 +206,52 @@ function handleLinkClick(callback = null) {
     close()
   }
 }
+
+function handleClickOutside(event) {
+  // Only close if sidebar is open and unpinned
+  if (!isOpen.value || isStuck.value) {
+    return
+  }
+
+  const target = event.target
+  
+  // Check if click is on the sidebar toggle button or its container
+  // These elements should not trigger the close action
+  const sidebarButton = document.getElementById('sidebar-button')
+  const sidebarTogglerButton = document.getElementById('sidebar-toggler-button')
+  
+  // Don't close if clicking on toggle button or its parent container
+  if (sidebarButton && sidebarButton.contains(target)) {
+    return
+  }
+  
+  if (sidebarTogglerButton && sidebarTogglerButton.contains(target)) {
+    return
+  }
+
+  // Check if click is outside the sidebar element
+  if (sidebarRef.value && !sidebarRef.value.contains(target)) {
+    close()
+  }
+}
+
+// Watch for sidebar open/close state to manage event listener
+watch([isOpen, isStuck], ([open, stuck]) => {
+  nextTick(() => {
+    if (open && !stuck) {
+      // Add event listener when sidebar is open and unpinned
+      document.addEventListener('click', handleClickOutside)
+    } else {
+      // Remove event listener when sidebar is closed or pinned
+      document.removeEventListener('click', handleClickOutside)
+    }
+  })
+}, { immediate: true })
+
+// Clean up event listener on unmount
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside)
+})
 
 defineExpose({
   isOpen,
