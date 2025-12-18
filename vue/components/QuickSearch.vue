@@ -303,7 +303,6 @@ defineExpose({
 .quick-search {
   position: relative;
   width: 100%;
-  max-width: 400px;
 }
 
 .search-container {
