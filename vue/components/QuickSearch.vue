@@ -369,7 +369,7 @@ defineExpose({
 
 .search-result-item:hover,
 .search-result-item.active {
-  background-color: #f8fafc;
+  background-color: var(--hover-background-color);
 }
 
 .result-content {
