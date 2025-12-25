@@ -5,6 +5,7 @@ import { TableIcon } from '@hugeicons/core-free-icons';
 import { ViewIcon } from '@hugeicons/core-free-icons';
 import { SecurityValidationIcon } from '@hugeicons/core-free-icons';
 import { CalendarIcon } from '@hugeicons/core-free-icons';
+import { EditIcon } from '@hugeicons/core-free-icons';
 
 const routes = [
   {
@@ -53,6 +54,15 @@ const routes = [
     meta: {
       title: 'Calendar Example',
       icon: CalendarIcon,
+    }
+  },
+  {
+    name: 'FormExample',
+    path: '/form-example',
+    component: () => import('./vue/views/FormExample.vue'),
+    meta: {
+      title: 'Form Example',
+      icon: EditIcon,
     }
   }
 ];

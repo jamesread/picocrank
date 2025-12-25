@@ -10,19 +10,21 @@
 		</template>
 	</Header>
 
-	<div id = "layout">
-		<Sidebar v-if="sidebarEnabled" ref = "sidebar" />
+	<Navigation ref="navigation">
+		<div id = "layout">
+			<Sidebar v-if="sidebarEnabled" ref = "sidebar" />
 
-		<div id = "content">
-			<main>
-				<router-view />
-			</main>
+			<div id = "content">
+				<main>
+					<router-view />
+				</main>
 
-			<footer>
-				<span><a href = "https://github.com/jamesread/picocrank">PicoCrank</a></span>
-			</footer>
+				<footer>
+					<span><a href = "https://github.com/jamesread/picocrank">PicoCrank</a></span>
+				</footer>
+			</div>
 		</div>
-	</div>
+	</Navigation>
 </template>
 
 <script setup>
@@ -31,12 +33,14 @@
 	import { Pin02Icon } from '@hugeicons/core-free-icons'
 
 	import QuickSearch from './../components/QuickSearch.vue'
+	import Navigation from './../components/Navigation.vue'
 	import '../../styles.css'
 	import logoUrl from '/logo.png';
 
 	const quickSearchRef = ref(null)
 	const router = useRouter();
 	const sidebar = ref(null);
+	const navigation = ref(null);
 	const sidebarEnabled = ref(true);
 
 	function toggleSidebar() {
@@ -54,17 +58,21 @@
 	provide('toggleSidebarEnabled', toggleSidebarEnabled);
 
 	onMounted(() => {
+		if (navigation.value) {
+			navigation.value.addRouterLink('Welcome')
+			navigation.value.addRouterLink('TableExample')
+			navigation.value.addRouterLink('CalendarExample')
+			navigation.value.addRouterLink('FormExample')
+			navigation.value.addSeparator('separator-1');
+			navigation.value.addRouterLink('ViewItem', 'View Awesome Item', { params: { id: 1 } })
+			navigation.value.addSeparator('separator-2');
+			navigation.value.addCallback('Callback Example', helloWorld, { icon: Pin02Icon })
+			navigation.value.addSeparator('separator-3');
+			navigation.value.addHtml('<h2 style = "padding: 0.75em;">Administration</h2>', { name: 'admin-heading' })
+			navigation.value.addRouterLink('Admin')
+		}
+
 		if (sidebar.value) {
-			sidebar.value.addRouterLink('Welcome')
-			sidebar.value.addRouterLink('TableExample')
-			sidebar.value.addRouterLink('CalendarExample')
-			sidebar.value.addSeparator('separator-1');
-			sidebar.value.addRouterLink('ViewItem', 'View Awesome Item', { params: { id: 1 } })
-			sidebar.value.addSeparator('separator-2');
-			sidebar.value.addCallback('Callback Example', helloWorld, { icon: Pin02Icon })
-			sidebar.value.addSeparator('separator-3');
-			sidebar.value.addHtml('<h2 style = "padding: 0.75em;">Administration</h2>', { name: 'admin-heading' })
-			sidebar.value.addRouterLink('Admin')
 			sidebar.value.open();
 			sidebar.value.stick();
 		}
