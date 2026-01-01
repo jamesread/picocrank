@@ -66,4 +66,8 @@ button {
 button:hover {
 	background-color: transparent;
 }
+
+.user-info span {
+	padding-right: 0.5rem;
+}
 </style>

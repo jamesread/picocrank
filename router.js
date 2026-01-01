@@ -5,6 +5,8 @@ import { TableIcon } from '@hugeicons/core-free-icons';
 import { ViewIcon } from '@hugeicons/core-free-icons';
 import { SecurityValidationIcon } from '@hugeicons/core-free-icons';
 import { CalendarIcon } from '@hugeicons/core-free-icons';
+import { EditIcon } from '@hugeicons/core-free-icons';
+import { Menu01Icon } from '@hugeicons/core-free-icons';
 
 const routes = [
   {
@@ -61,6 +63,42 @@ const routes = [
     component: () => import('./vue/views/Login.vue'),
     meta: {
       title: 'Login',
+      icon: SecurityValidationIcon,
+    }
+  },
+  {
+    name: 'FormExample',
+    path: '/form-example',
+    component: () => import('./vue/views/FormExample.vue'),
+    meta: {
+      title: 'Form Example',
+      icon: EditIcon,
+    }
+  },
+  {
+    name: 'TabsExample',
+    path: '/tabs-example',
+    component: () => import('./vue/views/TabsExample.vue'),
+    meta: {
+      title: 'Tabs Example',
+      icon: Menu01Icon,
+    }
+  },
+  {
+    name: 'UserControlPanel',
+    path: '/user-control-panel',
+    component: () => import('./vue/views/UserControlPanel.vue'),
+    meta: {
+      title: 'User Control Panel',
+      icon: SecurityValidationIcon,
+    }
+  },
+  {
+    name: 'LoginExample',
+    path: '/login-example',
+    component: () => import('./vue/views/LoginExample.vue'),
+    meta: {
+      title: 'Login Example',
       icon: SecurityValidationIcon,
     }
   }

@@ -33,7 +33,7 @@
 			</tr>
 		</tbody>
 	</table>
-	<div class = "padding">
+	<div v-if="showPagination" class = "padding">
 		<Pagination :total = "total" v-model:page="page" v-model:page-size="pageSize" />
 	</div>
 </template>
@@ -55,6 +55,10 @@
 		data: {
 			type: Array,
 			default: () => [],
+		},
+		showPagination: {
+			type: Boolean,
+			default: true,
 		},
 	});
 

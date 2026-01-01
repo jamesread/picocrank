@@ -24,7 +24,7 @@
 			<button class = "good">Add</button>
 		</template>
 
-		<div>
+		<div role = "toolbar">
 			<button class = "neutral">
 				Neutral
 			</button>

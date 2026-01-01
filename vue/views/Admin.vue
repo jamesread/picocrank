@@ -9,29 +9,29 @@
 				<h3>System Overview</h3>
 				<p>Welcome to the administrative panel. This is a placeholder for administrative functionality.</p>
 				
-				<div class="stats-grid">
-					<div class="stat-card">
+				<div class="grid-boxed">
+					<div class="stat-display">
 						<h4>Total Users</h4>
-						<div class="stat-value">1,247</div>
-						<div class="stat-change">+12% from last month</div>
+						<div class="stat fg-good">1,247</div>
+						<div class="subtle">+12% from last month</div>
 					</div>
 					
-					<div class="stat-card">
+					<div class="stat-display">
 						<h4>Active Sessions</h4>
-						<div class="stat-value">89</div>
-						<div class="stat-change">-3% from last hour</div>
+						<div class="stat fg-bad">89</div>
+						<div class="subtle">-3% from last hour</div>
 					</div>
 					
-					<div class="stat-card">
+					<div class="stat-display">
 						<h4>System Load</h4>
-						<div class="stat-value">67%</div>
-						<div class="stat-change">Normal</div>
+						<div class="stat fg-warning">67%</div>
+						<div class="subtle">Moderate</div>
 					</div>
 					
-					<div class="stat-card">
+					<div class="stat-display">
 						<h4>Storage Used</h4>
-						<div class="stat-value">2.4 GB</div>
-						<div class="stat-change">45% of total</div>
+						<div class="stat fg-good">2.4 GB</div>
+						<div class="subtle">45% of total</div>
 					</div>
 				</div>
 			</div>
@@ -64,7 +64,7 @@
 			
 			<div class="admin-section">
 				<h3>Quick Actions</h3>
-				<div class="action-buttons">
+				<div role = "toolbar">
 					<button class="action-btn">Create User</button>
 					<button class="action-btn">System Backup</button>
 					<button class="action-btn">View Logs</button>
