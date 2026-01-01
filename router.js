@@ -54,6 +54,15 @@ const routes = [
       title: 'Calendar Example',
       icon: CalendarIcon,
     }
+  },
+  {
+    name: 'Login',
+    path: '/login',
+    component: () => import('./vue/views/Login.vue'),
+    meta: {
+      title: 'Login',
+      icon: SecurityValidationIcon,
+    }
   }
 ];
 
