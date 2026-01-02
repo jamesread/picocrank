@@ -189,15 +189,11 @@ function handleLinkClick(link) {
 }
 
 .nav-button-label {
-	font-size: normal;
 	font-weight: bold;
+	font-size: 1.125rem;
 	word-break: break-word;
 	text-align: left;
 	line-height: 1.2;
-}
-
-.navigation-grid.compact .nav-button-label {
-	font-size: 0.85em;
 }
 
 .nav-button.active .nav-button-label {
@@ -205,17 +201,11 @@ function handleLinkClick(link) {
 }
 
 .nav-button-description {
-	font-size: small;
 	font-weight: normal;
 	color: var(--text-muted, #666);
 	word-break: break-word;
 	text-align: left;
 	line-height: 1.5;
-	opacity: 0.8;
-}
-
-.navigation-grid.compact .nav-button-description {
-	font-size: 0.7em;
 }
 
 .nav-button.active .nav-button-description {
@@ -253,42 +243,14 @@ function handleLinkClick(link) {
 	}
 }
 
-/* Responsive */
 @media (max-width: 768px) {
 	.navigation-grid {
-		grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+		grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
 		gap: 0.75rem;
 	}
 
 	.nav-button {
 		padding: 1rem 0.5rem;
-	}
-
-	.nav-button-label {
-		font-size: normal;
-	}
-
-	.nav-button-description {
-		font-size: 0.7em;
-	}
-}
-
-@media (max-width: 480px) {
-	.navigation-grid {
-		grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-		gap: 0.5rem;
-	}
-
-	.nav-button {
-		padding: 0.75rem 0.25rem;
-	}
-
-	.nav-button-label {
-		font-size: 0.8em;
-	}
-
-	.nav-button-description {
-		font-size: 0.65em;
 	}
 }
 </style>
