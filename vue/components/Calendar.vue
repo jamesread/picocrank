@@ -675,7 +675,7 @@ watch([currentMonth, currentYear], () => {
   }
 
   .calendar-day {
-    height: 80px;
+    height: 110px;
   }
 
   .day-number {
@@ -694,10 +694,6 @@ watch([currentMonth, currentYear], () => {
 @media (max-width: 480px) {
   .calendar-grid {
     min-height: 300px;
-  }
-
-  .calendar-day {
-    height: 60px;
   }
 
   .day-header {
