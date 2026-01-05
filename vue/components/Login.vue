@@ -57,12 +57,17 @@
 					</div>
 				</div>
 			</template>
+
+			<!-- Forward custom tab slots -->
+			<template v-for="slotName in customTabSlotNames" :key="slotName" v-slot:[slotName]="slotProps">
+				<slot :name="slotName" v-bind="slotProps" />
+			</template>
 		</Tabs>
 	</div>
 </template>
 
 <script setup>
-import { ref, reactive, watch } from 'vue';
+import { ref, reactive, watch, computed, useSlots } from 'vue';
 import Tabs from './Tabs.vue';
 import { HugeiconsIcon } from '@hugeicons/vue';
 
@@ -79,16 +84,63 @@ const props = defineProps({
 			local: 'Username & Password',
 			oauth: 'OAuth2'
 		})
+	},
+	// Custom tabs to inject (optional)
+	customTabs: {
+		type: Array,
+		default: () => []
+	},
+	// Whether to show default tabs (local and oauth)
+	showDefaultTabs: {
+		type: Boolean,
+		default: true
 	}
 });
 
 const emit = defineEmits(['local-login', 'oauth-login', 'tab-change']);
 
+const slots = useSlots();
+
+// Get custom tab slot names (exclude default tabs: tab-local and tab-oauth)
+const customTabSlotNames = computed(() => {
+	if (!slots) return [];
+	const defaultSlots = ['tab-local', 'tab-oauth'];
+	const allSlotNames = Object.keys(slots);
+	return allSlotNames.filter(
+		slotName => slotName.startsWith('tab-') && !defaultSlots.includes(slotName)
+	);
+});
+
 // Login tabs configuration
-const loginTabs = ref([
-	{ id: 'local', label: props.tabLabels.local || 'Username & Password' },
-	{ id: 'oauth', label: props.tabLabels.oauth || 'OAuth2' }
-]);
+const loginTabs = ref([]);
+
+// Initialize tabs
+function initializeTabs() {
+	const tabs = [];
+	
+	// Add default tabs if enabled
+	if (props.showDefaultTabs) {
+		tabs.push(
+			{ id: 'local', label: props.tabLabels.local || 'Username & Password' },
+			{ id: 'oauth', label: props.tabLabels.oauth || 'OAuth2' }
+		);
+	}
+	
+	// Add custom tabs
+	if (props.customTabs && props.customTabs.length > 0) {
+		tabs.push(...props.customTabs);
+	}
+	
+	loginTabs.value = tabs;
+}
+
+// Initialize tabs on mount
+initializeTabs();
+
+// Watch for changes to customTabs or showDefaultTabs
+watch(() => [props.customTabs, props.showDefaultTabs], () => {
+	initializeTabs();
+}, { deep: true });
 
 // Local login state
 const localLogin = reactive({
@@ -101,6 +153,7 @@ const localLoginError = ref('');
 // OAuth providers - provided by parent component
 const oauthProviders = ref(props.oauthProviders);
 const oauthError = ref('');
+
 
 // Watch for changes to oauthProviders prop
 watch(() => props.oauthProviders, (newProviders) => {
