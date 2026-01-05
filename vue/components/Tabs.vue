@@ -159,7 +159,7 @@ defineExpose({
 .tab-button.active {
 	color: var(--primary-color, #007bff);
 	border-bottom-color: var(--primary-color, #007bff);
-	font-weight: 500;
+	font-weight: bold;
 }
 
 .tab-button:focus {
