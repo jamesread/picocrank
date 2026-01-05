@@ -246,6 +246,7 @@ defineExpose({
 	background-color: var(--input-bg, #fff);
 	color: var(--text-color, #000);
 	width: 100%;
+	box-sizing: border-box;
 }
 
 .local-login-form input:focus {
