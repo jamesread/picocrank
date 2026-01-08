@@ -23,6 +23,17 @@
       <button 
         class="button"
         :disabled="currentPageValue === 1"
+        @click="goToPage(1)"
+        title="First page"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M18.41 16.59L13.82 12l4.59-4.59L17 6l-6 6l6 6zM6 6h2v12H6z"/>
+        </svg>
+      </button>
+      
+      <button 
+        class="button"
+        :disabled="currentPageValue === 1"
         @click="goToPage(currentPageValue - 1)"
         title="Previous page"
       >
@@ -31,37 +42,11 @@
         </svg>
       </button>
 
-      
-        <button 
-          v-if="showFirstPage"
-          class="button"
-          :class="{ active: currentPageValue === 1 }"
-          @click="goToPage(1)"
-        >
-          1
-        </button>
-        
-        <span v-if="showFirstEllipsis" class="pagination-ellipsis">...</span>
-        
-        <button 
-          v-for="page in visiblePages" 
-          :key="page"
-          class="button"
-          :class="{ active: currentPageValue === page }"
-          @click="goToPage(page)"
-        >
-          {{ page }}
-        </button>
-        
-        <span v-if="showLastEllipsis" class="pagination-ellipsis">...</span>
-        
-        <button 
-          v-if="showLastPage"
-          class="button"
-          :class="{ active: currentPageValue === totalPages }"
-          @click="goToPage(totalPages)"
-        >
-        {{ totalPages }}
+      <button 
+        class="button active"
+        disabled
+      >
+        {{ currentPageValue }}
       </button>
       
       <button 
@@ -72,6 +57,17 @@
       >
         <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24">
           <path fill="currentColor" d="M8.59 16.59L10 18l6-6l-6-6L8.59 7.41L13.17 12z"/>
+        </svg>
+      </button>
+      
+      <button 
+        class="button"
+        :disabled="currentPageValue === totalPages"
+        @click="goToPage(totalPages)"
+        title="Last page"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M5.59 7.41L10.18 12l-4.59 4.59L7 18l6-6l-6-6zM16 6h2v12h-2z"/>
         </svg>
       </button>
     </div>
@@ -126,30 +122,6 @@ const totalPages = computed(() => Math.ceil(props.total / localPageSize.value))
 const startItem = computed(() => (currentPageValue.value - 1) * localPageSize.value)
 const endItem = computed(() => Math.min(currentPageValue.value * localPageSize.value, props.total))
 
-const maxVisiblePages = 5
-const visiblePages = computed(() => {
-  const pages = []
-  const halfVisible = Math.floor(maxVisiblePages / 2)
-  
-  let start = Math.max(1, currentPageValue.value - halfVisible)
-  let end = Math.min(totalPages.value, start + maxVisiblePages - 1)
-  
-  if (end - start < maxVisiblePages - 1) {
-    start = Math.max(1, end - maxVisiblePages + 1)
-  }
-  
-  for (let i = start; i <= end; i++) {
-    pages.push(i)
-  }
-  
-  return pages
-})
-
-const showFirstPage = computed(() => visiblePages.value[0] > 1)
-const showLastPage = computed(() => visiblePages.value[visiblePages.value.length - 1] < totalPages.value)
-const showFirstEllipsis = computed(() => visiblePages.value[0] > 2)
-const showLastEllipsis = computed(() => visiblePages.value[visiblePages.value.length - 1] < totalPages.value - 1)
-
 function goToPage(page) {
   if (page >= 1 && page <= totalPages.value && page !== currentPageValue.value) {
     localCurrentPage.value = page
@@ -193,7 +165,7 @@ watch(() => props.pageSize, (newSize) => {
 
 .pagination-text {
   font-size: 0.875rem;
-  color: #6c757d;
+  color: #666;
 }
 
 .pagination-controls {
@@ -203,6 +175,7 @@ watch(() => props.pageSize, (newSize) => {
 }
 
 .button {
+  border: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -211,20 +184,8 @@ watch(() => props.pageSize, (newSize) => {
 }
 
 .button:disabled {
-  opacity: 0.5;
   background: transparent;
   cursor: not-allowed;
-}
-
-.button.active {
-  background: #545f69;
-  color: #fff;
-}
-
-.pagination-ellipsis {
-  padding: 0.5rem;
-  color: #6c757d;
-  font-size: 0.875rem;
 }
 
 #page-size {
@@ -251,6 +212,12 @@ option {
   
   .pagination-size {
     justify-content: center;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .pagination-text {
+	color: #adb5bd;
   }
 }
 </style> 
