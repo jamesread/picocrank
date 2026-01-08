@@ -4,7 +4,7 @@
   "description": "A set of zero dependency Vue components built on the Femtocrank global CSS theme.",
   "main": "vite.config.js",
   "scripts": {
-    "build": "vite build --base '.'",
+    "build": "vite build --base './'",
     "preview": "vite preview",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
