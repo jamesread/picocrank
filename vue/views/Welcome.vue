@@ -1,10 +1,20 @@
 <template>
 	<Section title = "Welcome" classes = "">
 		<template #toolbar>
-			<button @click="toggleSidebarEnabled" :class="sidebarEnabled ? 'neutral' : 'good'">
-				<HugeiconsIcon :icon="Menu01Icon" width="1em" height="1em" />
-				{{ sidebarEnabled ? 'Disable Sidebar' : 'Enable Sidebar' }}
-			</button>
+			<div style="display: flex; gap: 1rem; align-items: center;">
+				<label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+					<input type="checkbox" :checked="sidebarEnabled" @change="toggleSidebarEnabled" />
+					<span>Enable Sidebar</span>
+				</label>
+				<label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+					<input type="checkbox" :checked="quickSearchEnabled" @change="toggleQuickSearchEnabled" />
+					<span>Enable QuickSearch</span>
+				</label>
+				<label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+					<input type="checkbox" :checked="topBarEnabled" @change="toggleTopBarEnabled" />
+					<span>Enable TopBar</span>
+				</label>
+			</div>
 		</template>
 		<p>
 			Welcome to Femtocrank, a web-based tool for analyzing and visualizing the performance of your code.
@@ -83,7 +93,11 @@
 	import { HighlighterIcon } from '@hugeicons/core-free-icons';
 	import { Menu01Icon } from '@hugeicons/core-free-icons';
 
-	// Inject sidebar state and toggle function from App.vue
+	// Inject sidebar, QuickSearch, and TopBar state and toggle functions from App.vue
 	const sidebarEnabled = inject('sidebarEnabled');
 	const toggleSidebarEnabled = inject('toggleSidebarEnabled');
+	const quickSearchEnabled = inject('quickSearchEnabled');
+	const toggleQuickSearchEnabled = inject('toggleQuickSearchEnabled');
+	const topBarEnabled = inject('topBarEnabled');
+	const toggleTopBarEnabled = inject('toggleTopBarEnabled');
 </script>

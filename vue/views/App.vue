@@ -1,7 +1,8 @@
 <template>
-	<Header username = "Guest" @toggleSidebar="toggleSidebar" title = "PicoCrank" :logoUrl="logoUrl" :sidebarEnabled="sidebarEnabled">
+	<Header username = "Guest" @toggleSidebar="toggleSidebar" title = "PicoCrank" :logoUrl="logoUrl" :sidebarEnabled="sidebarEnabled" :navigation="navigation" :topBarEnabled="topBarEnabled">
 		<template #toolbar>
 			<QuickSearch
+				v-if="quickSearchEnabled"
 				ref="quickSearchRef"
 				placeholder="Search items..."
 				:search-fields="['title', 'name']"
@@ -42,6 +43,8 @@
 	const sidebar = ref(null);
 	const navigation = ref(null);
 	const sidebarEnabled = ref(true);
+	const quickSearchEnabled = ref(true);
+	const topBarEnabled = ref(false);
 
 	function toggleSidebar() {
 		if (sidebar.value) {
@@ -53,9 +56,21 @@
 		sidebarEnabled.value = !sidebarEnabled.value;
 	}
 
-	// Provide sidebar state and toggle function for child components
+	function toggleQuickSearchEnabled() {
+		quickSearchEnabled.value = !quickSearchEnabled.value;
+	}
+
+	function toggleTopBarEnabled() {
+		topBarEnabled.value = !topBarEnabled.value;
+	}
+
+	// Provide sidebar, QuickSearch, and TopBar state and toggle functions for child components
 	provide('sidebarEnabled', sidebarEnabled);
 	provide('toggleSidebarEnabled', toggleSidebarEnabled);
+	provide('quickSearchEnabled', quickSearchEnabled);
+	provide('toggleQuickSearchEnabled', toggleQuickSearchEnabled);
+	provide('topBarEnabled', topBarEnabled);
+	provide('toggleTopBarEnabled', toggleTopBarEnabled);
 
 	onMounted(() => {
 		if (navigation.value) {
@@ -84,15 +99,17 @@
 			sidebar.value.stick();
 		}
 
-		quickSearchRef.value.addItem({
-			id: 'hello-world',
-			title: 'Hello World',
-			name: 'hello-world',
-			description: 'This is a test item',
-			category: 'Actions',
-			type: 'callback',
-			callback: helloWorld
-		})
+		if (quickSearchRef.value) {
+			quickSearchRef.value.addItem({
+				id: 'hello-world',
+				title: 'Hello World',
+				name: 'hello-world',
+				description: 'This is a test item',
+				category: 'Actions',
+				type: 'callback',
+				callback: helloWorld
+			})
+		}
 	});
 
 	function helloWorld() {

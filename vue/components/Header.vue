@@ -11,6 +11,8 @@
 			</button>
 		</div>
 
+		<TopBar v-if="topBarEnabled" :navigation="navigation" />
+
 		<Breadcrumbs v-if="breadcrumbs" />
 
 		<slot name="toolbar" />
@@ -30,6 +32,7 @@
 	import { Menu01Icon } from "@hugeicons/core-free-icons";
 
 	import Breadcrumbs from "./Breadcrumbs.vue";
+	import TopBar from "./TopBar.vue";
 
 	const emit = defineEmits(["toggleSidebar"]);
 
@@ -53,6 +56,14 @@
 		sidebarEnabled: {
 			type: Boolean,
 			default: true,
+		},
+		topBarEnabled: {
+			type: Boolean,
+			default: false,
+		},
+		navigation: {
+			type: Object,
+			default: null,
 		},
 	});
 </script>
