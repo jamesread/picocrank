@@ -1,8 +1,12 @@
 <template>
 	<header>
-		<div class = "image-and-title flex-row" :id = "sidebarEnabled ? 'sidebar-button' : null" @click = "sidebarEnabled && emit('toggleSidebar')">
-			<img :src = "logoUrl" alt = "Logo" class = "logo" />
-			<h1>{{ title }}</h1>
+		<div
+			:id = "sidebarEnabled ? 'sidebar-button' : null"
+			:class="['image-and-title', 'flex-row', { 'disabled-branding': !showBranding }]"
+			@click = "sidebarEnabled && emit('toggleSidebar')"
+		>
+			<img v-if="showBranding" :src = "logoUrl" alt = "Logo" class = "logo" />
+			<h1 v-if="showBranding">{{ title }}</h1>
 
 			<div class = "fg1" />
 
@@ -54,6 +58,10 @@
 			type: Boolean,
 			default: true,
 		},
+		showBranding: {
+			type: Boolean,
+			default: true,
+		},
 	});
 </script>
 
@@ -65,6 +73,10 @@ button {
 
 button:hover {
 	background-color: transparent;
+}
+
+#sidebar-button.disabled-branding {
+	width: auto;
 }
 
 .user-info span {

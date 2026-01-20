@@ -5,6 +5,10 @@
 				<HugeiconsIcon :icon="Menu01Icon" width="1em" height="1em" />
 				{{ sidebarEnabled ? 'Disable Sidebar' : 'Enable Sidebar' }}
 			</button>
+			<button @click="toggleBrandingEnabled" :class="brandingEnabled ? 'neutral' : 'good'">
+				<HugeiconsIcon :icon="HighlighterIcon" width="1em" height="1em" />
+				{{ brandingEnabled ? 'Hide Logo & Title' : 'Show Logo & Title' }}
+			</button>
 		</template>
 		<p>
 			Welcome to Femtocrank, a web-based tool for analyzing and visualizing the performance of your code.
@@ -83,7 +87,9 @@
 	import { HighlighterIcon } from '@hugeicons/core-free-icons';
 	import { Menu01Icon } from '@hugeicons/core-free-icons';
 
-	// Inject sidebar state and toggle function from App.vue
+	// Inject sidebar and branding state and toggle functions from App.vue
 	const sidebarEnabled = inject('sidebarEnabled');
 	const toggleSidebarEnabled = inject('toggleSidebarEnabled');
+	const brandingEnabled = inject('brandingEnabled');
+	const toggleBrandingEnabled = inject('toggleBrandingEnabled');
 </script>

@@ -1,5 +1,5 @@
 <template>
-	<Header username = "Guest" @toggleSidebar="toggleSidebar" title = "PicoCrank" :logoUrl="logoUrl" :sidebarEnabled="sidebarEnabled">
+	<Header username = "Guest" @toggleSidebar="toggleSidebar" title = "PicoCrank" :logoUrl="logoUrl" :sidebarEnabled="sidebarEnabled" :showBranding="brandingEnabled">
 		<template #toolbar>
 			<QuickSearch
 				ref="quickSearchRef"
@@ -42,6 +42,7 @@
 	const sidebar = ref(null);
 	const navigation = ref(null);
 	const sidebarEnabled = ref(true);
+	const brandingEnabled = ref(true);
 
 	function toggleSidebar() {
 		if (sidebar.value) {
@@ -53,9 +54,15 @@
 		sidebarEnabled.value = !sidebarEnabled.value;
 	}
 
+	function toggleBrandingEnabled() {
+		brandingEnabled.value = !brandingEnabled.value;
+	}
+
 	// Provide sidebar state and toggle function for child components
 	provide('sidebarEnabled', sidebarEnabled);
 	provide('toggleSidebarEnabled', toggleSidebarEnabled);
+	provide('brandingEnabled', brandingEnabled);
+	provide('toggleBrandingEnabled', toggleBrandingEnabled);
 
 	onMounted(() => {
 		if (navigation.value) {
