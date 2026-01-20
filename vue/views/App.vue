@@ -1,7 +1,8 @@
 <template>
-	<Header username = "Guest" @toggleSidebar="toggleSidebar" title = "PicoCrank" :logoUrl="logoUrl" :sidebarEnabled="sidebarEnabled" :showBranding="brandingEnabled">
+	<Header username = "Guest" @toggleSidebar="toggleSidebar" title = "PicoCrank" :logoUrl="logoUrl" :sidebarEnabled="sidebarEnabled" :navigation="navigation" :topBarEnabled="topBarEnabled" :showBranding="brandingEnabled">
 		<template #toolbar>
 			<QuickSearch
+				v-if="quickSearchEnabled"
 				ref="quickSearchRef"
 				placeholder="Search items..."
 				:search-fields="['title', 'name']"
@@ -43,6 +44,8 @@
 	const navigation = ref(null);
 	const sidebarEnabled = ref(true);
 	const brandingEnabled = ref(true);
+	const quickSearchEnabled = ref(true);
+	const topBarEnabled = ref(false);
 
 	function toggleSidebar() {
 		if (sidebar.value) {
@@ -58,11 +61,24 @@
 		brandingEnabled.value = !brandingEnabled.value;
 	}
 
-	// Provide sidebar state and toggle function for child components
+	function toggleQuickSearchEnabled() {
+		quickSearchEnabled.value = !quickSearchEnabled.value;
+	}
+
+	function toggleTopBarEnabled() {
+		topBarEnabled.value = !topBarEnabled.value;
+	}
+
+	// Provide sidebar, QuickSearch, and TopBar state and toggle functions for child components
 	provide('sidebarEnabled', sidebarEnabled);
 	provide('toggleSidebarEnabled', toggleSidebarEnabled);
 	provide('brandingEnabled', brandingEnabled);
 	provide('toggleBrandingEnabled', toggleBrandingEnabled);
+
+	provide('quickSearchEnabled', quickSearchEnabled);
+	provide('toggleQuickSearchEnabled', toggleQuickSearchEnabled);
+	provide('topBarEnabled', topBarEnabled);
+	provide('toggleTopBarEnabled', toggleTopBarEnabled);
 
 	onMounted(() => {
 		if (navigation.value) {
@@ -91,15 +107,17 @@
 			sidebar.value.stick();
 		}
 
-		quickSearchRef.value.addItem({
-			id: 'hello-world',
-			title: 'Hello World',
-			name: 'hello-world',
-			description: 'This is a test item',
-			category: 'Actions',
-			type: 'callback',
-			callback: helloWorld
-		})
+		if (quickSearchRef.value) {
+			quickSearchRef.value.addItem({
+				id: 'hello-world',
+				title: 'Hello World',
+				name: 'hello-world',
+				description: 'This is a test item',
+				category: 'Actions',
+				type: 'callback',
+				callback: helloWorld
+			})
+		}
 	});
 
 	function helloWorld() {

@@ -9,14 +9,24 @@
 				<HugeiconsIcon :icon="HighlighterIcon" width="1em" height="1em" />
 				{{ brandingEnabled ? 'Hide Logo & Title' : 'Show Logo & Title' }}
 			</button>
+			<div style="display: flex; gap: 1rem; align-items: center;">
+				<label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+					<input type="checkbox" :checked="quickSearchEnabled" @change="toggleQuickSearchEnabled" />
+					<span>Enable QuickSearch</span>
+				</label>
+				<label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+					<input type="checkbox" :checked="topBarEnabled" @change="toggleTopBarEnabled" />
+					<span>Enable TopBar</span>
+				</label>
+			</div>
 		</template>
 		<p>
-			Welcome to Femtocrank, a web-based tool for analyzing and visualizing the performance of your code.
-			To get started, you can either upload a file or paste your code directly into the editor.
+			Welcome to <strong>PicoCrank</strong>! This is a flexible example application to showcase a modular Vue 3 UI with a focus on ease of navigation, live UI controls, and modern design elements. Use the toolbar above to interactively enable or disable interface features like the sidebar, branding, QuickSearch, and the top navigation bar.
 		</p>
 		<p>
-			For more information on how to use Femtocrank, please refer to the <a href = "/docs">documentation</a>.
+			Explore the sections below to see reusable components in action, including toolbars, buttons, and layout options. PicoCrank is designed to be a starting point for your own rapid Vue projects&mdash;inspect the code and try customizing the UI!
 		</p>
+
 	</Section>
 
 	<Section title = "Lorum" id = "lorem">
@@ -92,4 +102,8 @@
 	const toggleSidebarEnabled = inject('toggleSidebarEnabled');
 	const brandingEnabled = inject('brandingEnabled');
 	const toggleBrandingEnabled = inject('toggleBrandingEnabled');
+	const quickSearchEnabled = inject('quickSearchEnabled');
+	const toggleQuickSearchEnabled = inject('toggleQuickSearchEnabled');
+	const topBarEnabled = inject('topBarEnabled');
+	const toggleTopBarEnabled = inject('toggleTopBarEnabled');
 </script>
