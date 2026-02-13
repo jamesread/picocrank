@@ -107,6 +107,10 @@ function getNavigationLinks() {
 }
 
 function isActive(link) {
+  if (!route || !link) {
+	  return false
+  }
+
   // If link has a 'to' object with a name, compare route name and params
   if (link.to && typeof link.to === 'object' && link.to.name) {
     // Compare route names first
