@@ -2,8 +2,8 @@
 	<header>
 		<div
 			:id = "sidebarEnabled ? 'sidebar-button' : null"
-			:class="['image-and-title', 'flex-row', { 'disabled-branding': !showBranding }]"
-			@click = "sidebarEnabled && emit('toggleSidebar')"
+			:class="['image-and-title', 'flex-row', { 'disabled-branding': !showBranding, 'logo-title-clickable': !sidebarEnabled && showBranding }]"
+			@click = "onImageAndTitleClick"
 		>
 			<img v-if="showBranding" :src = "logoUrl" alt = "Logo" class = "logo" />
 			<h1 v-if="showBranding">{{ title }}</h1>
@@ -38,7 +38,7 @@
 	import Breadcrumbs from "./Breadcrumbs.vue";
 	import TopBar from "./TopBar.vue";
 
-	const emit = defineEmits(["toggleSidebar"]);
+	const emit = defineEmits(["toggleSidebar", "logoTitleClick"]);
 
 	const props = defineProps({
 		breadcrumbs: {
@@ -74,6 +74,14 @@
 			default: null,
 		},
 	});
+
+	function onImageAndTitleClick() {
+		if (props.sidebarEnabled) {
+			emit("toggleSidebar");
+		} else if (props.showBranding) {
+			emit("logoTitleClick");
+		}
+	}
 </script>
 
 <style scoped>
@@ -92,5 +100,9 @@ button:hover {
 
 .user-info span {
 	padding-right: 0.5rem;
+}
+
+.logo-title-clickable {
+	cursor: pointer;
 }
 </style>
