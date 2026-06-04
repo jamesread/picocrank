@@ -27,6 +27,10 @@
 			:current-year="currentYear"
 			@event-click="handleEventClick"
 			@date-click="handleDateClick"
+			@date-range-select="handleDateRangeSelect"
+			@event-move-request="handleEventMoveRequest"
+			@event-moved="handleEventMoved"
+			@event-move-rejected="handleEventMoveRejected"
 			@month-change="handleMonthChange"
 		/>
 	</Section>
@@ -187,8 +191,51 @@ function handleEventClick(event) {
 }
 
 function handleDateClick(date) {
+	// Single-day picks also emit `date-range-select`; keep this for integrations that only listen for `date-click`.
 	console.log('Date clicked:', date)
-	alert(`Date selected: ${date.toLocaleDateString()}`)
+}
+
+function handleDateRangeSelect(start, end) {
+	const same = start.getTime() === end.getTime()
+	const label = same
+		? start.toLocaleDateString()
+		: `${start.toLocaleDateString()} – ${end.toLocaleDateString()}`
+	console.log('Date range:', start, end)
+	alert(`Range selected: ${label}`)
+}
+
+function handleEventMoveRequest({ respond, event, sourceDate, targetDate }) {
+	window.setTimeout(() => {
+		const ok = window.confirm(
+			`Move "${event.title}" to ${targetDate.toLocaleDateString()}? (Cancel = decline)`
+		)
+		respond(ok)
+	}, 50)
+}
+
+function applyEventDateShift(event, deltaMs) {
+	const i = events.value.findIndex(e => String(e.id) === String(event.id))
+	if (i === -1) return
+	const ev = events.value[i]
+	const next = { ...ev }
+	if (next.startDate != null && next.endDate != null) {
+		next.startDate = new Date(new Date(next.startDate).getTime() + deltaMs)
+		next.endDate = new Date(new Date(next.endDate).getTime() + deltaMs)
+	} else if (next.date != null) {
+		next.date = new Date(new Date(next.date).getTime() + deltaMs)
+	}
+	const copy = [...events.value]
+	copy[i] = next
+	events.value = copy
+}
+
+function handleEventMoved({ event, sourceDate, targetDate }) {
+	const deltaMs = targetDate.getTime() - sourceDate.getTime()
+	applyEventDateShift(event, deltaMs)
+}
+
+function handleEventMoveRejected(payload) {
+	console.log('event-move-rejected', payload)
 }
 
 // Helper function to update the date picker value
