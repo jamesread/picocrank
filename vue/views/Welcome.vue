@@ -19,9 +19,12 @@
 					<span>Enable TopBar</span>
 				</label>
 			</div>
+			<button type="button" @click="toggleBreadcrumbsEnabled" :class="breadcrumbsEnabled ? 'neutral' : 'good'">
+				{{ breadcrumbsEnabled ? 'Hide Breadcrumbs' : 'Show Breadcrumbs' }}
+			</button>
 		</template>
 		<p>
-			Welcome to <strong>PicoCrank</strong>! This is a flexible example application to showcase a modular Vue 3 UI with a focus on ease of navigation, live UI controls, and modern design elements. Use the toolbar above to interactively enable or disable interface features like the sidebar, branding, QuickSearch, and the top navigation bar.
+			Welcome to <strong>PicoCrank</strong>! This is a flexible example application to showcase a modular Vue 3 UI with a focus on ease of navigation, live UI controls, and modern design elements. Use the toolbar above to interactively enable or disable interface features like the sidebar, branding, QuickSearch, the top navigation bar, and route breadcrumbs in the header.
 		</p>
 		<p>
 			Explore the sections below to see reusable components in action, including toolbars, buttons, and layout options. PicoCrank is designed to be a starting point for your own rapid Vue projects&mdash;inspect the code and try customizing the UI!
@@ -106,4 +109,6 @@
 	const toggleQuickSearchEnabled = inject('toggleQuickSearchEnabled');
 	const topBarEnabled = inject('topBarEnabled');
 	const toggleTopBarEnabled = inject('toggleTopBarEnabled');
+	const breadcrumbsEnabled = inject('breadcrumbsEnabled');
+	const toggleBreadcrumbsEnabled = inject('toggleBreadcrumbsEnabled');
 </script>

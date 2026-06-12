@@ -3,7 +3,7 @@
 		<div
 			:id = "sidebarEnabled ? 'sidebar-button' : null"
 			:class="['image-and-title', 'flex-row', { 'disabled-branding': !showBranding }]"
-			@click = "sidebarEnabled && emit('toggleSidebar')"
+			@click = "onImageAndTitleClick"
 		>
 			<img v-if="showBranding" :src = "logoUrl" alt = "Logo" class = "logo" />
 			<h1 v-if="showBranding">{{ title }}</h1>
@@ -38,7 +38,15 @@
 	import Breadcrumbs from "./Breadcrumbs.vue";
 	import TopBar from "./TopBar.vue";
 
-	const emit = defineEmits(["toggleSidebar"]);
+	const emit = defineEmits(["toggleSidebar", "logoClick"]);
+
+	function onImageAndTitleClick() {
+		if (props.sidebarEnabled) {
+			emit("toggleSidebar");
+		} else {
+			emit("logoClick");
+		}
+	}
 
 	const props = defineProps({
 		breadcrumbs: {

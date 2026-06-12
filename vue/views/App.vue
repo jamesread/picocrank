@@ -1,5 +1,5 @@
 <template>
-	<Header username = "Guest" @toggleSidebar="toggleSidebar" title = "PicoCrank" :logoUrl="logoUrl" :sidebarEnabled="sidebarEnabled" :navigation="navigation" :topBarEnabled="topBarEnabled" :showBranding="brandingEnabled">
+	<Header username = "Guest" @toggleSidebar="toggleSidebar" title = "PicoCrank" :logoUrl="logoUrl" :sidebarEnabled="sidebarEnabled" :navigation="navigation" :topBarEnabled="topBarEnabled" :showBranding="brandingEnabled" :breadcrumbs="breadcrumbsEnabled">
 		<template #toolbar>
 			<QuickSearch
 				v-if="quickSearchEnabled"
@@ -46,6 +46,7 @@
 	const brandingEnabled = ref(true);
 	const quickSearchEnabled = ref(true);
 	const topBarEnabled = ref(false);
+	const breadcrumbsEnabled = ref(false);
 
 	function toggleSidebar() {
 		if (sidebar.value) {
@@ -69,7 +70,11 @@
 		topBarEnabled.value = !topBarEnabled.value;
 	}
 
-	// Provide sidebar, QuickSearch, and TopBar state and toggle functions for child components
+	function toggleBreadcrumbsEnabled() {
+		breadcrumbsEnabled.value = !breadcrumbsEnabled.value;
+	}
+
+	// Provide sidebar, QuickSearch, TopBar, and breadcrumbs state and toggle functions for child components
 	provide('sidebarEnabled', sidebarEnabled);
 	provide('toggleSidebarEnabled', toggleSidebarEnabled);
 	provide('brandingEnabled', brandingEnabled);
@@ -79,6 +84,8 @@
 	provide('toggleQuickSearchEnabled', toggleQuickSearchEnabled);
 	provide('topBarEnabled', topBarEnabled);
 	provide('toggleTopBarEnabled', toggleTopBarEnabled);
+	provide('breadcrumbsEnabled', breadcrumbsEnabled);
+	provide('toggleBreadcrumbsEnabled', toggleBreadcrumbsEnabled);
 
 	onMounted(() => {
 		if (navigation.value) {
