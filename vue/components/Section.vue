@@ -2,7 +2,9 @@
 	<section :class = "'with-header-and-content ' + classes" :id = "id">
 		<div class = "section-header flex-row">
 			<div class = "fg1">
-				<h2 :title = "subtitle">{{ title }}</h2>
+				<h2 :title = "subtitle">
+					<slot name="title">{{ title }}</slot>
+				</h2>
 			</div>
 			<div role = "toolbar">
 				<slot name="toolbar" />
