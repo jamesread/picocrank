@@ -143,6 +143,7 @@ defineExpose({
 	background: transparent;
 	border: none;
 	border-bottom: 2px solid transparent;
+	border-radius: 0;
 	cursor: pointer;
 	font-size: 1em;
 	color: var(--text-muted, #666);
@@ -165,7 +166,7 @@ defineExpose({
 .tab-button:focus {
 	outline: 2px solid var(--primary-color, #007bff);
 	outline-offset: -2px;
-	border-radius: 4px 4px 0 0;
+	border-radius: 0;
 }
 
 .tabs-content {
@@ -174,7 +175,8 @@ defineExpose({
 }
 
 .tab-panel {
-	padding: 1.5rem;
+	padding-block: 1.5rem;
+	padding-inline: 0.75rem;
 	display: none;
 }
 
@@ -227,7 +229,8 @@ defineExpose({
 	}
 
 	.tab-panel {
-		padding: 1rem;
+		padding-block: 1rem;
+		padding-inline: 0.5rem;
 	}
 }
 </style>

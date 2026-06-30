@@ -28,7 +28,7 @@
 </template>
 
 <script setup>
-import { ref, computed, useId } from 'vue'
+import { ref, computed, useId, watch } from 'vue'
 import { HugeiconsIcon } from '@hugeicons/vue'
 import { Copy01Icon, CopyCheckIcon } from '@hugeicons/core-free-icons'
 
@@ -83,25 +83,58 @@ const props = defineProps({
 	},
 })
 
-const emit = defineEmits(['copy', 'copy-error'])
+const emit = defineEmits(['copy', 'copy-error', 'update:modelValue'])
 
 const generatedId = useId()
 const textareaId = props.id || `readonly-textarea-${generatedId}`
 const textareaRef = ref(null)
 const copied = ref(false)
+const content = ref(props.modelValue)
 let copiedTimer = null
 
+watch(() => props.modelValue, (value) => {
+	content.value = value
+})
+
 const displayValue = computed(() => {
-	if (!props.markdownTicks || !props.modelValue) {
-		return props.modelValue
+	if (!props.markdownTicks || !content.value) {
+		return content.value
 	}
 
 	const openingFence = props.markdownLang ? `\`\`\`${props.markdownLang}` : '```'
-	return `${openingFence}\n${props.modelValue}\n\`\`\``
+	return `${openingFence}\n${content.value}\n\`\`\``
 })
 
+function append(text) {
+	content.value += text
+	emit('update:modelValue', content.value)
+}
+
+function appendYamlProperty(k, v) {
+	const line = `${k}: ${v}`
+	if (content.value && !content.value.endsWith('\n')) {
+		content.value += '\n'
+	}
+	content.value += line
+	emit('update:modelValue', content.value)
+}
+
+function appendSection(sectionName) {
+	content.value += `\n# ${sectionName} ####\n`
+	emit('update:modelValue', content.value)
+}
+
+function clear() {
+	content.value = ''
+	emit('update:modelValue', content.value)
+}
+
+function getContentAsString() {
+	return content.value
+}
+
 async function copy() {
-	if (!props.modelValue) {
+	if (!content.value) {
 		return
 	}
 
@@ -133,6 +166,11 @@ function markCopied() {
 
 defineExpose({
 	copy,
+	append,
+	appendYamlProperty,
+	appendSection,
+	clear,
+	getContentAsString,
 })
 </script>
 

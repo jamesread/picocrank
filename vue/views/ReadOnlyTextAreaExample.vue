@@ -29,7 +29,15 @@
 			/>
 
 			<ReadOnlyTextArea
-				label="Empty output"
+				ref="yamlConfigRef"
+				v-model="yamlConfig"
+				label="Configuration (YAML)"
+				:rows="12"
+				markdown-ticks
+				markdown-lang="yaml"
+			/>
+
+			<ReadOnlyTextArea
 				:rows="4"
 				placeholder="No diagnostics available."
 			/>
@@ -42,13 +50,15 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, nextTick } from 'vue'
 import Section from '../components/Section.vue'
 import ReadOnlyTextArea from '../components/ReadOnlyTextArea.vue'
 
 const diagnosticLog = ref('')
 const environmentInfo = ref('')
+const yamlConfig = ref('')
 const lastCopied = ref('')
+const yamlConfigRef = ref(null)
 
 function buildDiagnosticLog() {
 	const now = new Date().toISOString()
@@ -81,10 +91,27 @@ function buildEnvironmentInfo() {
 	}, null, 2)
 }
 
+function buildYamlConfig() {
+	yamlConfig.value = ''
+	const area = yamlConfigRef.value
+	if (!area) {
+		return
+	}
+
+	area.appendSection('Application')
+	area.appendYamlProperty('name', 'picocrank')
+	area.appendYamlProperty('version', '1.0.0')
+	area.appendYamlProperty('environment', 'development')
+	area.appendSection('Runtime')
+	area.appendYamlProperty('language', navigator.language)
+	area.appendYamlProperty('online', navigator.onLine)
+}
+
 function refreshDiagnostics() {
 	diagnosticLog.value = buildDiagnosticLog()
 	environmentInfo.value = buildEnvironmentInfo()
 	lastCopied.value = ''
+	nextTick(() => buildYamlConfig())
 }
 
 function onCopy(value) {
