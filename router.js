@@ -7,6 +7,7 @@ import { SecurityValidationIcon } from '@hugeicons/core-free-icons';
 import { CalendarIcon } from '@hugeicons/core-free-icons';
 import { EditIcon } from '@hugeicons/core-free-icons';
 import { Menu01Icon } from '@hugeicons/core-free-icons';
+import { ClipboardCopyIcon } from '@hugeicons/core-free-icons';
 
 const routes = [
   {
@@ -73,6 +74,15 @@ const routes = [
     meta: {
       title: 'Form Example',
       icon: EditIcon,
+    }
+  },
+  {
+    name: 'ReadOnlyTextAreaExample',
+    path: '/readonly-textarea-example',
+    component: () => import('./vue/views/ReadOnlyTextAreaExample.vue'),
+    meta: {
+      title: 'ReadOnlyTextArea Example',
+      icon: ClipboardCopyIcon,
     }
   },
   {

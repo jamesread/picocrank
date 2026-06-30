@@ -93,6 +93,7 @@
 			navigation.value.addRouterLink('TableExample')
 			navigation.value.addRouterLink('CalendarExample')
 			navigation.value.addRouterLink('FormExample')
+			navigation.value.addRouterLink('ReadOnlyTextAreaExample')
 			navigation.value.addRouterLink('TabsExample')
 			navigation.value.addSeparator('separator-1');
 			navigation.value.addRouterLink('ViewItem', 'View Awesome Item', { params: { id: 1 } })
