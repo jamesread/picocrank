@@ -60,7 +60,9 @@ onMounted(() => {
 		}, { 
 			icon: ViewIcon, 
 			name: 'notifications',
-			description: 'Manage notification settings'
+			description: 'Manage notification settings',
+			iconColor: '#e67e22',
+			indicator: true
 		});
 		
 		localNavigation.value.addCallback('Billing', () => {
@@ -68,7 +70,8 @@ onMounted(() => {
 		}, { 
 			icon: EditIcon, 
 			name: 'billing',
-			description: 'View billing and subscription details'
+			description: 'View billing and subscription details',
+			disabled: true
 		});
 	}
 });

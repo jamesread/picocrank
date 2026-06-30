@@ -47,7 +47,10 @@ function addRouterLink(link, altTitle = null, options = {}) {
 		icon: foundRoute.meta?.icon || PinIcon,
 		type: 'route',
 		props: options.props || {},
-		description: options.description || foundRoute.meta?.description || null
+		description: options.description || foundRoute.meta?.description || null,
+		disabled: options.disabled || false,
+		iconColor: options.iconColor || null,
+		indicator: options.indicator || false
 	}
 
 	addNavigationLink(routeLink)
@@ -69,7 +72,10 @@ function addCallback(title, callback, options = {}) {
 	icon: options.icon || PinIcon,
 	callback: callback || (() => {}),
 	title: title,
-	description: options.description || null
+	description: options.description || null,
+	disabled: options.disabled || false,
+	iconColor: options.iconColor || null,
+	indicator: options.indicator || false
   }
 
   addNavigationLink(callbackLink)

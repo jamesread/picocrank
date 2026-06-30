@@ -4,11 +4,17 @@
 			<button
 				v-for="link in filteredLinks"
 				:key="link.name"
-				:class="['nav-button', { active: isLinkActive(link) }]"
+				:class="['nav-button', { active: isLinkActive(link), disabled: link.disabled }]"
+				:disabled="link.disabled"
 				:title="link.title"
 				@click="handleLinkClick(link)"
 			>
-				<div class="nav-button-icon">
+				<span
+					v-if="showIndicator(link)"
+					class="nav-button-indicator"
+					aria-label="Requires attention"
+				/>
+				<div class="nav-button-icon" :style="getIconStyle(link)">
 					<HugeiconsIcon
 						:icon="link.icon"
 						:width="iconSize"
@@ -102,10 +108,30 @@ const filteredLinks = computed(() => {
 });
 
 function isLinkActive(link) {
+	if (link.disabled) {
+		return false;
+	}
 	return isActive(link);
 }
 
+function getIconStyle(link) {
+	if (link.disabled || isLinkActive(link)) {
+		return undefined;
+	}
+	if (link.iconColor) {
+		return { color: link.iconColor };
+	}
+	return undefined;
+}
+
+function showIndicator(link) {
+	return link.indicator && !link.disabled;
+}
+
 function handleLinkClick(link) {
+	if (link.disabled) {
+		return;
+	}
 	if (link.type === 'route') {
 		const to = link.to || link.path;
 		if (to) {
@@ -147,6 +173,7 @@ function handleLinkClick(link) {
 	cursor: pointer;
 	transition: all 0.2s ease;
 	text-align: left;
+	position: relative;
 }
 
 .navigation-grid.compact .nav-button {
@@ -186,6 +213,46 @@ function handleLinkClick(link) {
 
 .nav-button.active .nav-button-icon {
 	color: #fff;
+}
+
+.nav-button:disabled,
+.nav-button.disabled {
+	cursor: not-allowed;
+	opacity: 0.6;
+}
+
+.nav-button:disabled:hover,
+.nav-button.disabled:hover {
+	border-color: var(--border-color, #e1e5e9);
+	transform: none;
+	box-shadow: none;
+	background: transparent;
+}
+
+.nav-button:disabled .nav-button-icon,
+.nav-button.disabled .nav-button-icon {
+	color: var(--text-muted, #999);
+}
+
+.nav-button-indicator {
+	position: absolute;
+	top: 0.75rem;
+	right: 0.75rem;
+	width: 0.625rem;
+	height: 0.625rem;
+	border-radius: 50%;
+	background: var(--indicator-color, #dc3545);
+	box-shadow: 0 0 0 2px var(--background-color, #fff);
+	flex-shrink: 0;
+}
+
+.navigation-grid.compact .nav-button-indicator {
+	top: 0.5rem;
+	right: 0.5rem;
+}
+
+.nav-button.active .nav-button-indicator {
+	box-shadow: 0 0 0 2px var(--primary-color, #007bff);
 }
 
 .nav-button-label {
