@@ -1,114 +1,236 @@
 <template>
-	<Section title = "Welcome" classes = "">
-		<template #toolbar>
-			<button @click="toggleSidebarEnabled" :class="sidebarEnabled ? 'neutral' : 'good'">
-				<HugeiconsIcon :icon="Menu01Icon" width="1em" height="1em" />
-				{{ sidebarEnabled ? 'Disable Sidebar' : 'Enable Sidebar' }}
-			</button>
-			<button @click="toggleBrandingEnabled" :class="brandingEnabled ? 'neutral' : 'good'">
-				<HugeiconsIcon :icon="HighlighterIcon" width="1em" height="1em" />
-				{{ brandingEnabled ? 'Hide Logo & Title' : 'Show Logo & Title' }}
-			</button>
-			<div style="display: flex; gap: 1rem; align-items: center;">
-				<label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
-					<input type="checkbox" :checked="quickSearchEnabled" @change="toggleQuickSearchEnabled" />
-					<span>Enable QuickSearch</span>
-				</label>
-				<label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
-					<input type="checkbox" :checked="topBarEnabled" @change="toggleTopBarEnabled" />
-					<span>Enable TopBar</span>
-				</label>
+	<Section
+		id="welcome"
+		subtitle="Vue components on the Femtocrank theme"
+		classes="welcome-hero-section"
+	>
+		<template #title>
+			<div class="welcome-hero-title">
+				<img :src="logoUrl" alt="" class="welcome-logo" />
+				<span>Welcome to PicoCrank</span>
 			</div>
-			<button type="button" @click="toggleBreadcrumbsEnabled" :class="breadcrumbsEnabled ? 'neutral' : 'good'">
-				{{ breadcrumbsEnabled ? 'Hide Breadcrumbs' : 'Show Breadcrumbs' }}
-			</button>
-		</template>
-		<p>
-			Welcome to <strong>PicoCrank</strong>! This is a flexible example application to showcase a modular Vue 3 UI with a focus on ease of navigation, live UI controls, and modern design elements. Use the toolbar above to interactively enable or disable interface features like the sidebar, branding, QuickSearch, the top navigation bar, and route breadcrumbs in the header.
-		</p>
-		<p>
-			Explore the sections below to see reusable components in action, including toolbars, buttons, and layout options. PicoCrank is designed to be a starting point for your own rapid Vue projects&mdash;inspect the code and try customizing the UI!
-		</p>
-
-	</Section>
-
-	<Section title = "Lorum" id = "lorem">
-		<template #toolbar>
-			<button>
-				<HugeiconsIcon :icon = "HighlighterIcon" width = "1em" height = "1em" />
-				Highlight</button>
-			<button>Quote</button>
-			<button class = "good">Add</button>
 		</template>
 
-		<div role = "toolbar">
-			<button class = "neutral">
-				Neutral
-			</button>
-			<button class = "good">
-				Good
-			</button>
-			<button class = "bad">
-				Bad
-			</button>
+		<p class="welcome-lead">
+			Build admin-style UIs quickly with ready-made Vue components and a minimal,
+			accessible CSS theme. Browse examples by how you would use them in a real app.
+		</p>
+
+		<div role="toolbar" class="welcome-actions">
+			<router-link :to="{ name: 'PageStructure' }" class="button good">
+				Configure layout
+			</router-link>
+			<a href="#start-here" class="button neutral">Browse components</a>
+			<a
+				href="https://github.com/jamesread/picocrank"
+				class="button neutral"
+				target="_blank"
+				rel="noopener noreferrer"
+			>
+				View on GitHub
+			</a>
 		</div>
 
-		<p>
-			Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-			Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-			Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
-			Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+		<p class="subtle">
+			New here? Open <router-link :to="{ name: 'PageStructure' }">Page structure</router-link>
+			to toggle the sidebar, header branding, QuickSearch, and more.
 		</p>
 	</Section>
 
-	<Section title = "Shakespeare" id = "shakespeare">
-		<p>
-			To be, or not to be, that is the question:
-			Whether 'tis nobler in the mind to suffer
-			The slings and arrows of outrageous fortune,
-			Or to take arms against a sea of troubles
-			And by opposing end them. To die: to sleep;
-			No more; and by a sleep to say we end
-			The heart-ache and the thousand natural shocks
-			That flesh is heir to, 'tis a consummation
-			Devoutly to be wish'd. To die, to sleep;
-			To sleep: perchance to dream: ay, there's the rub;
-			For in that sleep of death what dreams may come
-			When we have shuffled off this mortal coil,
-			Must give us pause: there's the respect
-			That makes calamity of so long life;
-			For who would bear the whips and scorns of time,
-			The oppressor's wrong
-		</p>
+	<Section
+		id="start-here"
+		title="Start here"
+		subtitle="Jump into the example areas"
+	>
+		<Navigation ref="welcomeNavigation">
+			<NavigationGrid />
+		</Navigation>
 	</Section>
 
-	<Section title = "More Lorem" id = "more-lorem">
-		<p>
-			Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-			Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-			Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
-			Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-		</p>
+	<Section
+		title="Popular examples"
+		subtitle="A few good places to begin"
+	>
+		<div class="grid-boxed welcome-popular-grid">
+			<router-link
+				v-for="example in popularExamples"
+				:key="example.name"
+				:to="{ name: example.name }"
+				class="stat-display welcome-popular-card"
+			>
+				<span class="subtle">{{ example.category }}</span>
+				<span class="stat">{{ example.label }}</span>
+				<span class="welcome-popular-description">{{ example.description }}</span>
+			</router-link>
+		</div>
 	</Section>
 
+	<Section
+		title="Try it"
+		subtitle="Small interactions you can trigger right now"
+	>
+		<dl>
+			<dt>Notification popup</dt>
+			<dd>
+				<button type="button" class="good" @click="showWelcomeToast">
+					Show a toast
+				</button>
+				<p class="subtle">Corner notifications stack, auto-dismiss, and can link elsewhere.</p>
+			</dd>
+
+			<dt>Light and dark mode</dt>
+			<dd>
+				<p>
+					Use the sun/moon button in the header to switch themes. Your preference is
+					remembered across visits.
+				</p>
+			</dd>
+
+			<dt>Femtocrank theme</dt>
+			<dd>
+				<p>
+					PicoCrank is built on
+					<a href="https://github.com/jamesread/femtocrank" target="_blank" rel="noopener noreferrer">Femtocrank</a>
+					&mdash; zero-dependency CSS with high accessibility defaults.
+				</p>
+			</dd>
+		</dl>
+	</Section>
 </template>
 
 <script setup>
-	import { inject } from 'vue';
-	import Section from '../components/Section.vue';
-	import { HugeiconsIcon } from '@hugeicons/vue';
-	import { HighlighterIcon } from '@hugeicons/core-free-icons';
-	import { Menu01Icon } from '@hugeicons/core-free-icons';
+import { ref, onMounted } from 'vue'
+import Section from '../components/Section.vue'
+import Navigation from '../components/Navigation.vue'
+import NavigationGrid from '../components/NavigationGrid.vue'
+import { useNotificationPopups } from '../composables/useNotificationPopups.js'
+import logoUrl from '/logo.png'
 
-	// Inject sidebar and branding state and toggle functions from App.vue
-	const sidebarEnabled = inject('sidebarEnabled');
-	const toggleSidebarEnabled = inject('toggleSidebarEnabled');
-	const brandingEnabled = inject('brandingEnabled');
-	const toggleBrandingEnabled = inject('toggleBrandingEnabled');
-	const quickSearchEnabled = inject('quickSearchEnabled');
-	const toggleQuickSearchEnabled = inject('toggleQuickSearchEnabled');
-	const topBarEnabled = inject('topBarEnabled');
-	const toggleTopBarEnabled = inject('toggleTopBarEnabled');
-	const breadcrumbsEnabled = inject('breadcrumbsEnabled');
-	const toggleBreadcrumbsEnabled = inject('toggleBreadcrumbsEnabled');
+const { show: showPopup } = useNotificationPopups()
+const welcomeNavigation = ref(null)
+
+const popularExamples = [
+	{
+		name: 'TableExample',
+		category: 'Data display',
+		label: 'Table',
+		description: 'Sortable columns and pagination',
+	},
+	{
+		name: 'CalendarExample',
+		category: 'Data display',
+		label: 'Calendar',
+		description: 'Events, drag-and-drop, and date ranges',
+	},
+	{
+		name: 'ButtonsExample',
+		category: 'Forms & input',
+		label: 'Buttons',
+		description: 'Variants, toolbars, and form actions',
+	},
+	{
+		name: 'StatusExample',
+		category: 'Feedback',
+		label: 'Status',
+		description: 'Inline messages and notification popups',
+	},
+]
+
+function showWelcomeToast() {
+	showPopup({
+		label: 'WELCOME',
+		class: 'success',
+		message: 'Thanks for exploring PicoCrank!',
+		linkTo: { name: 'TableExample' },
+		linkLabel: 'Try the table example',
+	})
+}
+
+onMounted(() => {
+	if (!welcomeNavigation.value) {
+		return
+	}
+
+	const nav = welcomeNavigation.value
+
+	nav.addRouterLink('PageStructure', 'Page structure', {
+		description: 'Sidebar, header, QuickSearch, and breadcrumbs',
+	})
+	nav.addRouterLink('TableExample', 'Table', {
+		description: 'Lists with sorting and pagination',
+	})
+	nav.addRouterLink('CalendarExample', 'Calendar', {
+		description: 'Month view with events',
+	})
+	nav.addRouterLink('ButtonsExample', 'Buttons', {
+		description: 'Button variants and toolbars',
+	})
+	nav.addRouterLink('FormExample', 'Forms', {
+		description: 'Labels, inputs, and fieldsets',
+	})
+	nav.addRouterLink('LoginExample', 'Login', {
+		description: 'Auth form with OAuth tabs',
+	})
+	nav.addRouterLink('StatusExample', 'Status', {
+		description: 'Notifications and inline status',
+	})
+	nav.addRouterLink('NavigationGridExample', 'Navigation grid', {
+		description: 'Icon grid for settings hubs',
+	})
+	nav.addRouterLink('TabsExample', 'Tabs', {
+		description: 'Tabbed content regions',
+	})
+})
 </script>
+
+<style scoped>
+.welcome-hero-title {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+}
+
+.welcome-logo {
+	width: 2.5rem;
+	height: 2.5rem;
+}
+
+.welcome-lead {
+	font-size: 1.05rem;
+	max-width: 42rem;
+}
+
+.welcome-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+	margin-bottom: 0.75rem;
+}
+
+.welcome-popular-grid {
+	grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+}
+
+.welcome-popular-card {
+	display: flex;
+	flex-direction: column;
+	gap: 0.35rem;
+	text-decoration: none;
+	color: inherit;
+	transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.welcome-popular-card:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.welcome-popular-description {
+	font-size: 0.85rem;
+	color: #666;
+}
+
+html[data-theme="dark"] .welcome-popular-description {
+	color: #bbb;
+}
+</style>

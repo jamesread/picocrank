@@ -90,7 +90,7 @@ const filteredLinks = computed(() => {
 	// Exclude separators and HTML items by default
 	if (props.excludeNonButtons) {
 		links = links.filter(link => 
-			link.type !== 'separator' && link.type !== 'html'
+			link.type !== 'separator' && link.type !== 'html' && link.type !== 'section'
 		);
 	}
 
@@ -286,7 +286,7 @@ function handleLinkClick(link) {
 }
 
 /* Dark theme support */
-@media (prefers-color-scheme: dark) {
+html[data-theme="dark"] {
 	.nav-button {
 		background: transparent;
 	}

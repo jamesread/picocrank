@@ -40,6 +40,13 @@
 import { ref, onMounted } from 'vue'
 import Calendar from '../components/Calendar.vue'
 import Section from '../components/Section.vue'
+import {
+	BeachIcon,
+	Calendar01Icon,
+	MeetingRoomIcon,
+	PartyIcon,
+	AlertCircleIcon,
+} from '@hugeicons/core-free-icons'
 
 const events = ref([])
 const loading = ref(false)
@@ -84,7 +91,9 @@ function generateDummyEventsForMonth(monthIndex, year) {
 				id: `weekend-${year}-${monthIndex}-${day}`,
 				title: 'Weekend Activity',
 				date: new Date(year, monthIndex, day, 10, 0),
-				description: 'Relaxing weekend activity'
+				description: 'Relaxing weekend activity',
+				icon: PartyIcon,
+				color: '#e8d5f5',
 			})
 		}
 		
@@ -105,7 +114,9 @@ function generateDummyEventsForMonth(monthIndex, year) {
 				id: `event-${year}-${monthIndex}-${day}-${Math.random().toString(36).substr(2, 9)}`,
 				title: eventType.title,
 				date: new Date(year, monthIndex, day, hours, minutes),
-				description: `Scheduled ${eventType.title.toLowerCase()}`
+				description: `Scheduled ${eventType.title.toLowerCase()}`,
+				icon: eventType.title === 'Team Meeting' ? MeetingRoomIcon : undefined,
+				color: eventType.title === 'Client Call' ? '#e0f2fe' : undefined,
 			})
 		}
 	}
@@ -116,7 +127,9 @@ function generateDummyEventsForMonth(monthIndex, year) {
 		title: 'Tech Conference',
 		startDate: new Date(year, monthIndex, 5, 9, 0),
 		endDate: new Date(year, monthIndex, 7, 17, 0),
-		description: 'Annual technology conference'
+		description: 'Annual technology conference',
+		icon: Calendar01Icon,
+		color: '#d6e8ff',
 	})
 	
 	dummyEvents.push({
@@ -124,7 +137,9 @@ function generateDummyEventsForMonth(monthIndex, year) {
 		title: 'Vacation',
 		startDate: new Date(year, monthIndex, 15, 0, 0),
 		endDate: new Date(year, monthIndex, 18, 23, 59),
-		description: 'Family vacation time'
+		description: 'Family vacation time',
+		icon: BeachIcon,
+		color: '#fff0d6',
 	})
 	
 	// Add some all-day events
@@ -132,7 +147,9 @@ function generateDummyEventsForMonth(monthIndex, year) {
 		id: `holiday-${year}-${monthIndex}`,
 		title: 'Public Holiday',
 		date: new Date(year, monthIndex, 1, 0, 0),
-		description: 'National holiday - office closed'
+		description: 'National holiday - office closed',
+		icon: PartyIcon,
+		color: '#ffe0e0',
 	})
 	
 	if (daysInMonth >= 25) {
@@ -140,7 +157,9 @@ function generateDummyEventsForMonth(monthIndex, year) {
 			id: `deadline-${year}-${monthIndex}`,
 			title: 'Project Deadline',
 			date: new Date(year, monthIndex, 25, 0, 0),
-			description: 'Important project deadline'
+			description: 'Important project deadline',
+			icon: AlertCircleIcon,
+			color: '#fde8e8',
 		})
 	}
 	
@@ -415,7 +434,7 @@ onMounted(() => {
 }
 
 /* Dark theme support */
-@media (prefers-color-scheme: dark) {
+html[data-theme="dark"] {
   .date-picker-label {
     color: #d1d5db;
   }

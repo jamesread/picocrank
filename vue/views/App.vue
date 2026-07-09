@@ -26,20 +26,22 @@
 			</div>
 		</div>
 	</Navigation>
+
+	<NotificationPopups />
 </template>
 
 <script setup>
 	import { ref, onMounted, provide } from 'vue';
-	import { useRouter } from 'vue-router';
-	import { Pin02Icon, SecurityValidationIcon, EditIcon, ViewIcon, HomeIcon } from '@hugeicons/core-free-icons'
+	import { Pin02Icon } from '@hugeicons/core-free-icons'
 
 	import QuickSearch from './../components/QuickSearch.vue'
 	import Navigation from './../components/Navigation.vue'
+	import NotificationPopups from './../components/NotificationPopups.vue'
 	import '../../styles.css'
+	import '../composables/useTheme.js'
 	import logoUrl from '/logo.png';
 
 	const quickSearchRef = ref(null)
-	const router = useRouter();
 	const sidebar = ref(null);
 	const navigation = ref(null);
 	const sidebarEnabled = ref(true);
@@ -90,24 +92,29 @@
 	onMounted(() => {
 		if (navigation.value) {
 			navigation.value.addRouterLink('Welcome')
-			navigation.value.addRouterLink('TableExample')
-			navigation.value.addRouterLink('CalendarExample')
-			navigation.value.addRouterLink('FormExample')
-			navigation.value.addRouterLink('ReadOnlyTextAreaExample')
-			navigation.value.addRouterLink('TabsExample')
-			navigation.value.addSeparator('separator-1');
-			navigation.value.addRouterLink('ViewItem', 'View Awesome Item', { params: { id: 1 } })
-			navigation.value.addSeparator('separator-2');
-			navigation.value.addCallback('Callback Example', helloWorld, { icon: Pin02Icon })
-			navigation.value.addSeparator('separator-3');
-			navigation.value.addHtml('<h2 style = "padding: 0.75em;">Authentication</h2>', { name: 'auth-heading' })
-			navigation.value.addRouterLink('LoginExample')
-			navigation.value.addSeparator('separator-4');
-			navigation.value.addHtml('<h2 style = "padding: 0.75em;">User Control Panel</h2>', { name: 'user-panel-heading' })
-			navigation.value.addRouterLink('UserControlPanel')
-			navigation.value.addSeparator('separator-5');
-			navigation.value.addHtml('<h2 style = "padding: 0.75em;">Administration</h2>', { name: 'admin-heading' })
+
+			navigation.value.addSection('Layouts', { name: 'nav-layouts' })
+			navigation.value.addRouterLink('PageStructure', 'Page structure')
+			navigation.value.addRouterLink('ViewItem', 'View item', { params: { id: 1 } })
+			navigation.value.addRouterLink('NavigationGridExample', 'Navigation Grid')
 			navigation.value.addRouterLink('Admin')
+			navigation.value.addRouterLink('TabsExample', 'Tabs')
+
+			navigation.value.addSection('Data display', { name: 'nav-data' })
+			navigation.value.addRouterLink('TableExample', 'Table')
+			navigation.value.addRouterLink('CalendarExample', 'Calendar')
+			navigation.value.addRouterLink('ReadOnlyTextAreaExample', 'Read-only output')
+
+			navigation.value.addSection('Forms & input', { name: 'nav-forms' })
+			navigation.value.addRouterLink('ButtonsExample', 'Buttons')
+			navigation.value.addRouterLink('FormExample', 'Forms')
+			navigation.value.addRouterLink('LoginExample', 'Login')
+
+			navigation.value.addSection('Feedback & status', { name: 'nav-feedback' })
+			navigation.value.addRouterLink('StatusExample', 'Status & notifications')
+
+			navigation.value.addSection('Patterns', { name: 'nav-patterns' })
+			navigation.value.addCallback('Callback example', helloWorld, { icon: Pin02Icon })
 		}
 
 		if (sidebar.value) {

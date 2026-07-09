@@ -197,7 +197,7 @@ defineExpose({
 }
 
 /* Dark theme support */
-@media (prefers-color-scheme: dark) {
+html[data-theme="dark"] {
 	.tabs-header {
 		border-bottom-color: var(--border-color, #444);
 	}

@@ -215,7 +215,7 @@ option {
   }
 }
 
-@media (prefers-color-scheme: dark) {
+html[data-theme="dark"] {
   .pagination-text {
 	color: #adb5bd;
   }

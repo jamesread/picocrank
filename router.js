@@ -7,7 +7,11 @@ import { SecurityValidationIcon } from '@hugeicons/core-free-icons';
 import { CalendarIcon } from '@hugeicons/core-free-icons';
 import { EditIcon } from '@hugeicons/core-free-icons';
 import { Menu01Icon } from '@hugeicons/core-free-icons';
+import { Navigation01Icon } from '@hugeicons/core-free-icons';
 import { ClipboardCopyIcon } from '@hugeicons/core-free-icons';
+import { CursorPointer01Icon } from '@hugeicons/core-free-icons';
+import { LayoutGridIcon } from '@hugeicons/core-free-icons';
+import { StatusIcon } from '@hugeicons/core-free-icons';
 
 const routes = [
   {
@@ -20,12 +24,21 @@ const routes = [
     }
   },
   {
+    name: 'PageStructure',
+    path: '/page-structure',
+    component: () => import('./vue/views/PageStructure.vue'),
+    meta: {
+      title: 'Page structure',
+      icon: LayoutGridIcon,
+    }
+  },
+  {
     name: 'TableExample',
     path: '/table-example',
     title: 'Table Example',
     component: () => import('./vue/views/TableExample.vue'),
     meta: {
-      title: 'Table Example',
+      title: 'Table',
       icon: TableIcon,
     }
   },
@@ -35,7 +48,7 @@ const routes = [
     component: () => import('./vue/views/ViewItem.vue'),
     props: true,
     meta: {
-      title: 'View Item',
+      title: 'View item',
       icon: ViewIcon,
     }
   },
@@ -54,7 +67,7 @@ const routes = [
     component: () => import('./vue/views/CalendarExample.vue'),
     props: true,
     meta: {
-      title: 'Calendar Example',
+      title: 'Calendar',
       icon: CalendarIcon,
     }
   },
@@ -68,11 +81,20 @@ const routes = [
     }
   },
   {
+    name: 'ButtonsExample',
+    path: '/buttons-example',
+    component: () => import('./vue/views/ButtonsExample.vue'),
+    meta: {
+      title: 'Buttons',
+      icon: CursorPointer01Icon,
+    }
+  },
+  {
     name: 'FormExample',
     path: '/form-example',
     component: () => import('./vue/views/FormExample.vue'),
     meta: {
-      title: 'Form Example',
+      title: 'Forms',
       icon: EditIcon,
     }
   },
@@ -81,8 +103,17 @@ const routes = [
     path: '/readonly-textarea-example',
     component: () => import('./vue/views/ReadOnlyTextAreaExample.vue'),
     meta: {
-      title: 'ReadOnlyTextArea Example',
+      title: 'Read-only output',
       icon: ClipboardCopyIcon,
+    }
+  },
+  {
+    name: 'StatusExample',
+    path: '/status-example',
+    component: () => import('./vue/views/StatusExample.vue'),
+    meta: {
+      title: 'Status & notifications',
+      icon: StatusIcon,
     }
   },
   {
@@ -90,17 +121,17 @@ const routes = [
     path: '/tabs-example',
     component: () => import('./vue/views/TabsExample.vue'),
     meta: {
-      title: 'Tabs Example',
+      title: 'Tabs',
       icon: Menu01Icon,
     }
   },
   {
-    name: 'UserControlPanel',
-    path: '/user-control-panel',
-    component: () => import('./vue/views/UserControlPanel.vue'),
+    name: 'NavigationGridExample',
+    path: '/navigation-grid',
+    component: () => import('./vue/views/NavigationGridExample.vue'),
     meta: {
-      title: 'User Control Panel',
-      icon: SecurityValidationIcon,
+      title: 'Navigation Grid',
+      icon: Navigation01Icon,
     }
   },
   {
@@ -108,7 +139,7 @@ const routes = [
     path: '/login-example',
     component: () => import('./vue/views/LoginExample.vue'),
     meta: {
-      title: 'Login Example',
+      title: 'Login',
       icon: SecurityValidationIcon,
     }
   }

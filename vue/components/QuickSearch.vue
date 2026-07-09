@@ -437,7 +437,7 @@ mark {
 }
 
 /* Dark theme */
-@media (prefers-color-scheme: dark) {
+html[data-theme="dark"] {
   .search-input {
     background-color: #1f2937;
     border-color: #374151;

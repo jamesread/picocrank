@@ -23,6 +23,16 @@
 		
 		<div class = "fg1"></div>
 
+		<button
+			type="button"
+			class="theme-toggle neutral"
+			:aria-label="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
+			:title="isDark ? 'Light mode' : 'Dark mode'"
+			@click="toggleTheme"
+		>
+			<HugeiconsIcon :icon="isDark ? Sun01Icon : Moon02Icon" width="1em" height="1em" />
+		</button>
+
 		<slot name = "user-info">
 			<div class = "user-info">
 				<span v-if="username">{{ username }}</span>
@@ -33,10 +43,13 @@
 
 <script setup>
 	import { HugeiconsIcon } from "@hugeicons/vue";
-	import { Menu01Icon } from "@hugeicons/core-free-icons";
+	import { Menu01Icon, Moon02Icon, Sun01Icon } from "@hugeicons/core-free-icons";
 
 	import Breadcrumbs from "./Breadcrumbs.vue";
 	import TopBar from "./TopBar.vue";
+	import { useTheme } from '../composables/useTheme.js';
+
+	const { isDark, toggleTheme } = useTheme();
 
 	const emit = defineEmits(["toggleSidebar", "logoClick"]);
 
@@ -100,5 +113,9 @@ button:hover {
 
 .user-info span {
 	padding-right: 0.5rem;
+}
+
+.theme-toggle {
+	margin-right: 0.25rem;
 }
 </style>

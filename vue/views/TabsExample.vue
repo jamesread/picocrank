@@ -322,7 +322,7 @@ function saveSettings() {
 	color: var(--text-muted, #666);
 }
 
-@media (prefers-color-scheme: dark) {
+html[data-theme="dark"] {
 	.detail-item,
 	.tab-info,
 	.profile-card {

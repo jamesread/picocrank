@@ -90,6 +90,15 @@ function addSeparator(id) {
   addNavigationLink(separator)
 }
 
+function addSection(title, options = {}) {
+  const section = {
+    name: options.name || `nav-section-${title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}`,
+    type: 'section',
+    title,
+  }
+  addNavigationLink(section)
+}
+
 function addHtml(html, options = {}) {
   const htmlLink = {
     name: options.name || `html-item-${Date.now()}`,
@@ -153,6 +162,7 @@ provide('navigation', {
   addNavigationLink,
   addCallback,
   addSeparator,
+  addSection,
   addHtml,
   removeNavigationLink,
   clearNavigationLinks,
@@ -167,6 +177,7 @@ defineExpose({
   addNavigationLink,
   addCallback,
   addSeparator,
+  addSection,
   addHtml,
   removeNavigationLink,
   clearNavigationLinks,

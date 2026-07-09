@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, watch, onUnmounted } from 'vue'
+import { HugeiconsIcon } from '@hugeicons/vue'
 
 export interface CalendarEvent {
   id: string | number
@@ -7,6 +8,10 @@ export interface CalendarEvent {
   startDate?: Date | string | null
   endDate?: Date | string | null
   date?: Date | string | null
+  /** Optional Hugeicons icon (from @hugeicons/core-free-icons). */
+  icon?: unknown
+  /** Optional CSS color overriding the default event background. */
+  color?: string
   [key: string]: any
 }
 
@@ -226,6 +231,11 @@ function formatEventTimeDefault(event: CalendarEvent, date: Date): string {
   }
 
   return 'All day'
+}
+
+function getEventStyle(event: CalendarEvent): Record<string, string> | undefined {
+  if (!event.color) return undefined
+  return { '--event-color': event.color }
 }
 
 // Get ordinal suffix for a number (1st, 2nd, 3rd, 4th, etc.)
@@ -655,8 +665,10 @@ watch([currentMonth, currentYear], () => {
                   'multi-day-start': isMultiDayEvent(event) && getMultiDayPosition(event, day.date) === 'start',
                   'multi-day-middle': isMultiDayEvent(event) && getMultiDayPosition(event, day.date) === 'middle',
                   'multi-day-end': isMultiDayEvent(event) && getMultiDayPosition(event, day.date) === 'end',
-                  'drag-source': draggingEventId === event.id
+                  'drag-source': draggingEventId === event.id,
+                  'has-custom-color': Boolean(event.color)
                 }"
+                :style="getEventStyle(event)"
                 :draggable="eventDragEnabled"
                 @dragstart.stop="onEventDragStart(event, day.date, $event)"
                 @dragend.stop="onEventDragEnd"
@@ -666,6 +678,13 @@ watch([currentMonth, currentYear], () => {
                 <slot name="event" :event="event" :date="day.date" :position="getMultiDayPosition(event, day.date)">
                   <div class="event-content">
                     <div class="event-title">
+                      <HugeiconsIcon
+                        v-if="event.icon"
+                        :icon="event.icon"
+                        class="event-icon"
+                        width="0.9em"
+                        height="0.9em"
+                      />
                       {{ event.title }}
                       <span v-if="isMultiDayEvent(event)" class="multi-day-indicator">
                         {{ getMultiDayPosition(event, day.date) === 'start' ? '▶' :
@@ -932,6 +951,21 @@ watch([currentMonth, currentYear], () => {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
 }
 
+.calendar-event.has-custom-color {
+  background: var(--event-color);
+  border-color: color-mix(in srgb, var(--event-color) 75%, black);
+}
+
+.calendar-event.has-custom-color:hover {
+  background: var(--event-color);
+  border-color: color-mix(in srgb, var(--event-color) 75%, black);
+  filter: brightness(0.92);
+}
+
+.event-icon {
+  flex-shrink: 0;
+}
+
 .calendar-event.multi-day-start {
   border-top-left-radius: 4px;
   border-bottom-left-radius: 4px;
@@ -1034,7 +1068,7 @@ watch([currentMonth, currentYear], () => {
   }
 }
 
-@media (prefers-color-scheme: dark) {
+html[data-theme="dark"] {
   .calendar-container {
     background: #565656;
     border-color: #374151;

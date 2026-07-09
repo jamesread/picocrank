@@ -2,8 +2,10 @@
 	<nav class="topbar">
 		<div class="topbar-links flex-row">
 			<template v-for="link in navigationLinks" :key="link.name">
+				<!-- Skip section headers in the top bar -->
+				<template v-if="link.type === 'section'"></template>
 				<!-- Render separator as a divider -->
-				<div v-if="link.type === 'separator'" class="separator"></div>
+				<div v-else-if="link.type === 'separator'" class="separator"></div>
 				<!-- Render callback link -->
 				<a v-else-if="link.type === 'callback'" href="#" @click.prevent="handleLinkClick(() => link.callback())" class="button topbar-link">
 					<HugeiconsIcon :icon="link.icon" width="1em" height="1em" />
@@ -120,7 +122,7 @@ function handleLinkClick(callback = null) {
 	margin: 0 0.125rem;
 }
 
-@media (prefers-color-scheme: dark) {
+html[data-theme="dark"] {
 	.topbar-link {
 		color: #f8f9fa;
 	}
