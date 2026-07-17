@@ -2,7 +2,7 @@
 	<header>
 		<div
 			:id = "sidebarEnabled ? 'sidebar-button' : null"
-			:class="['image-and-title', 'flex-row', { 'disabled-branding': !showBranding }]"
+			:class="['image-and-title', 'flex-row', { 'disabled-branding': !showBranding, 'logo-home-link': !sidebarEnabled && showBranding }]"
 			@click = "onImageAndTitleClick"
 		>
 			<img v-if="showBranding" :src = "logoUrl" alt = "Logo" class = "logo" />
@@ -109,6 +109,15 @@ button:hover {
 
 #sidebar-button.disabled-branding {
 	width: auto;
+}
+
+.logo-home-link {
+	cursor: pointer;
+}
+
+.logo-home-link:hover {
+	background-color: var(--header-hover-background-color);
+	color: var(--header-hover-text-color);
 }
 
 .user-info span {

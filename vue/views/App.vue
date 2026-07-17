@@ -1,5 +1,5 @@
 <template>
-	<Header username = "Guest" @toggleSidebar="toggleSidebar" title = "PicoCrank" :logoUrl="logoUrl" :sidebarEnabled="sidebarEnabled" :navigation="navigation" :topBarEnabled="topBarEnabled" :showBranding="brandingEnabled" :breadcrumbs="breadcrumbsEnabled">
+	<Header username = "Guest" @toggleSidebar="toggleSidebar" @logoClick="goToIndex" title = "PicoCrank" :logoUrl="logoUrl" :sidebarEnabled="sidebarEnabled" :navigation="navigation" :topBarEnabled="topBarEnabled" :showBranding="brandingEnabled" :breadcrumbs="breadcrumbsEnabled">
 		<template #toolbar>
 			<QuickSearch
 				v-if="quickSearchEnabled"
@@ -32,6 +32,7 @@
 
 <script setup>
 	import { ref, onMounted, provide } from 'vue';
+	import { useRouter } from 'vue-router';
 	import { Pin02Icon } from '@hugeicons/core-free-icons'
 
 	import QuickSearch from './../components/QuickSearch.vue'
@@ -41,6 +42,7 @@
 	import '../composables/useTheme.js'
 	import logoUrl from '/logo.png';
 
+	const router = useRouter();
 	const quickSearchRef = ref(null)
 	const sidebar = ref(null);
 	const navigation = ref(null);
@@ -54,6 +56,10 @@
 		if (sidebar.value) {
 			sidebar.value.toggle();
 		}
+	}
+
+	function goToIndex() {
+		router.push({ name: 'Welcome' });
 	}
 
 	function toggleSidebarEnabled() {
