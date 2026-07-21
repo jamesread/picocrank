@@ -46,6 +46,8 @@ export interface CalendarProps {
   formatEventTime?: (event: CalendarEvent, date: Date) => string
   // Customization
   showNavigation?: boolean
+  /** When true, day titles show ordinal + full month name (e.g. "21st July") instead of the day number alone. */
+  shortMonthSuffix?: boolean
   currentMonth?: number
   currentYear?: number
 }
@@ -62,6 +64,7 @@ const props = withDefaults(defineProps<CalendarProps>(), {
   eventDragEnabled: true,
   eventMoveResponseTimeoutMs: 15000,
   showNavigation: true,
+  shortMonthSuffix: false,
 })
 
 const emit = defineEmits<{
@@ -646,8 +649,16 @@ watch([currentMonth, currentYear], () => {
           }"
         >
           <div class="day-content">
-            <div class="day-number clickable">
-              {{ day.date.getDate() }}<span class="day-month">{{ getOrdinalSuffix(day.date.getDate()) }} {{ monthNames[day.date.getMonth()].substring(0, 3) }}</span>
+            <div
+              class="day-number clickable"
+              :class="{ 'with-month-suffix': shortMonthSuffix }"
+            >
+              <template v-if="shortMonthSuffix">
+                {{ day.date.getDate() }}{{ getOrdinalSuffix(day.date.getDate()) }} {{ monthNames[day.date.getMonth()] }}
+              </template>
+              <template v-else>
+                {{ day.date.getDate() }}<span class="day-month">{{ getOrdinalSuffix(day.date.getDate()) }} {{ monthNames[day.date.getMonth()].substring(0, 3) }}</span>
+              </template>
             </div>
             <div class="day-events">
               <div
@@ -911,6 +922,13 @@ watch([currentMonth, currentYear], () => {
 .day-number.clickable .day-month {
   display: none;
   font-size: small;
+}
+
+.day-number.with-month-suffix {
+  min-width: auto;
+  text-align: center;
+  font-size: 0.8rem;
+  white-space: nowrap;
 }
 
 .day-content:hover .day-number.clickable {

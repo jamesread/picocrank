@@ -4,6 +4,10 @@
 		padding
 	>
         <template #toolbar>
+            <label class="short-month-suffix-toggle">
+                <input type="checkbox" v-model="shortMonthSuffix" />
+                Short month suffix
+            </label>
             <button @click="goToToday">Today</button>
             <button @click="previousMonth">‹</button>
             <div class="date-picker-container">
@@ -23,6 +27,7 @@
 			:loading="loading"
 			:error="error"
 			:show-navigation="false"
+			:short-month-suffix="shortMonthSuffix"
 			:current-month="currentMonthIndex"
 			:current-year="currentYear"
 			@event-click="handleEventClick"
@@ -51,6 +56,7 @@ import {
 const events = ref([])
 const loading = ref(false)
 const error = ref(null)
+const shortMonthSuffix = ref(false)
 const currentMonth = ref('?')
 const currentMonthIndex = ref(new Date().getMonth())
 const currentYear = ref(new Date().getFullYear())
@@ -401,6 +407,15 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.short-month-suffix-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.875rem;
+  cursor: pointer;
+  user-select: none;
+}
+
 .date-picker-container {
   display: flex;
   align-items: center;
