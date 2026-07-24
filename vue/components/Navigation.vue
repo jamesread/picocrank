@@ -20,6 +20,11 @@ const router = useRouter()
  * @param {object} options.params - Route params to pass (e.g., { id: 1 })
  * @param {object} options.props - Props to pass to router-link (e.g., { replace: true, custom: true })
  * @param {object|string} options.to - Override the 'to' prop (if provided, takes precedence over params)
+ * @param {boolean} options.disabled - Disable the link
+ * @param {boolean} options.indicator - Show a notification indicator dot
+ * @param {number} options.count - Show a notification count badge (takes precedence over indicator)
+ * @param {string} options.iconColor - Optional icon color
+ * @param {string} options.description - Optional description (used by NavigationGrid)
  */
 function addRouterLink(link, altTitle = null, options = {}) {
 	const foundRoute = router.getRoutes().find(r => r.name === link)
@@ -50,7 +55,8 @@ function addRouterLink(link, altTitle = null, options = {}) {
 		description: options.description || foundRoute.meta?.description || null,
 		disabled: options.disabled || false,
 		iconColor: options.iconColor || null,
-		indicator: options.indicator || false
+		indicator: options.indicator || false,
+		count: normalizeCount(options.count),
 	}
 
 	addNavigationLink(routeLink)
@@ -75,10 +81,22 @@ function addCallback(title, callback, options = {}) {
 	description: options.description || null,
 	disabled: options.disabled || false,
 	iconColor: options.iconColor || null,
-	indicator: options.indicator || false
+	indicator: options.indicator || false,
+	count: normalizeCount(options.count),
   }
 
   addNavigationLink(callbackLink)
+}
+
+function normalizeCount(count) {
+  if (count === null || count === undefined || count === false) {
+    return null
+  }
+  const value = Number(count)
+  if (!Number.isFinite(value) || value <= 0) {
+    return null
+  }
+  return Math.floor(value)
 }
 
 function addSeparator(id) {
@@ -110,7 +128,7 @@ function addHtml(html, options = {}) {
 }
 
 function removeNavigationLink(linkId) {
-  navigationLinks.value = navigationLinks.value.filter(link => link.id !== linkId)
+  navigationLinks.value = navigationLinks.value.filter(link => link.name !== linkId)
 }
 
 function clearNavigationLinks() {

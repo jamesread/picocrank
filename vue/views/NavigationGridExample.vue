@@ -77,6 +77,16 @@ onMounted(() => {
 		indicator: true,
 	})
 
+	localNavigation.value.addCallback('Inbox', () => {
+		alert('Inbox action')
+	}, {
+		icon: ViewIcon,
+		name: 'inbox',
+		description: 'Shows a notification count on the tile',
+		iconColor: '#e67e22',
+		count: 12,
+	})
+
 	localNavigation.value.addCallback('Billing', () => {
 		alert('This item is disabled')
 	}, {

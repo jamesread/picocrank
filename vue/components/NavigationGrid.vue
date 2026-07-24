@@ -10,7 +10,12 @@
 				@click="handleLinkClick(link)"
 			>
 				<span
-					v-if="showIndicator(link)"
+					v-if="showCount(link)"
+					class="nav-button-count"
+					:aria-label="`${link.count} notifications`"
+				>{{ formatCount(link.count) }}</span>
+				<span
+					v-else-if="showIndicator(link)"
 					class="nav-button-indicator"
 					aria-label="Requires attention"
 				/>
@@ -124,8 +129,16 @@ function getIconStyle(link) {
 	return undefined;
 }
 
+function showCount(link) {
+	return !link.disabled && link.count != null && link.count > 0;
+}
+
 function showIndicator(link) {
-	return link.indicator && !link.disabled;
+	return link.indicator && !link.disabled && !showCount(link);
+}
+
+function formatCount(count) {
+	return count > 99 ? '99+' : String(count);
 }
 
 function handleLinkClick(link) {
@@ -246,12 +259,35 @@ function handleLinkClick(link) {
 	flex-shrink: 0;
 }
 
+.nav-button-count {
+	position: absolute;
+	top: 0.5rem;
+	right: 0.5rem;
+	min-width: 1.25rem;
+	padding: 0.1rem 0.4rem;
+	border-radius: 999px;
+	background: var(--indicator-color, #dc3545);
+	color: #fff;
+	font-size: 0.75em;
+	font-weight: 600;
+	line-height: 1.2;
+	text-align: center;
+	box-shadow: 0 0 0 2px var(--background-color, #fff);
+	flex-shrink: 0;
+}
+
 .navigation-grid.compact .nav-button-indicator {
 	top: 0.5rem;
 	right: 0.5rem;
 }
 
-.nav-button.active .nav-button-indicator {
+.navigation-grid.compact .nav-button-count {
+	top: 0.35rem;
+	right: 0.35rem;
+}
+
+.nav-button.active .nav-button-indicator,
+.nav-button.active .nav-button-count {
 	box-shadow: 0 0 0 2px var(--primary-color, #007bff);
 }
 

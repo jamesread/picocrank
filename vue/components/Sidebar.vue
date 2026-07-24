@@ -37,24 +37,49 @@
 						<li
 							v-else
 							:title="item.link.title"
+							:class="{ disabled: item.link.disabled }"
 						>
 							<div v-if="item.link.type === 'separator'" class="separator"></div>
-							<div v-else-if="item.link.type === 'callback'">
-								<a href="#" @click.prevent="handleLinkClick(() => item.link.callback())">
-									<HugeiconsIcon :icon="item.link.icon" />
-									<span>{{ item.link.title }}</span>
-								</a>
-							</div>
 							<div v-else-if="item.link.type === 'html'" v-html="item.link.html"></div>
+							<a
+								v-else-if="item.link.type === 'callback' || item.link.disabled"
+								href="#"
+								:class="{ active: isLinkActive(item.link), disabled: item.link.disabled }"
+								:aria-disabled="item.link.disabled || undefined"
+								@click.prevent="handleNavItemClick(item.link)"
+							>
+								<HugeiconsIcon :icon="item.link.icon" />
+								<span class="nav-link-title">{{ item.link.title }}</span>
+								<span
+									v-if="showCount(item.link)"
+									class="nav-link-count"
+									:aria-label="`${item.link.count} notifications`"
+								>{{ formatCount(item.link.count) }}</span>
+								<span
+									v-else-if="showIndicator(item.link)"
+									class="nav-link-indicator"
+									aria-label="Requires attention"
+								/>
+							</a>
 							<router-link
 								v-else
 								v-bind="item.link.props || {}"
 								:to="item.link.to || item.link.path"
-								:class="{ active: isActive(item.link) }"
+								:class="{ active: isLinkActive(item.link) }"
 								@click="handleLinkClick()"
 							>
 								<HugeiconsIcon :icon="item.link.icon" />
-								<span>{{ item.link.title }}</span>
+								<span class="nav-link-title">{{ item.link.title }}</span>
+								<span
+									v-if="showCount(item.link)"
+									class="nav-link-count"
+									:aria-label="`${item.link.count} notifications`"
+								>{{ formatCount(item.link.count) }}</span>
+								<span
+									v-else-if="showIndicator(item.link)"
+									class="nav-link-indicator"
+									aria-label="Requires attention"
+								/>
 							</router-link>
 						</li>
 					</template>
@@ -212,6 +237,36 @@ function close() {
   isStuck.value = false
 }
 
+function isLinkActive(link) {
+  if (link.disabled) {
+    return false
+  }
+  return isActive(link)
+}
+
+function showCount(link) {
+  return !link.disabled && link.count != null && link.count > 0
+}
+
+function showIndicator(link) {
+  return link.indicator && !link.disabled && !showCount(link)
+}
+
+function formatCount(count) {
+  return count > 99 ? '99+' : String(count)
+}
+
+function handleNavItemClick(link) {
+  if (link.disabled) {
+    return
+  }
+  if (link.type === 'callback' && link.callback) {
+    handleLinkClick(() => link.callback())
+    return
+  }
+  handleLinkClick()
+}
+
 function handleLinkClick(callback = null) {
   if (callback) {
     callback()
@@ -294,6 +349,39 @@ button {
 	gap: 0.75rem;
 	padding: .75em;
 	border-radius: 0;
+	position: relative;
+}
+
+.nav-link-title {
+	flex: 1;
+	min-width: 0;
+}
+
+.nav-link-indicator {
+	width: 0.5rem;
+	height: 0.5rem;
+	border-radius: 50%;
+	background: var(--indicator-color, #dc3545);
+	flex-shrink: 0;
+}
+
+.nav-link-count {
+	min-width: 1.25rem;
+	padding: 0.1rem 0.4rem;
+	border-radius: 999px;
+	background: var(--indicator-color, #dc3545);
+	color: #fff;
+	font-size: 0.75em;
+	font-weight: 600;
+	line-height: 1.2;
+	text-align: center;
+	flex-shrink: 0;
+}
+
+.navigation-links a.disabled,
+.navigation-links li.disabled a {
+	cursor: not-allowed;
+	opacity: 0.55;
 }
 
 .nav-section-header {

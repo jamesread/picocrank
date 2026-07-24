@@ -77,13 +77,42 @@
 					When enabled, use the menu button in the header to open and pin the sidebar.
 				</p>
 			</dd>
+
+			<dt>Example link states</dt>
+			<dd>
+				<label class="page-structure-control">
+					<input
+						type="checkbox"
+						:checked="exampleLinksEnabled"
+						@change="toggleExampleLinks"
+					/>
+					<span>Add example links that demonstrate indicator, count, and disabled states</span>
+				</label>
+				<p class="subtle">
+					Adds a “Link states” section to the sidebar with an attention indicator,
+					a notification count badge, and a disabled item.
+				</p>
+			</dd>
 		</dl>
 	</Section>
 </template>
 
 <script setup>
-import { inject } from 'vue'
+import { inject, ref, onBeforeUnmount } from 'vue'
 import Section from '../components/Section.vue'
+import {
+	Notification01Icon,
+	Alert02Icon,
+	UnavailableIcon,
+} from '@hugeicons/core-free-icons'
+
+const EXAMPLE_SECTION_ID = 'nav-link-states'
+const EXAMPLE_LINK_NAMES = [
+	EXAMPLE_SECTION_ID,
+	'example-indicator',
+	'example-count',
+	'example-disabled',
+]
 
 const sidebarEnabled = inject('sidebarEnabled')
 const toggleSidebarEnabled = inject('toggleSidebarEnabled')
@@ -95,6 +124,70 @@ const topBarEnabled = inject('topBarEnabled')
 const toggleTopBarEnabled = inject('toggleTopBarEnabled')
 const breadcrumbsEnabled = inject('breadcrumbsEnabled')
 const toggleBreadcrumbsEnabled = inject('toggleBreadcrumbsEnabled')
+const navigation = inject('navigation', null)
+
+const exampleLinksEnabled = ref(false)
+
+function removeExampleLinks() {
+	if (!navigation) {
+		return
+	}
+	for (const name of EXAMPLE_LINK_NAMES) {
+		navigation.removeNavigationLink(name)
+	}
+}
+
+function addExampleLinks() {
+	if (!navigation) {
+		return
+	}
+
+	removeExampleLinks()
+
+	navigation.addSection('Link states', { name: EXAMPLE_SECTION_ID })
+
+	navigation.addCallback('Needs attention', () => {
+		alert('Example link with a notification indicator')
+	}, {
+		name: 'example-indicator',
+		icon: Alert02Icon,
+		indicator: true,
+	})
+
+	navigation.addCallback('Inbox', () => {
+		alert('Example link with a notification count')
+	}, {
+		name: 'example-count',
+		icon: Notification01Icon,
+		count: 3,
+	})
+
+	navigation.addCallback('Unavailable', () => {
+		alert('This should not run while disabled')
+	}, {
+		name: 'example-disabled',
+		icon: UnavailableIcon,
+		disabled: true,
+	})
+}
+
+function toggleExampleLinks() {
+	exampleLinksEnabled.value = !exampleLinksEnabled.value
+	if (exampleLinksEnabled.value) {
+		if (!sidebarEnabled.value) {
+			toggleSidebarEnabled()
+		}
+		addExampleLinks()
+	} else {
+		removeExampleLinks()
+	}
+}
+
+onBeforeUnmount(() => {
+	if (exampleLinksEnabled.value) {
+		removeExampleLinks()
+	}
+})
 </script>
 
 <style scoped>
