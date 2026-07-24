@@ -4,6 +4,7 @@ html[data-theme="dark"] {
 
   --border-color: #595959;
   --hover-background-color: #1d345c;
+  --hover-text-color: #fff;
   --header-hover-background-color: #1d345c;
   --standout-bg-color: #1f1f1f;
   --disabled-background-color: #333;

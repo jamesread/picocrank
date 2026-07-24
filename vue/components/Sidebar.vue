@@ -396,12 +396,13 @@ button {
 	font-size: 1em;
 	color: inherit;
 	background: transparent;
+	border-radius: 0;
 	cursor: pointer;
 }
 
 .nav-section-header:hover {
 	background-color: var(--hover-background-color);
-	color: white;
+	color: var(--hover-text-color);
 }
 
 .nav-section-chevron {
