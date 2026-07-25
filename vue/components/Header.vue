@@ -24,6 +24,7 @@
 		<div class = "fg1"></div>
 
 		<button
+			v-if="themeToggleEnabled"
 			type="button"
 			class="theme-toggle neutral"
 			:aria-label="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
@@ -87,6 +88,10 @@
 			default: true,
 		},
 		topBarEnabled: {
+			type: Boolean,
+			default: false,
+		},
+		themeToggleEnabled: {
 			type: Boolean,
 			default: false,
 		},

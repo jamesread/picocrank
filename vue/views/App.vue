@@ -1,5 +1,5 @@
 <template>
-	<Header username = "Guest" @toggleSidebar="toggleSidebar" @logoClick="goToIndex" title = "PicoCrank" :logoUrl="logoUrl" :sidebarEnabled="sidebarEnabled" :navigation="navigation" :topBarEnabled="topBarEnabled" :showBranding="brandingEnabled" :breadcrumbs="breadcrumbsEnabled">
+	<Header username = "Guest" @toggleSidebar="toggleSidebar" @logoClick="goToIndex" title = "PicoCrank" :logoUrl="logoUrl" :sidebarEnabled="sidebarEnabled" :navigation="navigation" :topBarEnabled="topBarEnabled" :showBranding="brandingEnabled" :breadcrumbs="breadcrumbsEnabled" :themeToggleEnabled="true">
 		<template #toolbar>
 			<QuickSearch
 				v-if="quickSearchEnabled"
