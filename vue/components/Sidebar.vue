@@ -140,28 +140,35 @@ function toggleSection(sectionId) {
 
 const navigationGroups = computed(() => {
 	const ungrouped = []
+	const trailingUngrouped = []
 	const sections = []
 	let currentSection = null
+	let afterSeparator = false
 
 	for (const link of navigationLinks.value) {
 		if (link.type === 'section') {
 			currentSection = { id: link.name, title: link.title, items: [] }
 			sections.push(currentSection)
+			afterSeparator = false
 			continue
 		}
 
 		if (link.type === 'separator') {
+			currentSection = null
+			afterSeparator = true
 			continue
 		}
 
 		if (currentSection) {
 			currentSection.items.push(link)
+		} else if (afterSeparator) {
+			trailingUngrouped.push(link)
 		} else {
 			ungrouped.push(link)
 		}
 	}
 
-	return { ungrouped, sections }
+	return { ungrouped, trailingUngrouped, sections }
 })
 
 const visibleNavItems = computed(() => {
@@ -189,6 +196,10 @@ const visibleNavItems = computed(() => {
 				})
 			}
 		}
+	}
+
+	for (const link of navigationGroups.value.trailingUngrouped) {
+		items.push({ key: link.name, kind: 'link', link })
 	}
 
 	return items
