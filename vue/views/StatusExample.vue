@@ -89,15 +89,16 @@
 		title="In context"
 		subtitle="Inline notifications beside or below form fields"
 	>
-		<form class="status-form" @submit.prevent="submitForm">
-			<label for="status-email">Email</label>
-			<input
-				id="status-email"
-				v-model="formEmail"
-				type="email"
-				placeholder="you@example.com"
-				required
-			/>
+		<FormLayout class="status-form" @submit.prevent="submitForm">
+			<FormField label="Email" for="status-email">
+				<input
+					id="status-email"
+					v-model="formEmail"
+					type="email"
+					placeholder="you@example.com"
+					required
+				/>
+			</FormField>
 
 			<p
 				v-if="formMessage"
@@ -109,17 +110,19 @@
 				{{ formMessage }}
 			</p>
 
-			<fieldset>
+			<template #actions>
 				<button type="submit" class="good">Save</button>
 				<button type="button" @click="clearForm">Clear</button>
-			</fieldset>
-		</form>
+			</template>
+		</FormLayout>
 	</Section>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
 import Section from '../components/Section.vue'
+import FormLayout from '../components/FormLayout.vue'
+import FormField from '../components/FormField.vue'
 import { useNotificationPopups } from '../composables/useNotificationPopups.js'
 
 const { show: showPopup, dismissAll: dismissAllPopups } = useNotificationPopups()

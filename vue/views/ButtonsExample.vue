@@ -20,14 +20,14 @@
 	</Section>
 
 	<Section title="Form actions" subtitle="Semantic button types in a fieldset">
-		<form class="buttons-demo-form" @submit.prevent="onSubmit">
-			<fieldset>
+		<FormLayout class="buttons-demo-form" @submit.prevent="onSubmit">
+			<template #actions>
 				<button type="submit">Submit</button>
 				<button type="cancel">Cancel</button>
 				<button type="reset" @click="onReset">Reset</button>
-			</fieldset>
-			<p v-if="lastAction" class="subtle">{{ lastAction }}</p>
-		</form>
+			</template>
+		</FormLayout>
+		<p v-if="lastAction" class="subtle">{{ lastAction }}</p>
 	</Section>
 
 	<Section title="Links as buttons" subtitle="Anchor elements with the .button class">
@@ -68,6 +68,7 @@
 <script setup>
 import { ref } from 'vue'
 import Section from '../components/Section.vue'
+import FormLayout from '../components/FormLayout.vue'
 
 const lastAction = ref('')
 
