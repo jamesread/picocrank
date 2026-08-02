@@ -48,7 +48,7 @@
 <script setup>
 	import { computed, ref } from "vue";
 	import { HugeiconsIcon } from "@hugeicons/vue";
-	import { ComputerIcon, Menu01Icon, Moon02Icon, Sun01Icon } from "@hugeicons/core-free-icons";
+	import { BulbIcon, Menu01Icon, Moon02Icon, Sun01Icon } from "@hugeicons/core-free-icons";
 
 	import Breadcrumbs from "./Breadcrumbs.vue";
 	import TopBar from "./TopBar.vue";
@@ -56,29 +56,30 @@
 	import { useTheme } from '../composables/useTheme.js';
 	import { useResponsiveNav } from '../composables/useResponsiveNav.js';
 
-	const { theme, toggleTheme } = useTheme();
+	const { theme, nextTheme, toggleTheme } = useTheme();
 
 	const themeToggleMeta = {
 		auto: {
-			icon: ComputerIcon,
+			icon: BulbIcon,
 			title: 'Auto',
-			label: 'Theme auto. Switch to light mode',
 		},
 		light: {
 			icon: Sun01Icon,
 			title: 'Light',
-			label: 'Theme light. Switch to dark mode',
 		},
 		dark: {
 			icon: Moon02Icon,
 			title: 'Dark',
-			label: 'Theme dark. Switch to auto mode',
 		},
 	};
 
-	const themeToggleIcon = computed(() => themeToggleMeta[theme.value]?.icon ?? ComputerIcon);
+	const themeToggleIcon = computed(() => themeToggleMeta[theme.value]?.icon ?? BulbIcon);
 	const themeToggleTitle = computed(() => themeToggleMeta[theme.value]?.title ?? 'Auto');
-	const themeToggleLabel = computed(() => themeToggleMeta[theme.value]?.label ?? 'Theme auto. Switch to light mode');
+	const themeToggleLabel = computed(() => {
+		const current = themeToggleMeta[theme.value]?.title ?? 'Auto';
+		const next = themeToggleMeta[nextTheme.value]?.title ?? 'Auto';
+		return `Theme ${current.toLowerCase()}. Switch to ${next.toLowerCase()} mode`;
+	});
 
 	const emit = defineEmits(["toggleSidebar", "logoClick"]);
 

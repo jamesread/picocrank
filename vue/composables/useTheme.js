@@ -1,7 +1,6 @@
 import { ref, computed, watch } from 'vue'
 
 const STORAGE_KEY = 'picocrank-theme'
-const THEME_CYCLE = ['auto', 'light', 'dark']
 
 function getSystemTheme() {
 	if (typeof window === 'undefined') {
@@ -23,6 +22,17 @@ function readStoredPreference() {
 
 function resolveTheme(preference) {
 	return preference === 'auto' ? getSystemTheme() : preference
+}
+
+function getNextTheme(preference) {
+	const system = getSystemTheme()
+	if (preference === 'auto') {
+		return system === 'light' ? 'dark' : 'light'
+	}
+	if (preference === 'light') {
+		return system === 'light' ? 'auto' : 'dark'
+	}
+	return system === 'dark' ? 'auto' : 'light'
 }
 
 function applyTheme(value) {
@@ -59,11 +69,11 @@ if (typeof window !== 'undefined') {
 
 export function useTheme() {
 	const resolvedTheme = computed(() => resolveTheme(theme.value))
+	const nextTheme = computed(() => getNextTheme(theme.value))
 	const isDark = computed(() => resolvedTheme.value === 'dark')
 
 	function toggleTheme() {
-		const index = THEME_CYCLE.indexOf(theme.value)
-		theme.value = THEME_CYCLE[(index + 1) % THEME_CYCLE.length]
+		theme.value = getNextTheme(theme.value)
 	}
 
 	function setTheme(value) {
@@ -75,6 +85,7 @@ export function useTheme() {
 	return {
 		theme,
 		resolvedTheme,
+		nextTheme,
 		isDark,
 		toggleTheme,
 		setTheme,
