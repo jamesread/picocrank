@@ -96,15 +96,46 @@ import { Pin02Icon, PinIcon, ArrowDown01Icon, ArrowRight01Icon } from '@hugeicon
 
 const STORAGE_KEY = 'picocrank-nav-sections-collapsed'
 
+const props = defineProps({
+	navigation: {
+		type: Object,
+		default: null,
+	},
+})
+
 const isOpen = ref(false)
 const isStuck = ref(false)
 const sidebarRef = ref(null)
 const route = useRoute()
 
-const navigation = inject('navigation', null)
+const injectedNavigation = inject('navigation', null)
 
-const navigationLinks = navigation ? navigation.navigationLinks : ref([])
-const isActive = navigation ? navigation.isActive : (() => false)
+const navigation = computed(() => {
+	const nav = props.navigation || injectedNavigation
+	if (!nav) return null
+	// Component ref (or ref-like): use exposed API
+	if (nav.value) {
+		return nav.value
+	}
+	return nav
+})
+
+const navigationLinks = computed(() => {
+	const nav = navigation.value
+	if (!nav?.navigationLinks) {
+		return []
+	}
+	const links = nav.navigationLinks
+	return Array.isArray(links) ? links : (links?.value ?? [])
+})
+
+function isActive(link) {
+	const nav = navigation.value
+	if (!nav?.isActive) {
+		return false
+	}
+	return nav.isActive(link)
+}
 
 function loadCollapsedSections() {
 	try {

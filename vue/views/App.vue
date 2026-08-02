@@ -1,17 +1,17 @@
 <template>
-	<Header username = "Guest" @toggleSidebar="toggleSidebar" @logoClick="goToIndex" title = "PicoCrank" :logoUrl="logoUrl" :sidebarEnabled="sidebarEnabled" :navigation="navigation" :topBarEnabled="topBarEnabled" :showBranding="brandingEnabled" :breadcrumbs="breadcrumbsEnabled" :themeToggleEnabled="true">
-		<template #toolbar>
-			<QuickSearch
-				v-if="quickSearchEnabled"
-				ref="quickSearchRef"
-				placeholder="Search items..."
-				:search-fields="['title', 'name']"
-				:max-results="15"
-			/>
-		</template>
-	</Header>
-
 	<Navigation ref="navigation">
+		<Header username = "Guest" @toggleSidebar="toggleSidebar" @logoClick="goToIndex" title = "PicoCrank" :logoUrl="logoUrl" :sidebarEnabled="sidebarEnabled" :navigation="navigation" :topBarEnabled="topBarEnabled" :showBranding="brandingEnabled" :breadcrumbs="breadcrumbsEnabled" :themeToggleEnabled="true">
+			<template #toolbar>
+				<QuickSearch
+					v-if="quickSearchEnabled"
+					ref="quickSearchRef"
+					placeholder="Search items..."
+					:search-fields="['title', 'name']"
+					:max-results="15"
+				/>
+			</template>
+		</Header>
+
 		<div id = "layout">
 			<Sidebar v-if="sidebarEnabled" ref = "sidebar" />
 

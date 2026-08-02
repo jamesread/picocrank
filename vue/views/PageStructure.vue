@@ -33,6 +33,9 @@
 					/>
 					<span>Show QuickSearch in the header toolbar</span>
 				</label>
+				<p class="subtle">
+					On narrow screens it collapses to a search button that opens search in an overlay.
+				</p>
 			</dd>
 
 			<dt>Top bar</dt>
@@ -45,6 +48,10 @@
 					/>
 					<span>Show horizontal navigation links below the header</span>
 				</label>
+				<p class="subtle">
+					On narrow screens: if both are on, the sidebar takes precedence and the top bar is hidden.
+					If only the top bar is on, Header collapses it into a mobile sidebar automatically.
+				</p>
 			</dd>
 
 			<dt>Breadcrumbs</dt>

@@ -1,57 +1,101 @@
 <template>
-  <div class="quick-search">
-    <div class="search-container">
-      <input
-        ref="searchInput"
-        v-model="searchQuery"
-        type="text"
-        class="search-input"
-        :placeholder="placeholder"
-        @input="onSearch"
-        @focus="onFocus"
-        @blur="onBlur"
-        @keydown="onKeydown"
-      />
-      <div class="search-icon">
-        <HugeiconsIcon :icon="SearchIcon" width="1em" height="1em" />
-      </div>
-    </div>
-    
-    <div v-if="showResults && filteredItems.length > 0" class="search-results">
+  <!-- Mobile: collapse to a search button in the header -->
+  <button
+    v-if="isMobile"
+    type="button"
+    class="quick-search-trigger neutral"
+    aria-label="Open search"
+    aria-haspopup="dialog"
+    :aria-expanded="overlayOpen"
+    @click="openOverlay"
+  >
+    <HugeiconsIcon :icon="SearchIcon" width="1em" height="1em" />
+  </button>
+
+  <Teleport to="body" :disabled="!isMobile">
+    <div
+      v-if="!isMobile || overlayOpen"
+      :class="{ 'quick-search-overlay-root': isMobile }"
+    >
       <div
-        v-for="(item, index) in filteredItems"
-        :key="item.id"
-        :class="['search-result-item', { active: selectedIndex === index }]"
-        @click="selectItem(item)"
-        @mouseenter="selectedIndex = index"
+        v-if="isMobile"
+        class="quick-search-backdrop"
+        aria-hidden="true"
+        @click="closeOverlay"
+      />
+
+      <div
+        :class="['quick-search', { 'quick-search--overlay': isMobile }]"
+        :role="isMobile ? 'dialog' : undefined"
+        :aria-modal="isMobile ? 'true' : undefined"
+        :aria-label="isMobile ? 'Search' : undefined"
       >
-        <div class="result-content">
-          <div class="result-title" v-html="highlightText(item.title, searchQuery)"></div>
-          <div v-if="item.description" class="result-description" v-html="highlightText(item.description, searchQuery)"></div>
-          <div v-if="item.category" class="result-category">{{ item.category }}</div>
+        <div v-if="isMobile" class="quick-search-overlay-header">
+          <span class="quick-search-overlay-title">Search</span>
+          <button
+            type="button"
+            class="quick-search-overlay-close neutral"
+            aria-label="Close search"
+            @click="closeOverlay"
+          >
+            <HugeiconsIcon :icon="Cancel01Icon" width="1em" height="1em" />
+          </button>
         </div>
-        <div v-if="item.icon" class="result-icon">
-          <HugeiconsIcon :icon="item.icon" width="1.2em" height="1.2em" />
+
+        <div class="search-container">
+          <input
+            ref="searchInput"
+            v-model="searchQuery"
+            type="text"
+            class="search-input"
+            :placeholder="placeholder"
+            @input="onSearch"
+            @focus="onFocus"
+            @blur="onBlur"
+            @keydown="onKeydown"
+          />
+          <div class="search-icon">
+            <HugeiconsIcon :icon="SearchIcon" width="1em" height="1em" />
+          </div>
+        </div>
+
+        <div v-if="showResults && filteredItems.length > 0" class="search-results">
+          <div
+            v-for="(item, index) in filteredItems"
+            :key="item.id"
+            :class="['search-result-item', { active: selectedIndex === index }]"
+            @click="selectItem(item)"
+            @mouseenter="selectedIndex = index"
+          >
+            <div v-if="item.icon" class="result-icon">
+              <HugeiconsIcon :icon="item.icon" width="1.2em" height="1.2em" />
+            </div>
+            <div class="result-content">
+              <div class="result-title" v-html="highlightText(item.title, searchQuery)"></div>
+              <div v-if="item.description" class="result-description" v-html="highlightText(item.description, searchQuery)"></div>
+              <div v-if="item.category" class="result-category">{{ item.category }}</div>
+            </div>
+          </div>
+        </div>
+
+        <div v-if="showResults && searchQuery && filteredItems.length === 0" class="no-results">
+          <div class="no-results-content">
+            <HugeiconsIcon :icon="SearchRemoveIcon" width="2em" height="2em" />
+            <p>No results found for "{{ searchQuery }}"</p>
+          </div>
         </div>
       </div>
     </div>
-    
-    <div v-if="showResults && searchQuery && filteredItems.length === 0" class="no-results">
-      <div class="no-results-content">
-        <HugeiconsIcon :icon="SearchRemoveIcon" width="2em" height="2em" />
-        <p>No results found for "{{ searchQuery }}"</p>
-      </div>
-    </div>
-  </div>
+  </Teleport>
 </template>
 
 <script setup>
 import { ref, computed, watch, nextTick, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { HugeiconsIcon } from '@hugeicons/vue'
-import { SearchIcon } from '@hugeicons/core-free-icons'
-import { SearchRemoveIcon } from '@hugeicons/core-free-icons'
-import { ViewIcon } from '@hugeicons/core-free-icons'
+import { SearchIcon, SearchRemoveIcon, ViewIcon, Cancel01Icon } from '@hugeicons/core-free-icons'
+import { useMediaQuery } from '../composables/useMediaQuery.js'
+import { MOBILE_NAV_QUERY } from '../composables/useResponsiveNav.js'
 
 const props = defineProps({
   placeholder: {
@@ -87,6 +131,8 @@ const props = defineProps({
 const emit = defineEmits(['select', 'search', 'focus', 'blur'])
 
 const router = useRouter()
+const isMobile = useMediaQuery(MOBILE_NAV_QUERY)
+const overlayOpen = ref(false)
 const searchInput = ref(null)
 const searchQuery = ref('')
 const showResults = ref(false)
@@ -127,16 +173,35 @@ const filteredItems = computed(() => {
   return filtered.slice(0, props.maxResults)
 })
 
+function openOverlay() {
+  if (!isMobile.value) {
+    return
+  }
+  overlayOpen.value = true
+  nextTick(() => {
+    searchInput.value?.focus()
+    showResults.value = true
+  })
+}
+
+function closeOverlay() {
+  if (!overlayOpen.value) {
+    return
+  }
+  overlayOpen.value = false
+  clear()
+}
+
 function handleGlobalKeydown(event) {
   // Check if Ctrl+K is pressed
   if (event.ctrlKey && event.key === 'k') {
     event.preventDefault()
-    
+
     // Don't trigger if user is typing in an input/textarea
     if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') {
       return
     }
-    
+
     focus()
   }
 }
@@ -156,15 +221,31 @@ function onFocus() {
 }
 
 function onBlur() {
+  emit('blur')
+  // Keep overlay results visible on mobile; only collapse the inline dropdown.
+  if (isMobile.value) {
+    return
+  }
   // Delay hiding results to allow for click events
   setTimeout(() => {
     showResults.value = false
     selectedIndex.value = -1
-    emit('blur')
   }, 150)
 }
 
 function onKeydown(event) {
+  if (event.key === 'Escape') {
+    if (isMobile.value && overlayOpen.value) {
+      event.preventDefault()
+      closeOverlay()
+      return
+    }
+    showResults.value = false
+    selectedIndex.value = -1
+    searchInput.value?.blur()
+    return
+  }
+
   if (!showResults.value || filteredItems.value.length === 0) return
   
   switch (event.key) {
@@ -181,11 +262,6 @@ function onKeydown(event) {
       if (selectedIndex.value >= 0) {
         selectItem(filteredItems.value[selectedIndex.value])
       }
-      break
-    case 'Escape':
-      showResults.value = false
-      selectedIndex.value = -1
-      searchInput.value.blur()
       break
   }
 }
@@ -205,6 +281,10 @@ function selectItem(item) {
   searchQuery.value = ''
   showResults.value = false
   selectedIndex.value = -1
+
+  if (isMobile.value && overlayOpen.value) {
+    overlayOpen.value = false
+  }
 }
 
 function highlightText(text, query) {
@@ -241,10 +321,18 @@ function setItems(newItems) {
 }
 
 function focus() {
+  if (isMobile.value) {
+    openOverlay()
+    return
+  }
   searchInput.value?.focus()
 }
 
 function blur() {
+  if (isMobile.value && overlayOpen.value) {
+    closeOverlay()
+    return
+  }
   searchInput.value?.blur()
 }
 
@@ -259,6 +347,19 @@ function refreshRoutes() {
     importRoutesFromRouter()
   }
 }
+
+watch(isMobile, (mobile) => {
+  if (!mobile && overlayOpen.value) {
+    closeOverlay()
+  }
+})
+
+watch(overlayOpen, (open) => {
+  if (typeof document === 'undefined') {
+    return
+  }
+  document.body.style.overflow = open ? 'hidden' : ''
+})
 
 // Global shortcut management
 onMounted(() => {
@@ -275,6 +376,9 @@ onMounted(() => {
 onUnmounted(() => {
   if (props.enableGlobalShortcut) {
     document.removeEventListener('keydown', handleGlobalKeydown)
+  }
+  if (typeof document !== 'undefined') {
+    document.body.style.overflow = ''
   }
 })
 
@@ -293,16 +397,85 @@ defineExpose({
   blur,
   clear,
   refreshRoutes,
+  openOverlay,
+  closeOverlay,
   searchQuery,
   filteredItems,
-  showResults
+  showResults,
+  overlayOpen
 })
 </script>
 
 <style scoped>
+.quick-search-trigger {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  color: #fff;
+  padding: 0.5em;
+  cursor: pointer;
+  background: transparent;
+}
+
+.quick-search-trigger:hover {
+  background-color: var(--header-hover-background-color);
+  color: var(--header-hover-text-color);
+}
+
+.quick-search-overlay-root {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 1rem;
+  padding-top: max(1rem, env(safe-area-inset-top));
+}
+
+.quick-search-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+}
+
 .quick-search {
   position: relative;
   width: 100%;
+}
+
+.quick-search--overlay {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 28rem);
+  margin-top: 10vh;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  background: #fff;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+}
+
+.quick-search-overlay-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.quick-search-overlay-title {
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.quick-search-overlay-close {
+  border: 0;
+  padding: 0.35em;
+  cursor: pointer;
+  color: #1f2937;
+  background: transparent;
 }
 
 .search-container {
@@ -321,6 +494,16 @@ defineExpose({
   transition: all 0.2s ease;
   background-color: #666;
   color: #fff;
+}
+
+.quick-search--overlay .search-input {
+  background-color: #f3f4f6;
+  color: #111827;
+  padding: 0.65em 2.25em 0.65em 0.75em;
+}
+
+.quick-search--overlay .search-input::placeholder {
+  color: #9ca3af;
 }
 
 .search-input::placeholder {
@@ -352,6 +535,19 @@ defineExpose({
   max-height: 300px;
   overflow-y: auto;
   z-index: 1000;
+}
+
+.quick-search--overlay .search-results,
+.quick-search--overlay .no-results {
+  position: relative;
+  top: auto;
+  left: auto;
+  right: auto;
+  margin-top: 0.5rem;
+  border: 1px solid #e1e5e9;
+  border-radius: 0.4rem;
+  max-height: min(50vh, 320px);
+  box-shadow: none;
 }
 
 .search-result-item {
@@ -397,7 +593,7 @@ defineExpose({
 }
 
 .result-icon {
-  margin-left: 0.75rem;
+  margin-right: 0.75rem;
   color: #6b7280;
   flex-shrink: 0;
 }
@@ -438,6 +634,20 @@ mark {
 
 /* Dark theme */
 html[data-theme="dark"] {
+  .quick-search--overlay {
+    background: #111827;
+  }
+
+  .quick-search-overlay-title,
+  .quick-search-overlay-close {
+    color: #f9fafb;
+  }
+
+  .quick-search--overlay .search-input {
+    background-color: #1f2937;
+    color: #f9fafb;
+  }
+
   .search-input {
     background-color: #1f2937;
     border-color: #374151;
@@ -492,20 +702,14 @@ html[data-theme="dark"] {
     color: #9ca3af;
   }
 
+  .quick-search--overlay .search-results,
+  .quick-search--overlay .no-results {
+    border-color: #374151;
+  }
+
   mark {
     background-color: #451a03;
     color: #fbbf24;
-  }
-}
-
-/* Responsive */
-@media (max-width: 640px) {
-  .quick-search {
-    max-width: 100%;
-  }
-  
-  .search-results {
-    max-height: 250px;
   }
 }
 </style>
