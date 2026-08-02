@@ -27,11 +27,11 @@
 			v-if="themeToggleEnabled"
 			type="button"
 			class="theme-toggle neutral"
-			:aria-label="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
-			:title="isDark ? 'Light mode' : 'Dark mode'"
+			:aria-label="themeToggleLabel"
+			:title="themeToggleTitle"
 			@click="toggleTheme"
 		>
-			<HugeiconsIcon :icon="isDark ? Sun01Icon : Moon02Icon" width="1em" height="1em" />
+			<HugeiconsIcon :icon="themeToggleIcon" width="1em" height="1em" />
 		</button>
 
 		<slot name = "user-info">
@@ -46,9 +46,9 @@
 </template>
 
 <script setup>
-	import { ref } from "vue";
+	import { computed, ref } from "vue";
 	import { HugeiconsIcon } from "@hugeicons/vue";
-	import { Menu01Icon, Moon02Icon, Sun01Icon } from "@hugeicons/core-free-icons";
+	import { ComputerIcon, Menu01Icon, Moon02Icon, Sun01Icon } from "@hugeicons/core-free-icons";
 
 	import Breadcrumbs from "./Breadcrumbs.vue";
 	import TopBar from "./TopBar.vue";
@@ -56,7 +56,29 @@
 	import { useTheme } from '../composables/useTheme.js';
 	import { useResponsiveNav } from '../composables/useResponsiveNav.js';
 
-	const { isDark, toggleTheme } = useTheme();
+	const { theme, toggleTheme } = useTheme();
+
+	const themeToggleMeta = {
+		auto: {
+			icon: ComputerIcon,
+			title: 'Auto',
+			label: 'Theme auto. Switch to light mode',
+		},
+		light: {
+			icon: Sun01Icon,
+			title: 'Light',
+			label: 'Theme light. Switch to dark mode',
+		},
+		dark: {
+			icon: Moon02Icon,
+			title: 'Dark',
+			label: 'Theme dark. Switch to auto mode',
+		},
+	};
+
+	const themeToggleIcon = computed(() => themeToggleMeta[theme.value]?.icon ?? ComputerIcon);
+	const themeToggleTitle = computed(() => themeToggleMeta[theme.value]?.title ?? 'Auto');
+	const themeToggleLabel = computed(() => themeToggleMeta[theme.value]?.label ?? 'Theme auto. Switch to light mode');
 
 	const emit = defineEmits(["toggleSidebar", "logoClick"]);
 
