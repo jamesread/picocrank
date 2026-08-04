@@ -158,12 +158,26 @@ html[data-theme="dark"] {
     background-color: #555;
   }
 
+  & .radio-group label:hover,
+  & .radio-group label:has(input:focus-visible) {
+    background-color: var(--hover-background-color);
+    color: white;
+  }
+
+  & .multiple-checklist {
+    border-color: var(--border-color);
+  }
+
+  & .multiple-checklist label {
+    background-color: #555;
+  }
+
   & aside {
     background-color: #000;
     box-shadow: 0 0 .5em #121212;
   }
 
-  & aside ul li a:hover {
+  & aside :is(ul, menu) li a:hover {
     background-color: var(--hover-background-color);
   }
 

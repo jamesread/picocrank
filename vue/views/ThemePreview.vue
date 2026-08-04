@@ -63,27 +63,24 @@
 	</Section>
 
 	<Section title="Form controls" subtitle="Inputs inherit theme variables">
-		<form class="preview-form" @submit.prevent>
-			<label>
-				Name
-				<input type="text" value="PicoCrank" />
-			</label>
-			<label>
-				Status
-				<select>
+		<FormLayout @submit.prevent>
+			<FormField label="Name" for="theme-preview-name">
+				<input id="theme-preview-name" type="text" value="PicoCrank" />
+			</FormField>
+			<FormField label="Status" for="theme-preview-status">
+				<select id="theme-preview-status">
 					<option>Ready</option>
 					<option>Busy</option>
 				</select>
-			</label>
-			<label>
-				Notes
-				<textarea rows="3">Override Femtocrank tokens in theme.css</textarea>
-			</label>
-			<div role="toolbar" class="preview-row">
+			</FormField>
+			<FormField label="Notes" for="theme-preview-notes">
+				<textarea id="theme-preview-notes" rows="3">Override Femtocrank tokens in theme.css</textarea>
+			</FormField>
+			<template #actions>
 				<button type="submit" class="good">Save</button>
 				<button type="button" class="neutral">Cancel</button>
-			</div>
-		</form>
+			</template>
+		</FormLayout>
 	</Section>
 
 	<Section title="Content chrome" subtitle="Sections, links, and muted text">
@@ -121,6 +118,8 @@
 
 <script setup>
 import Section from '../components/Section.vue'
+import FormLayout from '../components/FormLayout.vue'
+import FormField from '../components/FormField.vue'
 import { useCustomTheme } from '../composables/useCustomTheme.js'
 
 const { availableThemes, themePreference, setTheme, discoverThemes } = useCustomTheme()
@@ -149,19 +148,6 @@ function onThemeChange(event) {
 	display: flex;
 	flex-wrap: wrap;
 	gap: 0.5rem;
-}
-
-.preview-form {
-	display: flex;
-	flex-direction: column;
-	gap: 0.75rem;
-	max-width: 28rem;
-}
-
-.preview-form label {
-	display: flex;
-	flex-direction: column;
-	gap: 0.35rem;
 }
 
 .preview-table {

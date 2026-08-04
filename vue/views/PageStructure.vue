@@ -10,132 +10,132 @@
 	</Section>
 
 	<Section title="Header" subtitle="Branding, search, and top navigation">
-		<dl>
-			<dt>Logo and title</dt>
-			<dd>
-				<label class="page-structure-control">
-					<input
-						type="checkbox"
-						:checked="brandingEnabled"
-						@change="toggleBrandingEnabled"
-					/>
-					<span>Show logo and title in the header</span>
-				</label>
-			</dd>
+		<FormLayout @submit.prevent>
+			<FormField label="Logo and title" fake>
+				<RadioGroup
+					name="ps-branding"
+					variant="boolean"
+					aria-label="Logo and title"
+					:model-value="brandingEnabled"
+					:options="showHideOptions"
+					@update:model-value="setBrandingEnabled"
+				/>
+			</FormField>
 
-			<dt>QuickSearch</dt>
-			<dd>
-				<label class="page-structure-control">
-					<input
-						type="checkbox"
-						:checked="quickSearchEnabled"
-						@change="toggleQuickSearchEnabled"
-					/>
-					<span>Show search button in the header</span>
-				</label>
-			</dd>
+			<FormField label="QuickSearch" fake>
+				<RadioGroup
+					name="ps-quicksearch"
+					variant="boolean"
+					aria-label="QuickSearch"
+					:model-value="quickSearchEnabled"
+					:options="showHideOptions"
+					@update:model-value="setQuickSearchEnabled"
+				/>
+			</FormField>
 
-			<dt>Dummy background search</dt>
-			<dd>
-				<label class="page-structure-control">
-					<input
-						type="checkbox"
-						:checked="dummySearchFetchEnabled"
-						@change="toggleDummySearchFetchEnabled"
+			<FormField label="Dummy background search" fake :disabled="!quickSearchEnabled">
+				<div>
+					<RadioGroup
+						name="ps-dummy-search"
+						variant="boolean"
+						aria-label="Dummy background search"
+						:model-value="dummySearchFetchEnabled"
+						:options="onOffOptions"
 						:disabled="!quickSearchEnabled"
+						@update:model-value="setDummySearchFetchEnabled"
 					/>
-					<span>Simulate async search (1.5s delay, empty results)</span>
-				</label>
-				<p class="subtle">
-					Turns on QuickSearch’s background-fetch loading UI. Local matches still
-					appear immediately while the dummy request runs.
-				</p>
-			</dd>
+					<p class="subtle">
+						Turns on QuickSearch’s background-fetch loading UI. Local matches still
+						appear immediately while the dummy request runs.
+					</p>
+				</div>
+			</FormField>
 
-			<dt>Theme switcher</dt>
-			<dd>
-				<label class="page-structure-control">
-					<input
-						type="checkbox"
-						:checked="themeToggleEnabled"
-						@change="toggleThemeToggleEnabled"
-					/>
-					<span>Show light/dark theme toggle in the header</span>
-				</label>
-				<p class="subtle">
-					On narrow screens it collapses to a search button that opens search in an overlay.
-				</p>
-			</dd>
+			<FormField label="Dark/Light mode button" fake>
+				<RadioGroup
+					name="ps-theme-toggle"
+					variant="boolean"
+					aria-label="Dark/Light mode button"
+					:model-value="themeToggleEnabled"
+					:options="showHideOptions"
+					@update:model-value="setThemeToggleEnabled"
+				/>
+			</FormField>
 
-			<dt>Top bar</dt>
-			<dd>
-				<label class="page-structure-control">
-					<input
-						type="checkbox"
-						:checked="topBarEnabled"
-						@change="toggleTopBarEnabled"
+			<FormField label="Top bar" fake>
+				<div>
+					<RadioGroup
+						name="ps-topbar"
+						variant="boolean"
+						aria-label="Top bar"
+						:model-value="topBarEnabled"
+						:options="showHideOptions"
+						@update:model-value="setTopBarEnabled"
 					/>
-					<span>Show horizontal navigation links below the header</span>
-				</label>
-				<p class="subtle">
-					On narrow screens: if both are on, the sidebar takes precedence and the top bar is hidden.
-					If only the top bar is on, Header collapses it into a mobile sidebar automatically.
-				</p>
-			</dd>
+					<p class="subtle">
+						On narrow screens: if both are on, the sidebar takes precedence and the top bar is hidden.
+						If only the top bar is on, Header collapses it into a mobile sidebar automatically.
+					</p>
+				</div>
+			</FormField>
 
-			<dt>Breadcrumbs</dt>
-			<dd>
-				<label class="page-structure-control">
-					<input
-						type="checkbox"
-						:checked="breadcrumbsEnabled"
-						@change="toggleBreadcrumbsEnabled"
-					/>
-					<span>Show route breadcrumbs in the header</span>
-				</label>
-			</dd>
-		</dl>
+			<FormField label="Breadcrumbs" fake>
+				<RadioGroup
+					name="ps-breadcrumbs"
+					variant="boolean"
+					aria-label="Breadcrumbs"
+					:model-value="breadcrumbsEnabled"
+					:options="showHideOptions"
+					@update:model-value="setBreadcrumbsEnabled"
+				/>
+			</FormField>
+		</FormLayout>
 	</Section>
 
 	<Section title="Sidebar" subtitle="Primary navigation panel">
-		<dl>
-			<dt>Sidebar navigation</dt>
-			<dd>
-				<label class="page-structure-control">
-					<input
-						type="checkbox"
-						:checked="sidebarEnabled"
-						@change="toggleSidebarEnabled"
+		<FormLayout @submit.prevent>
+			<FormField label="Sidebar navigation" fake>
+				<div>
+					<RadioGroup
+						name="ps-sidebar"
+						variant="boolean"
+						aria-label="Sidebar navigation"
+						:model-value="sidebarEnabled"
+						:options="showHideOptions"
+						@update:model-value="setSidebarEnabled"
 					/>
-					<span>Show the sidebar navigation panel</span>
-				</label>
-				<p class="subtle">
-					When enabled, use the menu button in the header to open and pin the sidebar.
-				</p>
-			</dd>
+					<p class="subtle">
+						When enabled, use the menu button in the header to open and pin the sidebar.
+					</p>
+				</div>
+			</FormField>
 
-			<dt>Example link states</dt>
-			<dd>
-				<label class="page-structure-control">
-					<input
-						type="checkbox"
-						:checked="exampleLinksEnabled"
-						@change="toggleExampleLinks"
+			<FormField label="Example link states" fake>
+				<div>
+					<RadioGroup
+						name="ps-example-links"
+						variant="boolean"
+						aria-label="Example link states"
+						:model-value="exampleLinksEnabled"
+						:options="onOffOptions"
+						@update:model-value="setExampleLinks"
 					/>
-					<span>Add example links that demonstrate indicator, count, and disabled states</span>
-				</label>
-				<p class="subtle">
-					Adds a “Link states” section to the sidebar with an attention indicator,
-					a notification count badge, and a disabled item.
-				</p>
-			</dd>
-		</dl>
+					<p class="subtle">
+						Adds a “Link states” section to the sidebar with an attention indicator,
+						a notification count badge, and a disabled item.
+					</p>
+				</div>
+			</FormField>
+		</FormLayout>
 	</Section>
 </template>
 
 <script setup>
 import { inject, ref, onBeforeUnmount } from 'vue'
 import Section from '../components/Section.vue'
+import FormLayout from '../components/FormLayout.vue'
+import FormField from '../components/FormField.vue'
+import RadioGroup from '../components/RadioGroup.vue'
 import {
 	Notification01Icon,
 	Alert02Icon,
@@ -148,6 +148,16 @@ const EXAMPLE_LINK_NAMES = [
 	'example-indicator',
 	'example-count',
 	'example-disabled',
+]
+
+const showHideOptions = [
+	{ label: 'Shown', value: true },
+	{ label: 'Hidden', value: false },
+]
+
+const onOffOptions = [
+	{ label: 'On', value: true },
+	{ label: 'Off', value: false },
 ]
 
 const sidebarEnabled = inject('sidebarEnabled')
@@ -167,6 +177,40 @@ const toggleBreadcrumbsEnabled = inject('toggleBreadcrumbsEnabled')
 const navigation = inject('navigation', null)
 
 const exampleLinksEnabled = ref(false)
+
+function setFlag(flag, toggle, want) {
+	if (flag.value !== want) {
+		toggle()
+	}
+}
+
+function setBrandingEnabled(want) {
+	setFlag(brandingEnabled, toggleBrandingEnabled, want)
+}
+
+function setQuickSearchEnabled(want) {
+	setFlag(quickSearchEnabled, toggleQuickSearchEnabled, want)
+}
+
+function setDummySearchFetchEnabled(want) {
+	setFlag(dummySearchFetchEnabled, toggleDummySearchFetchEnabled, want)
+}
+
+function setThemeToggleEnabled(want) {
+	setFlag(themeToggleEnabled, toggleThemeToggleEnabled, want)
+}
+
+function setTopBarEnabled(want) {
+	setFlag(topBarEnabled, toggleTopBarEnabled, want)
+}
+
+function setBreadcrumbsEnabled(want) {
+	setFlag(breadcrumbsEnabled, toggleBreadcrumbsEnabled, want)
+}
+
+function setSidebarEnabled(want) {
+	setFlag(sidebarEnabled, toggleSidebarEnabled, want)
+}
 
 function removeExampleLinks() {
 	if (!navigation) {
@@ -211,9 +255,12 @@ function addExampleLinks() {
 	})
 }
 
-function toggleExampleLinks() {
-	exampleLinksEnabled.value = !exampleLinksEnabled.value
-	if (exampleLinksEnabled.value) {
+function setExampleLinks(want) {
+	if (exampleLinksEnabled.value === want) {
+		return
+	}
+	exampleLinksEnabled.value = want
+	if (want) {
 		if (!sidebarEnabled.value) {
 			toggleSidebarEnabled()
 		}
@@ -231,14 +278,7 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
-.page-structure-control {
-	display: flex;
-	align-items: center;
-	gap: 0.5rem;
-	cursor: pointer;
-}
-
-.page-structure-control + .subtle {
+.subtle {
 	margin-top: 0.5rem;
 }
 </style>

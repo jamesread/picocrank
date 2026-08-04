@@ -1,100 +1,115 @@
 <template>
-	<aside ref="sidebarRef" :class="{ 'shown': isOpen, 'stuck': isStuck }" class="sidebar">
-		<div class = "flex-row">
-			<h2>Navigation</h2>
-			<div class = "fg1" />
-				<button class="stick-toggle" :aria-pressed="isStuck" :title="isStuck ? 'Unstick sidebar' : 'Stick sidebar'"	@click="toggleStick">
-					<span v-if="isStuck">
-						<HugeiconsIcon :icon="Pin02Icon" width = "1em" height = "1em" :strokeWidth = 3 />
-					</span>
-					<span v-else>
-						<HugeiconsIcon :icon="PinIcon" width = "1em" height = "1em" :strokeWidth = 3 />
-					</span>
-				</button>
-			</div>
+	<aside
+		:id="SIDEBAR_PANEL_ID"
+		ref="sidebarRef"
+		class="sidebar"
+		:class="{ 'shown': isOpen, 'stuck': isStuck }"
+		aria-label="Sidebar"
+		:aria-hidden="isVisible ? undefined : 'true'"
+		:inert="isVisible ? undefined : true"
+	>
+		<div class="flex-row">
+			<h2 :id="headingId">Navigation</h2>
+			<div class="fg1" />
+			<button
+				type="button"
+				class="stick-toggle"
+				:aria-pressed="isStuck"
+				:aria-label="isStuck ? 'Unstick sidebar' : 'Stick sidebar'"
+				:title="isStuck ? 'Unstick sidebar' : 'Stick sidebar'"
+				@click="toggleStick"
+			>
+				<span aria-hidden="true">
+					<HugeiconsIcon
+						v-if="isStuck"
+						:icon="Pin02Icon"
+						width="1em"
+						height="1em"
+						:strokeWidth="3"
+					/>
+					<HugeiconsIcon
+						v-else
+						:icon="PinIcon"
+						width="1em"
+						height="1em"
+						:strokeWidth="3"
+					/>
+				</span>
+			</button>
+		</div>
 
-			<nav class="mainnav">
-				<ul class="navigation-links">
-					<template v-for="item in visibleNavItems" :key="item.key">
-						<li v-if="item.kind === 'section-header'" class="nav-section-header-item">
-							<button
-								type="button"
-								class="nav-section-header"
-								:aria-expanded="!item.collapsed"
-								:aria-controls="`nav-section-${item.section.id}`"
-								@click="toggleSection(item.section.id)"
-							>
-								<span>{{ item.section.title }}</span>
-								<HugeiconsIcon
-									:icon="item.collapsed ? ArrowRight01Icon : ArrowDown01Icon"
-									width="0.85em"
-									height="0.85em"
-									class="nav-section-chevron"
-								/>
-							</button>
-						</li>
+		<nav class="mainnav" :aria-labelledby="headingId">
+			<menu class="navigation-links">
+				<SidebarNavLink
+					v-for="link in navigationGroups.ungrouped"
+					:key="link.name"
+					:link="link"
+					:active="isLinkActive(link)"
+					@select="handleNavItemClick"
+				/>
 
-						<li
-							v-else
-							:title="item.link.title"
-							:class="{ disabled: item.link.disabled }"
-						>
-							<div v-if="item.link.type === 'separator'" class="separator"></div>
-							<div v-else-if="item.link.type === 'html'" v-html="item.link.html"></div>
-							<a
-								v-else-if="item.link.type === 'callback' || item.link.disabled"
-								href="#"
-								:class="{ active: isLinkActive(item.link), disabled: item.link.disabled }"
-								:aria-disabled="item.link.disabled || undefined"
-								@click.prevent="handleNavItemClick(item.link)"
-							>
-								<HugeiconsIcon :icon="item.link.icon" />
-								<span class="nav-link-title">{{ item.link.title }}</span>
-								<span
-									v-if="showCount(item.link)"
-									class="nav-link-count"
-									:aria-label="`${item.link.count} notifications`"
-								>{{ formatCount(item.link.count) }}</span>
-								<span
-									v-else-if="showIndicator(item.link)"
-									class="nav-link-indicator"
-									aria-label="Requires attention"
-								/>
-							</a>
-							<router-link
-								v-else
-								v-bind="item.link.props || {}"
-								:to="item.link.to || item.link.path"
-								:class="{ active: isLinkActive(item.link) }"
-								@click="handleLinkClick()"
-							>
-								<HugeiconsIcon :icon="item.link.icon" />
-								<span class="nav-link-title">{{ item.link.title }}</span>
-								<span
-									v-if="showCount(item.link)"
-									class="nav-link-count"
-									:aria-label="`${item.link.count} notifications`"
-								>{{ formatCount(item.link.count) }}</span>
-								<span
-									v-else-if="showIndicator(item.link)"
-									class="nav-link-indicator"
-									aria-label="Requires attention"
-								/>
-							</router-link>
-						</li>
-					</template>
-				</ul>
-			</nav>
+				<li
+					v-for="section in navigationGroups.sections"
+					:key="section.id"
+					class="nav-section"
+				>
+					<button
+						type="button"
+						class="nav-section-header"
+						:id="sectionHeaderId(section.id)"
+						:aria-expanded="!isSectionCollapsed(section.id)"
+						:aria-controls="sectionPanelId(section.id)"
+						@click="toggleSection(section.id)"
+					>
+						<span>{{ section.title }}</span>
+						<HugeiconsIcon
+							:icon="isSectionCollapsed(section.id) ? ArrowRight01Icon : ArrowDown01Icon"
+							width="0.85em"
+							height="0.85em"
+							class="nav-section-chevron"
+							aria-hidden="true"
+						/>
+					</button>
+
+					<menu
+						:id="sectionPanelId(section.id)"
+						class="nav-section-links"
+						role="group"
+						:aria-labelledby="sectionHeaderId(section.id)"
+						:hidden="isSectionCollapsed(section.id)"
+					>
+						<SidebarNavLink
+							v-for="link in section.items"
+							:key="link.name"
+							:link="link"
+							:active="isLinkActive(link)"
+							@select="handleNavItemClick"
+						/>
+					</menu>
+				</li>
+
+				<SidebarNavLink
+					v-for="link in navigationGroups.trailingUngrouped"
+					:key="link.name"
+					:link="link"
+					:active="isLinkActive(link)"
+					@select="handleNavItemClick"
+				/>
+			</menu>
+		</nav>
 	</aside>
 </template>
 
 <script setup>
-import { ref, inject, onUnmounted, watch, nextTick, computed } from 'vue'
+import { ref, inject, onUnmounted, watch, nextTick, computed, useId } from 'vue'
 import { useRoute } from 'vue-router'
 import { HugeiconsIcon } from '@hugeicons/vue'
 import { Pin02Icon, PinIcon, ArrowDown01Icon, ArrowRight01Icon } from '@hugeicons/core-free-icons'
+import SidebarNavLink from './SidebarNavLink.vue'
 
 const STORAGE_KEY = 'picocrank-nav-sections-collapsed'
+const SIDEBAR_PANEL_ID = 'picocrank-sidebar'
+const TOGGLER_ID = 'sidebar-toggler-button'
 
 const props = defineProps({
 	navigation: {
@@ -107,13 +122,15 @@ const isOpen = ref(false)
 const isStuck = ref(false)
 const sidebarRef = ref(null)
 const route = useRoute()
+const headingId = useId()
+
+const isVisible = computed(() => isOpen.value || isStuck.value)
 
 const injectedNavigation = inject('navigation', null)
 
 const navigation = computed(() => {
 	const nav = props.navigation || injectedNavigation
 	if (!nav) return null
-	// Component ref (or ref-like): use exposed API
 	if (nav.value) {
 		return nav.value
 	}
@@ -156,6 +173,14 @@ function saveCollapsedSections() {
 
 function isSectionCollapsed(sectionId) {
 	return collapsedSections.value.has(sectionId)
+}
+
+function sectionHeaderId(sectionId) {
+	return `nav-section-header-${sectionId}`
+}
+
+function sectionPanelId(sectionId) {
+	return `nav-section-${sectionId}`
 }
 
 function toggleSection(sectionId) {
@@ -202,40 +227,6 @@ const navigationGroups = computed(() => {
 	return { ungrouped, trailingUngrouped, sections }
 })
 
-const visibleNavItems = computed(() => {
-	const items = []
-
-	for (const link of navigationGroups.value.ungrouped) {
-		items.push({ key: link.name, kind: 'link', link })
-	}
-
-	for (const section of navigationGroups.value.sections) {
-		const collapsed = isSectionCollapsed(section.id)
-		items.push({
-			key: section.id,
-			kind: 'section-header',
-			section,
-			collapsed,
-		})
-
-		if (!collapsed) {
-			for (const link of section.items) {
-				items.push({
-					key: link.name,
-					kind: 'link',
-					link,
-				})
-			}
-		}
-	}
-
-	for (const link of navigationGroups.value.trailingUngrouped) {
-		items.push({ key: link.name, kind: 'link', link })
-	}
-
-	return items
-})
-
 function expandSectionContainingActiveRoute() {
 	for (const section of navigationGroups.value.sections) {
 		const hasActiveLink = section.items.some((link) => isActive(link))
@@ -254,126 +245,143 @@ watch(() => route.fullPath, () => {
 }, { immediate: true })
 
 function toggleStick() {
-  isStuck.value = !isStuck.value
+	isStuck.value = !isStuck.value
 }
 
 function stick() {
-  isStuck.value = true
+	isStuck.value = true
 }
 
 function unstick() {
-  isStuck.value = false
+	isStuck.value = false
 }
 
 function toggle() {
-  isOpen.value = !isOpen.value
-  isStuck.value = false
+	isOpen.value = !isOpen.value
+	isStuck.value = false
 }
 
 function open() {
-  isOpen.value = true
+	isOpen.value = true
 }
 
 function close() {
-  isOpen.value = false
-  isStuck.value = false
+	isOpen.value = false
+	isStuck.value = false
 }
 
 function isLinkActive(link) {
-  if (link.disabled) {
-    return false
-  }
-  return isActive(link)
-}
-
-function showCount(link) {
-  return !link.disabled && link.count != null && link.count > 0
-}
-
-function showIndicator(link) {
-  return link.indicator && !link.disabled && !showCount(link)
-}
-
-function formatCount(count) {
-  return count > 99 ? '99+' : String(count)
+	if (link.disabled) {
+		return false
+	}
+	return isActive(link)
 }
 
 function handleNavItemClick(link) {
-  if (link.disabled) {
-    return
-  }
-  if (link.type === 'callback' && link.callback) {
-    handleLinkClick(() => link.callback())
-    return
-  }
-  handleLinkClick()
+	if (link.disabled) {
+		return
+	}
+	if (link.type === 'callback' && link.callback) {
+		handleLinkClick(() => link.callback())
+		return
+	}
+	handleLinkClick()
 }
 
 function handleLinkClick(callback = null) {
-  if (callback) {
-    callback()
-  }
-  if (!isStuck.value) {
-    close()
-  }
+	if (callback) {
+		callback()
+	}
+	if (!isStuck.value) {
+		close()
+	}
+}
+
+function syncTogglerAria() {
+	const toggler = document.getElementById(TOGGLER_ID)
+	if (!toggler) {
+		return
+	}
+
+	const expanded = isVisible.value
+	toggler.setAttribute('aria-expanded', String(expanded))
+	toggler.setAttribute('aria-controls', SIDEBAR_PANEL_ID)
+	toggler.setAttribute(
+		'aria-label',
+		expanded ? 'Close sidebar navigation' : 'Open sidebar navigation',
+	)
+	toggler.removeAttribute('aria-pressed')
+	toggler.removeAttribute('aria-haspopup')
 }
 
 function handleClickOutside(event) {
-  if (!isOpen.value || isStuck.value) {
-    return
-  }
+	if (!isOpen.value || isStuck.value) {
+		return
+	}
 
-  const target = event.target
-  
-  const sidebarButton = document.getElementById('sidebar-button')
-  const sidebarTogglerButton = document.getElementById('sidebar-toggler-button')
-  
-  if (sidebarButton && sidebarButton.contains(target)) {
-    return
-  }
-  
-  if (sidebarTogglerButton && sidebarTogglerButton.contains(target)) {
-    return
-  }
+	const target = event.target
 
-  if (sidebarRef.value && !sidebarRef.value.contains(target)) {
-    close()
-  }
+	const sidebarButton = document.getElementById('sidebar-button')
+	const sidebarTogglerButton = document.getElementById(TOGGLER_ID)
+
+	if (sidebarButton && sidebarButton.contains(target)) {
+		return
+	}
+
+	if (sidebarTogglerButton && sidebarTogglerButton.contains(target)) {
+		return
+	}
+
+	if (sidebarRef.value && !sidebarRef.value.contains(target)) {
+		close()
+	}
+}
+
+function handleDocumentKeydown(event) {
+	if (event.key !== 'Escape') {
+		return
+	}
+	if (!isOpen.value || isStuck.value) {
+		return
+	}
+	close()
+	document.getElementById(TOGGLER_ID)?.focus()
 }
 
 watch([isOpen, isStuck], ([open, stuck]) => {
-  nextTick(() => {
-    if (open && !stuck) {
-      document.addEventListener('click', handleClickOutside)
-    } else {
-      document.removeEventListener('click', handleClickOutside)
-    }
-  })
+	nextTick(() => {
+		syncTogglerAria()
+		if (open && !stuck) {
+			document.addEventListener('click', handleClickOutside)
+			document.addEventListener('keydown', handleDocumentKeydown)
+		} else {
+			document.removeEventListener('click', handleClickOutside)
+			document.removeEventListener('keydown', handleDocumentKeydown)
+		}
+	})
 }, { immediate: true })
 
 onUnmounted(() => {
-  document.removeEventListener('click', handleClickOutside)
+	document.removeEventListener('click', handleClickOutside)
+	document.removeEventListener('keydown', handleDocumentKeydown)
 })
 
 defineExpose({
-  isOpen,
-  stick,
-  unstick,
-  toggleStick,
-  toggle,
-  open,
-  close,
+	isOpen,
+	isStuck,
+	isVisible,
+	stick,
+	unstick,
+	toggleStick,
+	toggle,
+	open,
+	close,
 })
 </script>
 
 <style scoped>
-
 h2 {
-    padding: .75em;
-}
-
-.active {
-	text-decoration: underline;
+	padding: .75em;
 }
 
 li {
@@ -385,45 +393,15 @@ button {
 	border: 0;
 }
 
-.navigation-links a {
-	display: flex;
-	align-items: center;
-	gap: 0.75rem;
-	padding: .75em;
-	border-radius: 0;
-	position: relative;
+.navigation-links,
+.nav-section-links {
+	list-style: none;
+	margin: 0;
+	padding: 0;
 }
 
-.nav-link-title {
-	flex: 1;
-	min-width: 0;
-}
-
-.nav-link-indicator {
-	width: 0.5rem;
-	height: 0.5rem;
-	border-radius: 50%;
-	background: var(--indicator-color, #dc3545);
-	flex-shrink: 0;
-}
-
-.nav-link-count {
-	min-width: 1.25rem;
-	padding: 0.1rem 0.4rem;
-	border-radius: 999px;
-	background: var(--indicator-color, #dc3545);
-	color: #fff;
-	font-size: 0.75em;
-	font-weight: 600;
-	line-height: 1.2;
-	text-align: center;
-	flex-shrink: 0;
-}
-
-.navigation-links a.disabled,
-.navigation-links li.disabled a {
-	cursor: not-allowed;
-	opacity: 0.55;
+.nav-section {
+	list-style: none;
 }
 
 .nav-section-header {
@@ -452,12 +430,6 @@ button {
 	opacity: 0.8;
 }
 
-.separator {
-	height: 1px;
-	background-color: #eee;
-	margin: 0.5rem 0.75rem;
-}
-
 .icon {
 	font-size: 1.2em;
 	width: 1.5rem;
@@ -465,30 +437,22 @@ button {
 }
 
 html[data-theme="dark"] {
-  .navigation-links a {
-	color: #f8f9fa;
-  }
+	.nav-section-header {
+		color: #f8f9fa;
+	}
 
-  .nav-section-header {
-	color: #f8f9fa;
-  }
-
-  .separator {
-	background-color: #444;
-  }
-
-  .supplemental-links {
-	border-top: 1px solid #444;
-  }
+	.supplemental-links {
+		border-top: 1px solid #444;
+	}
 }
 
 @media (max-width: 768px) {
-  .sidebar {
-	  left: -100%;
-  }
+	.sidebar {
+		left: -100%;
+	}
 
-  .sidebar.shown {
-	  left: 0;
-  }
+	.sidebar.shown {
+		left: 0;
+	}
 }
 </style>

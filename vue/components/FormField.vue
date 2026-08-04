@@ -1,6 +1,6 @@
 <template>
-	<label v-if="!fake" :for="controlId">{{ label }}</label>
-	<span v-else class="fake-label">{{ label }}</span>
+	<label v-if="!fake" :for="controlId" :class="{ disabled }">{{ label }}</label>
+	<span v-else class="fake-label" :class="{ disabled }">{{ label }}</span>
 	<slot />
 </template>
 
@@ -24,7 +24,19 @@ const props = defineProps({
 		type: Boolean,
 		default: false,
 	},
+	disabled: {
+		type: Boolean,
+		default: false,
+	},
 })
 
 const controlId = computed(() => props.htmlFor || props.for)
 </script>
+
+<style scoped>
+label.disabled,
+.fake-label.disabled {
+	color: var(--disabled-text-color);
+	cursor: not-allowed;
+}
+</style>

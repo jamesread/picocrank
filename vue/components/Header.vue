@@ -10,8 +10,17 @@
 
 			<div class = "fg1" />
 
-			<button v-if="showSidebarChrome" id = "sidebar-toggler-button" aria-label = "Open sidebar navigation" aria-pressed = "false" aria-haspopup = "menu" class = "neutral">
-				<HugeiconsIcon :icon = "Menu01Icon" width = "1em" height = "1em" :strokeWidth = 3 />
+			<button
+				v-if="showSidebarChrome"
+				id="sidebar-toggler-button"
+				type="button"
+				class="neutral"
+				aria-expanded="false"
+				aria-controls="picocrank-sidebar"
+				aria-label="Open sidebar navigation"
+				@click.stop="toggleNavSidebar"
+			>
+				<HugeiconsIcon :icon="Menu01Icon" width="1em" height="1em" :strokeWidth="3" aria-hidden="true" />
 			</button>
 		</div>
 

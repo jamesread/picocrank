@@ -98,7 +98,7 @@ aside a:visited {
 }
 
 aside a:hover,
-aside ul li a:hover,
+aside :is(ul, menu) li a:hover,
 aside .nav-section-header:hover {
 	background-color: var(--dracula-selection);
 	color: var(--dracula-foreground);

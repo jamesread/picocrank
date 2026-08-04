@@ -19,35 +19,20 @@
 			</FormField>
 
 			<FormField label="Role" fake>
-				<div class="radio-group">
-					<label>
-						<input 
-							type="radio" 
-							name="role"
-							value="sales"
-							v-model="formData.role"
-						/>
-						<span>Sales</span>
-					</label>
-					<label>
-						<input 
-							type="radio" 
-							name="role"
-							value="engineering"
-							v-model="formData.role"
-						/>
-						<span>Engineering</span>
-					</label>
-					<label>
-						<input 
-							type="radio" 
-							name="role"
-							value="hr"
-							v-model="formData.role"
-						/>
-						<span>HR</span>
-					</label>
-				</div>
+				<RadioGroup
+					v-model="formData.role"
+					name="role"
+					:options="roleOptions"
+				/>
+			</FormField>
+
+			<FormField label="Term" fake>
+				<RadioGroup
+					v-model="formData.term"
+					name="term"
+					variant="boolean"
+					:options="termOptions"
+				/>
 			</FormField>
 
 			<FormField label="Salary" for="salary">
@@ -59,6 +44,23 @@
 					<option value="40000">£40,000</option>
 					<option value="50000">£50,000</option>
 				</select>
+			</FormField>
+
+			<FormField label="Compensation" fake>
+				<RadioGroup
+					v-model="formData.compensation"
+					name="compensation"
+					variant="list"
+					:options="compensationOptions"
+				/>
+			</FormField>
+
+			<FormField label="Accessibility requirements" fake>
+				<CheckGroup
+					v-model="formData.accessibility"
+					name="accessibility"
+					:options="accessibilityOptions"
+				/>
 			</FormField>
 
 			<FormField label="Email" for="email">
@@ -190,11 +192,41 @@ import { ref } from 'vue'
 import Section from '../components/Section.vue'
 import FormLayout from '../components/FormLayout.vue'
 import FormField from '../components/FormField.vue'
+import RadioGroup from '../components/RadioGroup.vue'
+import CheckGroup from '../components/CheckGroup.vue'
+
+// From femtocrank/tests/simple.html — Role (default), Term (boolean), Compensation (list)
+const roleOptions = [
+	{ label: 'Sales', value: 'sales' },
+	{ label: 'Engineering', value: 'engineering' },
+	{ label: 'HR', value: 'hr' },
+]
+
+const termOptions = [
+	{ label: 'Full Time', value: 'full-time' },
+	{ label: 'Part Time', value: 'part-time' },
+]
+
+const compensationOptions = [
+	{ label: 'Performance Incentive', value: 'performance-incentive' },
+	{ label: 'Sales Target Incentive', value: 'sales-target-incentive' },
+	{ label: 'Objective Incentive', value: 'objective-incentive' },
+]
+
+const accessibilityOptions = [
+	{ label: 'Screen reader support', value: 'screen-reader' },
+	{ label: 'Keyboard navigation', value: 'keyboard-navigation' },
+	{ label: 'High contrast', value: 'high-contrast' },
+	{ label: 'Captions / transcripts', value: 'captions' },
+]
 
 const formData = ref({
 	name: '',
 	role: '',
+	term: '',
 	salary: '0',
+	compensation: '',
+	accessibility: [],
 	email: '',
 	isAdmin: false,
 	website: '',
@@ -227,7 +259,10 @@ function resetForm() {
 	formData.value = {
 		name: '',
 		role: '',
+		term: '',
 		salary: '0',
+		compensation: '',
+		accessibility: [],
 		email: '',
 		isAdmin: false,
 		website: '',
