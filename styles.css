@@ -1,3 +1,5 @@
-/* Import femtocrank styles */
-@import 'femtocrank/style.css';
+/* Layer order: drop-in themes win over component and karma styles */
+@layer components, karma, theme;
+
+@import 'femtocrank/style.css' layer(components);
 @import './styles/dark-theme.css';

@@ -1,0 +1,143 @@
+/*
+ * Waffles — a playful accent sample theme for PicoCrank.
+ *
+ * Asset URLs must be absolute, e.g.:
+ *   background-image: url('/themes/waffles/background.png');
+ */
+
+:root,
+html {
+	--waffle-cream: #fff8e7;
+	--waffle-batter: #f5e6c8;
+	--waffle-crust: #c4863b;
+	--waffle-syrup: #8b4513;
+	--waffle-butter: #ffd966;
+	--waffle-berry: #c23b5a;
+
+	--text-color: var(--waffle-syrup);
+	--border-color: #e0c896;
+	--standout-bg-color: var(--waffle-batter);
+	--hover-background-color: #f0d9a8;
+	--hover-text-color: var(--waffle-syrup);
+	--header-hover-background-color: var(--waffle-crust);
+	--header-hover-text-color: var(--waffle-cream);
+	--disabled-background-color: #efe4cb;
+	--disabled-text-color: #a88860;
+
+	--karma-good: #b8d98a;
+	--karma-bad: #f0a0a8;
+	--karma-warning: var(--waffle-butter);
+	--karma-severe: #e08a6a;
+	--karma-important: #ffe8a3;
+	--karma-note: #a8d4e8;
+	--karma-info: var(--waffle-batter);
+	--karma-old: #d4c4a0;
+
+	--karma-good-fg: #4a7a28;
+	--karma-bad-fg: var(--waffle-berry);
+	--karma-warning-fg: #9a6b00;
+	--karma-severe-fg: #a04020;
+	--karma-important-fg: #8a6800;
+	--karma-note-fg: #2a6a88;
+	--karma-info-fg: #7a6540;
+	--karma-old-fg: #6a5840;
+}
+
+body {
+	background-color: var(--waffle-cream);
+	color: var(--waffle-syrup);
+	background-image:
+		repeating-linear-gradient(
+			0deg,
+			transparent,
+			transparent 11px,
+			rgba(196, 134, 59, 0.08) 11px,
+			rgba(196, 134, 59, 0.08) 12px
+		),
+		repeating-linear-gradient(
+			90deg,
+			transparent,
+			transparent 11px,
+			rgba(196, 134, 59, 0.08) 11px,
+			rgba(196, 134, 59, 0.08) 12px
+		);
+}
+
+header {
+	background: linear-gradient(180deg, var(--waffle-crust), #a86e2e);
+	border-bottom: 3px solid var(--waffle-syrup);
+	color: var(--waffle-cream);
+	box-shadow: 0 2px 8px rgba(139, 69, 19, 0.25);
+}
+
+header a,
+header button,
+header .button {
+	color: var(--waffle-cream);
+}
+
+#sidebar-toggler-button,
+#sidebar-toggler-button.neutral,
+header .theme-toggle,
+header .theme-toggle.neutral,
+header .search-trigger,
+header .search-trigger.neutral {
+	background-color: transparent;
+	border: 0;
+	color: var(--waffle-cream);
+}
+
+#sidebar-toggler-button:hover,
+header .theme-toggle:hover,
+header .search-trigger:hover,
+header .user-info:hover {
+	background-color: var(--header-hover-background-color);
+	color: var(--header-hover-text-color);
+}
+
+section {
+	background-color: #fffdf6;
+	border: 1px solid var(--border-color);
+	box-shadow: 0 2px 6px rgba(139, 69, 19, 0.12);
+}
+
+section .section-header {
+	background-color: var(--waffle-batter);
+	border-bottom: 2px solid var(--waffle-crust);
+	color: var(--waffle-syrup);
+}
+
+button,
+.button {
+	border: 1px solid var(--waffle-crust);
+	background-color: var(--waffle-butter);
+	color: var(--waffle-syrup);
+}
+
+button:hover,
+.button:hover {
+	background-color: #ffe14d;
+}
+
+button.good,
+.button.good {
+	background-color: #9ccc65;
+	border-color: #6a9a38;
+	color: #2a4010;
+}
+
+button.bad,
+.button.bad {
+	background-color: var(--waffle-berry);
+	border-color: #8a2040;
+	color: #fff8e7;
+}
+
+a {
+	color: #a05020;
+}
+
+footer {
+	color: var(--waffle-syrup);
+	border-top: 1px dashed var(--border-color);
+}

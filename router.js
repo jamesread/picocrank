@@ -12,6 +12,8 @@ import { ClipboardCopyIcon } from '@hugeicons/core-free-icons';
 import { CursorPointer01Icon } from '@hugeicons/core-free-icons';
 import { LayoutGridIcon } from '@hugeicons/core-free-icons';
 import { StatusIcon } from '@hugeicons/core-free-icons';
+import { PaintBoardIcon } from '@hugeicons/core-free-icons';
+import { UserIcon } from '@hugeicons/core-free-icons';
 
 const routes = [
   {
@@ -30,6 +32,24 @@ const routes = [
     meta: {
       title: 'Page structure',
       icon: LayoutGridIcon,
+    }
+  },
+  {
+    name: 'ThemePreview',
+    path: '/theme-preview',
+    component: () => import('./vue/views/ThemePreview.vue'),
+    meta: {
+      title: 'Theme Switcher',
+      icon: PaintBoardIcon,
+    }
+  },
+  {
+    name: 'UserDetails',
+    path: '/user',
+    component: () => import('./vue/views/UserDetails.vue'),
+    meta: {
+      title: 'User details',
+      icon: UserIcon,
     }
   },
   {

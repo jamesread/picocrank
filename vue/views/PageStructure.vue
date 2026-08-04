@@ -31,7 +31,36 @@
 						:checked="quickSearchEnabled"
 						@change="toggleQuickSearchEnabled"
 					/>
-					<span>Show QuickSearch in the header toolbar</span>
+					<span>Show search button in the header</span>
+				</label>
+			</dd>
+
+			<dt>Dummy background search</dt>
+			<dd>
+				<label class="page-structure-control">
+					<input
+						type="checkbox"
+						:checked="dummySearchFetchEnabled"
+						@change="toggleDummySearchFetchEnabled"
+						:disabled="!quickSearchEnabled"
+					/>
+					<span>Simulate async search (1.5s delay, empty results)</span>
+				</label>
+				<p class="subtle">
+					Turns on QuickSearch’s background-fetch loading UI. Local matches still
+					appear immediately while the dummy request runs.
+				</p>
+			</dd>
+
+			<dt>Theme switcher</dt>
+			<dd>
+				<label class="page-structure-control">
+					<input
+						type="checkbox"
+						:checked="themeToggleEnabled"
+						@change="toggleThemeToggleEnabled"
+					/>
+					<span>Show light/dark theme toggle in the header</span>
 				</label>
 			</dd>
 
@@ -120,6 +149,10 @@ const brandingEnabled = inject('brandingEnabled')
 const toggleBrandingEnabled = inject('toggleBrandingEnabled')
 const quickSearchEnabled = inject('quickSearchEnabled')
 const toggleQuickSearchEnabled = inject('toggleQuickSearchEnabled')
+const dummySearchFetchEnabled = inject('dummySearchFetchEnabled')
+const toggleDummySearchFetchEnabled = inject('toggleDummySearchFetchEnabled')
+const themeToggleEnabled = inject('themeToggleEnabled')
+const toggleThemeToggleEnabled = inject('toggleThemeToggleEnabled')
 const topBarEnabled = inject('topBarEnabled')
 const toggleTopBarEnabled = inject('toggleTopBarEnabled')
 const breadcrumbsEnabled = inject('breadcrumbsEnabled')

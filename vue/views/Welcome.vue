@@ -111,6 +111,12 @@ const welcomeNavigation = ref(null)
 
 const popularExamples = [
 	{
+		name: 'ThemePreview',
+		category: 'Layouts',
+		label: 'Theme Switcher',
+		description: 'Switch drop-in themes live',
+	},
+	{
 		name: 'TableExample',
 		category: 'Data display',
 		label: 'Table',
@@ -127,12 +133,6 @@ const popularExamples = [
 		category: 'Forms & input',
 		label: 'Buttons',
 		description: 'Variants, toolbars, and form actions',
-	},
-	{
-		name: 'StatusExample',
-		category: 'Feedback',
-		label: 'Status',
-		description: 'Inline messages and notification popups',
 	},
 ]
 
@@ -155,6 +155,9 @@ onMounted(() => {
 
 	nav.addRouterLink('PageStructure', 'Page structure', {
 		description: 'Sidebar, header, QuickSearch, and breadcrumbs',
+	})
+	nav.addRouterLink('ThemePreview', 'Theme Switcher', {
+		description: 'Drop-in themes on Femtocrank',
 	})
 	nav.addRouterLink('TableExample', 'Table', {
 		description: 'Lists with sorting and pagination',
