@@ -1,8 +1,8 @@
 <template>
 	<header>
 		<div
-			:id = "sidebarEnabled ? 'sidebar-button' : null"
-			:class="['image-and-title', 'flex-row', { 'disabled-branding': !showBranding, 'logo-home-link': !sidebarEnabled && showBranding }]"
+			:id = "showSidebarChrome ? 'sidebar-button' : null"
+			:class="['image-and-title', 'flex-row', { 'disabled-branding': !showBranding, 'logo-home-link': !showSidebarChrome && showBranding }]"
 			@click = "onImageAndTitleClick"
 		>
 			<img v-if="showBranding" :src = "logoUrl" alt = "Logo" class = "logo" />
@@ -10,12 +10,12 @@
 
 			<div class = "fg1" />
 
-			<button v-if="sidebarEnabled" id = "sidebar-toggler-button" aria-label = "Open sidebar navigation" aria-pressed = "false" aria-haspopup = "menu" class = "neutral">
+			<button v-if="showSidebarChrome" id = "sidebar-toggler-button" aria-label = "Open sidebar navigation" aria-pressed = "false" aria-haspopup = "menu" class = "neutral">
 				<HugeiconsIcon :icon = "Menu01Icon" width = "1em" height = "1em" :strokeWidth = 3 />
 			</button>
 		</div>
 
-		<TopBar v-if="topBarEnabled" :navigation="navigation" />
+		<TopBar v-if="showTopBar" :navigation="navigation" />
 
 		<Breadcrumbs v-if="breadcrumbs" />
 
@@ -26,11 +26,11 @@
 				v-if="themeToggleEnabled"
 				type="button"
 				class="theme-toggle neutral"
-				:aria-label="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
-				:title="isDark ? 'Light mode' : 'Dark mode'"
+				:aria-label="themeToggleLabel"
+				:title="themeToggleTitle"
 				@click="toggleTheme"
 			>
-				<HugeiconsIcon :icon="isDark ? Sun01Icon : Moon02Icon" width="1em" height="1em" />
+				<HugeiconsIcon :icon="themeToggleIcon" width="1em" height="1em" />
 			</button>
 
 			<slot name="toolbar" />
@@ -49,27 +49,48 @@
 			</slot>
 		</div>
 	</header>
+
+	<!-- Top-bar-only mobile: Header owns the fallback sidebar so consumers need no extra wiring. -->
+	<Sidebar v-if="needsFallbackSidebar" ref="fallbackSidebar" :navigation="navigation" />
 </template>
 
 <script setup>
+	import { computed, ref } from "vue";
 	import { HugeiconsIcon } from "@hugeicons/vue";
-	import { Menu01Icon, Moon02Icon, Sun01Icon, UserIcon } from "@hugeicons/core-free-icons";
+	import { BulbIcon, Menu01Icon, Moon02Icon, Sun01Icon, UserIcon } from "@hugeicons/core-free-icons";
 
 	import Breadcrumbs from "./Breadcrumbs.vue";
 	import TopBar from "./TopBar.vue";
+	import Sidebar from "./Sidebar.vue";
 	import { useTheme } from '../composables/useTheme.js';
+	import { useResponsiveNav } from '../composables/useResponsiveNav.js';
 
-	const { isDark, toggleTheme } = useTheme();
+	const { theme, nextTheme, toggleTheme } = useTheme();
+
+	const themeToggleMeta = {
+		auto: {
+			icon: BulbIcon,
+			title: 'Auto',
+		},
+		light: {
+			icon: Sun01Icon,
+			title: 'Light',
+		},
+		dark: {
+			icon: Moon02Icon,
+			title: 'Dark',
+		},
+	};
+
+	const themeToggleIcon = computed(() => themeToggleMeta[theme.value]?.icon ?? BulbIcon);
+	const themeToggleTitle = computed(() => themeToggleMeta[theme.value]?.title ?? 'Auto');
+	const themeToggleLabel = computed(() => {
+		const current = themeToggleMeta[theme.value]?.title ?? 'Auto';
+		const next = themeToggleMeta[nextTheme.value]?.title ?? 'Auto';
+		return `Theme ${current.toLowerCase()}. Switch to ${next.toLowerCase()} mode`;
+	});
 
 	const emit = defineEmits(["toggleSidebar", "logoClick", "userClick"]);
-
-	function onImageAndTitleClick() {
-		if (props.sidebarEnabled) {
-			emit("toggleSidebar");
-		} else {
-			emit("logoClick");
-		}
-	}
 
 	const props = defineProps({
 		breadcrumbs: {
@@ -109,6 +130,29 @@
 			default: null,
 		},
 	});
+
+	const fallbackSidebar = ref(null);
+
+	const { showTopBar, showSidebarChrome, needsFallbackSidebar } = useResponsiveNav(
+		() => props.sidebarEnabled,
+		() => props.topBarEnabled,
+	);
+
+	function toggleNavSidebar() {
+		if (needsFallbackSidebar.value) {
+			fallbackSidebar.value?.toggle();
+			return;
+		}
+		emit("toggleSidebar");
+	}
+
+	function onImageAndTitleClick() {
+		if (showSidebarChrome.value) {
+			toggleNavSidebar();
+		} else {
+			emit("logoClick");
+		}
+	}
 </script>
 
 <style scoped>

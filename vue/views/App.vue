@@ -1,18 +1,18 @@
 <template>
-	<Header username = "Guest" @toggleSidebar="toggleSidebar" @logoClick="goToIndex" @userClick="goToUserDetails" title = "PicoCrank" :logoUrl="logoUrl" :sidebarEnabled="sidebarEnabled" :navigation="navigation" :topBarEnabled="topBarEnabled" :showBranding="brandingEnabled" :breadcrumbs="breadcrumbsEnabled" :themeToggleEnabled="themeToggleEnabled">
-		<template #toolbar>
-			<QuickSearch
-				v-if="quickSearchEnabled"
-				ref="quickSearchRef"
-				placeholder="Search items..."
-				:search-fields="['title', 'name', 'description', 'category']"
-				:max-results="15"
-				:fetch-results="dummySearchFetchEnabled ? dummyFetchResults : null"
-			/>
-		</template>
-	</Header>
-
 	<Navigation ref="navigation">
+		<Header username = "Guest" @toggleSidebar="toggleSidebar" @logoClick="goToIndex" @userClick="goToUserDetails" title = "PicoCrank" :logoUrl="logoUrl" :sidebarEnabled="sidebarEnabled" :navigation="navigation" :topBarEnabled="topBarEnabled" :showBranding="brandingEnabled" :breadcrumbs="breadcrumbsEnabled" :themeToggleEnabled="themeToggleEnabled">
+			<template #toolbar>
+				<QuickSearch
+					v-if="quickSearchEnabled"
+					ref="quickSearchRef"
+					placeholder="Search items..."
+					:search-fields="['title', 'name', 'description', 'category']"
+					:max-results="15"
+					:fetch-results="dummySearchFetchEnabled ? dummyFetchResults : null"
+				/>
+			</template>
+		</Header>
+
 		<div id = "layout">
 			<Sidebar v-if="sidebarEnabled" ref = "sidebar" />
 
