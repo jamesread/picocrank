@@ -362,11 +362,35 @@ function selectItem(item) {
   close()
 }
 
-function highlightText(text, query) {
-  if (!query || !text) return text
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
 
-  const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi')
-  return text.replace(regex, '<mark>$1</mark>')
+function highlightText(text, query) {
+  if (text == null || text === '') return ''
+
+  const source = String(text)
+  if (!query) return escapeHtml(source)
+
+  const regex = new RegExp(query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi')
+  let result = ''
+  let lastIndex = 0
+
+  for (const match of source.matchAll(regex)) {
+    const start = match.index
+    const matched = match[0]
+    result += escapeHtml(source.slice(lastIndex, start))
+    result += `<mark>${escapeHtml(matched)}</mark>`
+    lastIndex = start + matched.length
+  }
+
+  result += escapeHtml(source.slice(lastIndex))
+  return result
 }
 
 function addItem(item) {
