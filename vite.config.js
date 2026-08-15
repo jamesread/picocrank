@@ -94,7 +94,7 @@ export default defineConfig({
   plugins: [
     themesIndexPlugin(),
     Components({
-      dirs: "./vue/",
+      dirs: ['./vue/components/'],
       extensions: ['vue'],
       deep: true,
       dts: false,

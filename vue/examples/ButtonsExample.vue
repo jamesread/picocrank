@@ -5,7 +5,9 @@
 	>
 		<p>
 			Buttons use the global Femtocrank theme. Apply karma classes for intent, or
-			rely on <code>type</code> attributes for form semantics.
+			rely on <code>type</code> attributes for form semantics. Use
+			<code>.inline-icon</code> on buttons with icons, and
+			<code>aria-label</code> when there is no visible text.
 		</p>
 	</Section>
 
@@ -16,6 +18,47 @@
 			<button type="button" class="good">Good</button>
 			<button type="button" class="bad">Bad</button>
 			<button type="button" class="warning">Warning</button>
+		</div>
+	</Section>
+
+	<Section title="Icon and text" subtitle="Hugeicons with a visible label">
+		<div role="toolbar" class="buttons-row">
+			<button type="button" class="inline-icon">
+				<HugeiconsIcon :icon="Add01Icon" width="1em" height="1em" :strokeWidth="iconStrokeWidth" aria-hidden="true" />
+				<span>Add item</span>
+			</button>
+			<button type="button" class="inline-icon neutral">
+				<HugeiconsIcon :icon="EditIcon" width="1em" height="1em" :strokeWidth="iconStrokeWidth" aria-hidden="true" />
+				<span>Edit</span>
+			</button>
+			<button type="button" class="inline-icon good">
+				<HugeiconsIcon :icon="SearchIcon" width="1em" height="1em" :strokeWidth="iconStrokeWidth" aria-hidden="true" />
+				<span>Search</span>
+			</button>
+			<button type="button" class="inline-icon">
+				<HugeiconsIcon :icon="Copy01Icon" width="1em" height="1em" :strokeWidth="iconStrokeWidth" aria-hidden="true" />
+				<span>Copy</span>
+			</button>
+		</div>
+	</Section>
+
+	<Section title="Icon only" subtitle="Hugeicons without visible text">
+		<div role="toolbar" class="buttons-row">
+			<button type="button" class="inline-icon" aria-label="Add item">
+				<HugeiconsIcon :icon="Add01Icon" width="1em" height="1em" :strokeWidth="iconStrokeWidth" aria-hidden="true" />
+			</button>
+			<button type="button" class="inline-icon neutral" aria-label="Edit">
+				<HugeiconsIcon :icon="EditIcon" width="1em" height="1em" :strokeWidth="iconStrokeWidth" aria-hidden="true" />
+			</button>
+			<button type="button" class="inline-icon good" aria-label="Search">
+				<HugeiconsIcon :icon="SearchIcon" width="1em" height="1em" :strokeWidth="iconStrokeWidth" aria-hidden="true" />
+			</button>
+			<button type="button" class="inline-icon bad" aria-label="Delete">
+				<HugeiconsIcon :icon="Delete02Icon" width="1em" height="1em" :strokeWidth="iconStrokeWidth" aria-hidden="true" />
+			</button>
+			<button type="button" class="inline-icon neutral" aria-label="Settings">
+				<HugeiconsIcon :icon="Settings01Icon" width="1em" height="1em" :strokeWidth="iconStrokeWidth" aria-hidden="true" />
+			</button>
 		</div>
 	</Section>
 
@@ -67,10 +110,20 @@
 
 <script setup>
 import { ref } from 'vue'
+import { HugeiconsIcon } from '@hugeicons/vue'
+import {
+	Add01Icon,
+	Copy01Icon,
+	Delete02Icon,
+	EditIcon,
+	SearchIcon,
+	Settings01Icon,
+} from '@hugeicons/core-free-icons'
 import Section from '../components/Section.vue'
 import FormLayout from '../components/FormLayout.vue'
 
 const lastAction = ref('')
+const iconStrokeWidth = 2.5
 
 function onSubmit() {
 	lastAction.value = 'Form submitted.'

@@ -20,7 +20,7 @@ const routes = [
   {
     name: 'Welcome',
     path: '/',
-    component: () => import('./vue/views/Welcome.vue'),
+    component: () => import('./vue/examples/Welcome.vue'),
     meta: {
       title: 'Welcome',
       icon: HomeIcon,
@@ -29,7 +29,7 @@ const routes = [
   {
     name: 'PageStructure',
     path: '/page-structure',
-    component: () => import('./vue/views/PageStructure.vue'),
+    component: () => import('./vue/examples/PageStructure.vue'),
     meta: {
       title: 'Page structure',
       icon: LayoutGridIcon,
@@ -38,7 +38,7 @@ const routes = [
   {
     name: 'ThemePreview',
     path: '/theme-preview',
-    component: () => import('./vue/views/ThemePreview.vue'),
+    component: () => import('./vue/examples/ThemePreview.vue'),
     meta: {
       title: 'Theme Switcher',
       icon: PaintBoardIcon,
@@ -47,7 +47,7 @@ const routes = [
   {
     name: 'UserDetails',
     path: '/user',
-    component: () => import('./vue/views/UserDetails.vue'),
+    component: () => import('./vue/examples/UserDetails.vue'),
     meta: {
       title: 'User details',
       icon: UserIcon,
@@ -57,7 +57,7 @@ const routes = [
     name: 'TableExample',
     path: '/table-example',
     title: 'Table Example',
-    component: () => import('./vue/views/TableExample.vue'),
+    component: () => import('./vue/examples/TableExample.vue'),
     meta: {
       title: 'Table',
       icon: TableIcon,
@@ -66,7 +66,7 @@ const routes = [
   {
     name: 'TableRemoteExample',
     path: '/table-remote-example',
-    component: () => import('./vue/views/TableRemoteExample.vue'),
+    component: () => import('./vue/examples/TableRemoteExample.vue'),
     meta: {
       title: 'Remote table',
       icon: TableIcon,
@@ -75,7 +75,7 @@ const routes = [
   {
     name: 'ViewItem',
     path: '/view-item/:id',
-    component: () => import('./vue/views/ViewItem.vue'),
+    component: () => import('./vue/examples/ViewItem.vue'),
     props: true,
     meta: {
       title: 'View item',
@@ -85,7 +85,7 @@ const routes = [
   {
     name: 'Admin',
     path: '/admin',
-    component: () => import('./vue/views/Admin.vue'),
+    component: () => import('./vue/examples/Admin.vue'),
     meta: {
       title: 'Admin',
       icon: SecurityValidationIcon,
@@ -94,7 +94,7 @@ const routes = [
   {
     name: 'CalendarExample',
     path: '/calendar-example',
-    component: () => import('./vue/views/CalendarExample.vue'),
+    component: () => import('./vue/examples/CalendarExample.vue'),
     props: true,
     meta: {
       title: 'Calendar',
@@ -104,7 +104,7 @@ const routes = [
   {
     name: 'Login',
     path: '/login',
-    component: () => import('./vue/views/Login.vue'),
+    component: () => import('./vue/examples/Login.vue'),
     meta: {
       title: 'Login',
       icon: SecurityValidationIcon,
@@ -113,7 +113,7 @@ const routes = [
   {
     name: 'ButtonsExample',
     path: '/buttons-example',
-    component: () => import('./vue/views/ButtonsExample.vue'),
+    component: () => import('./vue/examples/ButtonsExample.vue'),
     meta: {
       title: 'Buttons',
       icon: CursorPointer01Icon,
@@ -122,7 +122,7 @@ const routes = [
   {
     name: 'FormExample',
     path: '/form-example',
-    component: () => import('./vue/views/FormExample.vue'),
+    component: () => import('./vue/examples/FormExample.vue'),
     meta: {
       title: 'Forms',
       icon: EditIcon,
@@ -131,7 +131,7 @@ const routes = [
   {
     name: 'ReadOnlyTextAreaExample',
     path: '/readonly-textarea-example',
-    component: () => import('./vue/views/ReadOnlyTextAreaExample.vue'),
+    component: () => import('./vue/examples/ReadOnlyTextAreaExample.vue'),
     meta: {
       title: 'Read-only output',
       icon: ClipboardCopyIcon,
@@ -140,7 +140,7 @@ const routes = [
   {
     name: 'StatusExample',
     path: '/status-example',
-    component: () => import('./vue/views/StatusExample.vue'),
+    component: () => import('./vue/examples/StatusExample.vue'),
     meta: {
       title: 'Status & notifications',
       icon: StatusIcon,
@@ -149,7 +149,7 @@ const routes = [
   {
     name: 'DialogExample',
     path: '/dialog-example',
-    component: () => import('./vue/views/DialogExample.vue'),
+    component: () => import('./vue/examples/DialogExample.vue'),
     meta: {
       title: 'Dialog',
       icon: InformationCircleIcon,
@@ -158,7 +158,7 @@ const routes = [
   {
     name: 'TabsExample',
     path: '/tabs-example',
-    component: () => import('./vue/views/TabsExample.vue'),
+    component: () => import('./vue/examples/TabsExample.vue'),
     meta: {
       title: 'Tabs',
       icon: Menu01Icon,
@@ -167,7 +167,7 @@ const routes = [
   {
     name: 'NavigationGridExample',
     path: '/navigation-grid',
-    component: () => import('./vue/views/NavigationGridExample.vue'),
+    component: () => import('./vue/examples/NavigationGridExample.vue'),
     meta: {
       title: 'Navigation Grid',
       icon: Navigation01Icon,
@@ -176,7 +176,7 @@ const routes = [
   {
     name: 'LoginExample',
     path: '/login-example',
-    component: () => import('./vue/views/LoginExample.vue'),
+    component: () => import('./vue/examples/LoginExample.vue'),
     meta: {
       title: 'Login',
       icon: SecurityValidationIcon,
