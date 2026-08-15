@@ -188,6 +188,7 @@
 
 			navigation.value.addSection('Data display', { name: 'nav-data' })
 			navigation.value.addRouterLink('TableExample', 'Table')
+			navigation.value.addRouterLink('TableRemoteExample', 'Remote table')
 			navigation.value.addRouterLink('CalendarExample', 'Calendar')
 			navigation.value.addRouterLink('ReadOnlyTextAreaExample', 'Read-only output')
 

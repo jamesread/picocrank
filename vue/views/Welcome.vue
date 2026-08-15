@@ -120,7 +120,7 @@ const popularExamples = [
 		name: 'TableExample',
 		category: 'Data display',
 		label: 'Table',
-		description: 'Sortable columns and pagination',
+		description: 'Sorting, pagination, and column filters',
 	},
 	{
 		name: 'CalendarExample',
@@ -160,7 +160,10 @@ onMounted(() => {
 		description: 'Drop-in themes on Femtocrank',
 	})
 	nav.addRouterLink('TableExample', 'Table', {
-		description: 'Lists with sorting and pagination',
+		description: 'Lists with sorting, pagination, and filters',
+	})
+	nav.addRouterLink('TableRemoteExample', 'Remote table', {
+		description: 'Server-style fetchRows pagination and filters',
 	})
 	nav.addRouterLink('CalendarExample', 'Calendar', {
 		description: 'Month view with events',

@@ -64,6 +64,15 @@ const routes = [
     }
   },
   {
+    name: 'TableRemoteExample',
+    path: '/table-remote-example',
+    component: () => import('./vue/views/TableRemoteExample.vue'),
+    meta: {
+      title: 'Remote table',
+      icon: TableIcon,
+    }
+  },
+  {
     name: 'ViewItem',
     path: '/view-item/:id',
     component: () => import('./vue/views/ViewItem.vue'),
