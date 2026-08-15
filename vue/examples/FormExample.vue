@@ -8,7 +8,11 @@
 		</template>
 
 		<FormLayout @submit.prevent="handleSubmit">
-			<FormField label="Name" for="name">
+			<FormField
+				label="Name"
+				for="name"
+				description="Your full name as it will appear on your profile."
+			>
 				<input 
 					id="name"
 					v-model="formData.name" 
@@ -46,7 +50,14 @@
 				</select>
 			</FormField>
 
-			<FormField label="Compensation" fake>
+			<FormField
+				label="Compensation"
+				fake
+				description-above
+				description="Select the incentive plan that applies to this role."
+				docs-url="https://github.com/jamesread/femtocrank"
+				docs-url-title="Femtocrank documentation"
+			>
 				<RadioGroup
 					v-model="formData.compensation"
 					name="compensation"
@@ -55,7 +66,14 @@
 				/>
 			</FormField>
 
-			<FormField label="Accessibility requirements" fake>
+			<FormField
+				label="Accessibility requirements"
+				fake
+				description-above
+				description="Choose any accommodations needed for this role."
+				docs-url="https://www.w3.org/WAI/fundamentals/accessibility-intro/"
+				docs-url-title="Web accessibility introduction"
+			>
 				<CheckGroup
 					v-model="formData.accessibility"
 					name="accessibility"
@@ -63,7 +81,13 @@
 				/>
 			</FormField>
 
-			<FormField label="Email" for="email">
+			<FormField
+				label="Email"
+				for="email"
+				description="We'll use this address for account notifications only."
+				docs-url="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/email"
+				docs-url-title="HTML email input reference"
+			>
 				<input 
 					id="email"
 					v-model="formData.email" 
@@ -81,7 +105,13 @@
 				/>
 			</FormField>
 
-			<FormField label="Website" for="website">
+			<FormField
+				label="Website"
+				for="website"
+				description="Include https:// for external links."
+				docs-url="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/url"
+				docs-url-title="HTML URL input reference"
+			>
 				<input 
 					id="website"
 					v-model="formData.website" 
@@ -141,7 +171,11 @@
 				</div>
 			</FormField>
 
-			<FormField label="Comments" for="comments">
+			<FormField
+				label="Comments"
+				for="comments"
+				description="Optional feedback or notes about this submission."
+			>
 				<textarea
 					id="comments"
 					v-model="formData.comments"
