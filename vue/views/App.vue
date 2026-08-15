@@ -198,6 +198,7 @@
 
 			navigation.value.addSection('Feedback & status', { name: 'nav-feedback' })
 			navigation.value.addRouterLink('StatusExample', 'Status & notifications')
+			navigation.value.addRouterLink('DialogExample', 'Dialog')
 
 			navigation.value.addSection('Patterns', { name: 'nav-patterns' })
 			navigation.value.addCallback('Callback example', helloWorld, { icon: Pin02Icon })

@@ -14,6 +14,7 @@ import { LayoutGridIcon } from '@hugeicons/core-free-icons';
 import { StatusIcon } from '@hugeicons/core-free-icons';
 import { PaintBoardIcon } from '@hugeicons/core-free-icons';
 import { UserIcon } from '@hugeicons/core-free-icons';
+import { InformationCircleIcon } from '@hugeicons/core-free-icons';
 
 const routes = [
   {
@@ -134,6 +135,15 @@ const routes = [
     meta: {
       title: 'Status & notifications',
       icon: StatusIcon,
+    }
+  },
+  {
+    name: 'DialogExample',
+    path: '/dialog-example',
+    component: () => import('./vue/views/DialogExample.vue'),
+    meta: {
+      title: 'Dialog',
+      icon: InformationCircleIcon,
     }
   },
   {
