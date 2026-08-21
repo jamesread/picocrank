@@ -7,6 +7,7 @@
 					<form @submit.prevent="handleLocalLogin" class="local-login-form">
 						<input
 							id="username"
+							type="text"
 							v-model="localLogin.username"
 							required
 							autocomplete="username"
@@ -240,11 +241,8 @@ defineExpose({
 
 .local-login-form input {
 	padding: 0.75rem;
-	border: 1px solid var(--border-color, #ccc);
 	border-radius: 4px;
 	font-size: 1em;
-	background-color: var(--input-bg, #fff);
-	color: var(--text-color, #000);
 	width: 100%;
 	box-sizing: border-box;
 }

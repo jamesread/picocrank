@@ -1,6 +1,8 @@
 # Drop-in themes
 
-Themes are **not** part of the PicoCrank Vite/JS CSS bundle. Drop a folder here and restart the dev server (or rebuild) to make it discoverable.
+App themes are **not** part of the PicoCrank Vite/JS CSS bundle. Drop a folder under `public/themes/` and restart the dev server (or rebuild) to make it discoverable.
+
+**Supplemental themes** (Catppuccin Latte / Frappé, Dracula / Alucard, Gruvbox (Dark+Light), waffles) live in `supplemental-themes/` at the repo root. They are **included in the default build** but are **not listed or loaded** unless the app sets `includeSupplementalThemes: true` on `ThemeSwitcher` or `useCustomTheme()`.
 
 ## Layout
 
@@ -24,6 +26,21 @@ body {
 }
 ```
 
+For supplemental themes, use `/supplemental-themes/<name>/…`.
+
 ## Switching
 
-The examples app uses `useCustomTheme()` to list themes from `index.json` and apply the selected `theme.css` with `@import … layer(theme)`.
+Use `ThemeSwitcher` or `useCustomTheme()`:
+
+```vue
+<!-- App themes only (default) -->
+<ThemeSwitcher />
+
+<!-- Also list bundled supplemental themes -->
+<ThemeSwitcher :include-supplemental-themes="true" />
+```
+
+- `includeSupplementalThemes` (default `false`) — list and load supplemental themes when present.
+- `VITE_INCLUDE_SUPPLEMENTAL_THEMES=false` — omit supplemental theme files from `dist` (`npm run build:minimal`).
+
+Light/dark mode (header sun/moon) is separate from drop-in themes.

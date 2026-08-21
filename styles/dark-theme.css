@@ -5,6 +5,7 @@ html[data-theme="dark"] {
   --border-color: #595959;
   --hover-background-color: #1d345c;
   --hover-text-color: #fff;
+  --text-color: #ddd;
   --header-hover-background-color: #1d345c;
   --standout-bg-color: #1f1f1f;
   --disabled-background-color: #333;
@@ -111,6 +112,18 @@ html[data-theme="dark"] {
     color: white;
   }
 
+  & table thead th.sortable:hover,
+  & table thead th.filtered,
+  & table thead th.menu-open {
+    color: var(--text-color);
+  }
+
+  & th.actions .actions-menu-trigger button:hover,
+  & th.actions .actions-menu-trigger button:focus-visible {
+    background-color: var(--hover-background-color);
+    color: var(--text-color);
+  }
+
   & footer span {
     background-color: #444;
   }
@@ -177,8 +190,10 @@ html[data-theme="dark"] {
     box-shadow: 0 0 .5em #121212;
   }
 
-  & aside :is(ul, menu) li a:hover {
+  & aside :is(ul, menu) li a:hover,
+  & aside :is(ul, menu) li a:focus-visible {
     background-color: var(--hover-background-color);
+    color: var(--hover-text-color, #fff);
   }
 
   & dt {

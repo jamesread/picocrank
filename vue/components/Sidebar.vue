@@ -420,7 +420,8 @@ button {
 	cursor: pointer;
 }
 
-.nav-section-header:hover {
+.nav-section-header:hover,
+.nav-section-header:focus-visible {
 	background-color: var(--hover-background-color);
 	color: var(--hover-text-color);
 }

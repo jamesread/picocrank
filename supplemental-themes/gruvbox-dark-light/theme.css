@@ -1,0 +1,264 @@
+/*
+ * Gruvbox (Dark+Light) supplemental theme for PicoCrank / Femtocrank.
+ * Palette: https://github.com/morhetz/gruvbox (medium contrast)
+ *
+ * Dark mode (header toggle) uses Gruvbox Dark; light mode uses Gruvbox Light.
+ *
+ * Asset URLs must be absolute, e.g.:
+ *   background-image: url('/supplemental-themes/gruvbox-dark-light/background.png');
+ */
+
+html[data-theme="dark"] {
+	color-scheme: dark;
+
+	--gb-bg0: #282828;
+	--gb-bg0-hard: #1d2021;
+	--gb-bg1: #3c3836;
+	--gb-bg2: #504945;
+	--gb-bg3: #665c54;
+	--gb-bg4: #7c6f64;
+	--gb-fg0: #fbf1c7;
+	--gb-fg1: #ebdbb2;
+	--gb-fg2: #d5c4a1;
+	--gb-fg3: #bdae93;
+	--gb-fg4: #a89984;
+	--gb-gray: #928374;
+	--gb-red: #fb4934;
+	--gb-green: #b8bb26;
+	--gb-yellow: #fabd2f;
+	--gb-blue: #83a598;
+	--gb-purple: #d3869b;
+	--gb-aqua: #8ec07c;
+	--gb-orange: #fe8019;
+	--gb-accent: var(--gb-blue);
+	--gb-shadow: rgba(29, 32, 33, 0.85);
+	--gb-shadow-strong: rgba(29, 32, 33, 0.9);
+	--gb-good-fg: var(--gb-bg0-hard);
+
+	--text-color: var(--gb-fg0);
+	--border-color: var(--gb-bg3);
+	--standout-bg-color: var(--gb-bg1);
+	--hover-background-color: var(--gb-bg2);
+	--hover-text-color: var(--gb-fg0);
+	--header-hover-background-color: var(--gb-bg2);
+	--header-hover-text-color: var(--gb-fg0);
+	--header-text-color: var(--gb-fg0);
+	--disabled-background-color: var(--gb-bg2);
+	--disabled-text-color: var(--gb-gray);
+
+	--karma-good: var(--gb-green);
+	--karma-bad: var(--gb-red);
+	--karma-warning: var(--gb-yellow);
+	--karma-severe: var(--gb-orange);
+	--karma-important: var(--gb-purple);
+	--karma-note: var(--gb-aqua);
+	--karma-info: var(--gb-bg2);
+	--karma-old: var(--gb-gray);
+
+	--karma-good-fg: var(--gb-green);
+	--karma-bad-fg: var(--gb-red);
+	--karma-warning-fg: var(--gb-yellow);
+	--karma-severe-fg: var(--gb-orange);
+	--karma-important-fg: var(--gb-purple);
+	--karma-note-fg: var(--gb-aqua);
+	--karma-info-fg: var(--gb-fg3);
+	--karma-old-fg: var(--gb-fg4);
+}
+
+html[data-theme="light"] {
+	color-scheme: light;
+
+	--gb-bg0: #fbf1c7;
+	--gb-bg0-hard: #f9f5d7;
+	--gb-bg1: #ebdbb2;
+	--gb-bg2: #d5c4a1;
+	--gb-bg3: #bdae93;
+	--gb-bg4: #a89984;
+	--gb-fg0: #282828;
+	--gb-fg1: #3c3836;
+	--gb-fg2: #504945;
+	--gb-fg3: #665c54;
+	--gb-fg4: #7c6f64;
+	--gb-gray: #928374;
+	--gb-red: #9d0006;
+	--gb-green: #79740e;
+	--gb-yellow: #b57614;
+	--gb-blue: #076678;
+	--gb-purple: #8f3f71;
+	--gb-aqua: #427b58;
+	--gb-orange: #af3a03;
+	--gb-accent: var(--gb-blue);
+	--gb-shadow: rgba(40, 40, 40, 0.12);
+	--gb-shadow-strong: rgba(40, 40, 40, 0.16);
+	--gb-good-fg: var(--gb-bg0);
+
+	--text-color: var(--gb-fg0);
+	--border-color: var(--gb-bg3);
+	--standout-bg-color: var(--gb-bg1);
+	--hover-background-color: var(--gb-bg2);
+	--hover-text-color: var(--gb-fg0);
+	--header-hover-background-color: var(--gb-bg2);
+	--header-hover-text-color: var(--gb-fg0);
+	--header-text-color: var(--gb-fg0);
+	--disabled-background-color: var(--gb-bg2);
+	--disabled-text-color: var(--gb-gray);
+
+	--karma-good: var(--gb-green);
+	--karma-bad: var(--gb-red);
+	--karma-warning: var(--gb-yellow);
+	--karma-severe: var(--gb-orange);
+	--karma-important: var(--gb-purple);
+	--karma-note: var(--gb-aqua);
+	--karma-info: var(--gb-bg2);
+	--karma-old: var(--gb-gray);
+
+	--karma-good-fg: var(--gb-green);
+	--karma-bad-fg: var(--gb-red);
+	--karma-warning-fg: var(--gb-yellow);
+	--karma-severe-fg: var(--gb-orange);
+	--karma-important-fg: var(--gb-purple);
+	--karma-note-fg: var(--gb-aqua);
+	--karma-info-fg: var(--gb-fg3);
+	--karma-old-fg: var(--gb-fg4);
+}
+
+body {
+	background-color: var(--gb-bg0);
+	color: var(--gb-fg0);
+}
+
+header {
+	background-color: var(--gb-bg0-hard);
+	border-bottom: 1px solid var(--gb-bg2);
+	box-shadow: none;
+	color: var(--gb-fg0);
+}
+
+header a,
+header a:visited,
+header button,
+header .button,
+header h1,
+header .topbar-link,
+header .topbar-link:visited {
+	color: var(--header-text-color, var(--gb-fg0));
+}
+
+#sidebar-toggler-button,
+#sidebar-toggler-button.neutral,
+header .theme-toggle,
+header .theme-toggle.neutral,
+header .search-trigger,
+header .search-trigger.neutral,
+header .user-info {
+	background-color: transparent;
+	border: 0;
+	color: var(--header-text-color, var(--gb-fg0));
+}
+
+#sidebar-toggler-button:hover,
+header .theme-toggle:hover,
+header .search-trigger:hover,
+header .user-info:hover {
+	background-color: var(--header-hover-background-color);
+	color: var(--header-hover-text-color);
+}
+
+aside,
+#sidebar {
+	background-color: var(--gb-bg1);
+	color: var(--gb-fg0);
+	border-color: var(--gb-bg2);
+	box-shadow: 0.15em 0 0.6em var(--gb-shadow);
+}
+
+aside a,
+aside a:visited {
+	color: var(--gb-fg0);
+}
+
+aside a:hover,
+aside a:focus-visible,
+aside :is(ul, menu) li a:hover,
+aside :is(ul, menu) li a:focus-visible,
+aside .nav-section-header:hover,
+aside .nav-section-header:focus-visible {
+	background-color: var(--gb-bg2);
+	color: var(--gb-fg0);
+}
+
+section {
+	background-color: var(--gb-bg1);
+	color: var(--gb-fg0);
+	box-shadow: 0 0 0.5em var(--gb-shadow-strong);
+	border-color: var(--gb-bg2);
+}
+
+section .section-header,
+section .section-subheader {
+	background-color: var(--gb-bg1);
+	border-bottom-color: var(--gb-bg2);
+	color: var(--gb-fg0);
+}
+
+button,
+.button {
+	background-color: var(--gb-bg2);
+	border: 1px solid var(--gb-bg3);
+	color: var(--gb-fg0);
+}
+
+button:hover,
+.button:hover {
+	background-color: var(--gb-bg3);
+	color: var(--gb-fg0);
+}
+
+button.good,
+.button.good {
+	background-color: var(--gb-green);
+	border-color: var(--gb-green);
+	color: var(--gb-good-fg);
+}
+
+button.bad,
+.button.bad {
+	background-color: var(--gb-red);
+	border-color: var(--gb-red);
+	color: var(--gb-bg0-hard);
+}
+
+button.warning,
+.button.warning {
+	background-color: var(--gb-yellow);
+	border-color: var(--gb-yellow);
+	color: var(--gb-bg0-hard);
+}
+
+button.neutral,
+.button.neutral {
+	background-color: var(--gb-bg2);
+	border-color: var(--gb-bg3);
+	color: var(--gb-fg0);
+}
+
+input,
+select,
+textarea {
+	background-color: var(--gb-bg0);
+	border: 1px solid var(--gb-bg3);
+	color: var(--gb-fg0);
+}
+
+a {
+	color: var(--gb-accent);
+}
+
+footer {
+	color: var(--gb-fg3);
+	border-top-color: var(--gb-bg2);
+}
+
+.subtle {
+	color: var(--gb-fg3);
+}

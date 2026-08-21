@@ -233,12 +233,10 @@ function handleSSOLogin(provider) {
 
 .magic-link-form input {
 	padding: 0.75rem;
-	border: 1px solid var(--border-color, #ccc);
 	border-radius: 4px;
 	font-size: 1em;
-	background-color: var(--input-bg, #fff);
-	color: var(--text-color, #000);
 	width: 100%;
+	box-sizing: border-box;
 }
 
 .magic-link-form input:focus {

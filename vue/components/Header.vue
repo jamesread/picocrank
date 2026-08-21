@@ -205,7 +205,7 @@
 .header-actions :deep(button) {
 	border: 0;
 	border-radius: 0;
-	color: #fff;
+	color: var(--header-text-color, #fff);
 	background-color: transparent;
 	align-self: stretch;
 	display: inline-flex;
@@ -227,7 +227,7 @@
 #sidebar-toggler-button {
 	border: 0;
 	border-radius: 0;
-	color: #fff;
+	color: var(--header-text-color, #fff);
 	background-color: transparent;
 	align-self: stretch;
 	display: inline-flex;
@@ -260,7 +260,7 @@ header .search-trigger,
 header .search-trigger.neutral {
 	border: 0;
 	border-radius: 0;
-	color: #fff;
+	color: var(--header-text-color, #fff);
 	background-color: transparent;
 	align-self: stretch;
 	height: 100%;

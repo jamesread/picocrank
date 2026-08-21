@@ -4,32 +4,27 @@
 		subtitle="Drop-in themes layered on Femtocrank — not part of the Vite CSS/JS bundle"
 	>
 		<p>
-			Themes live under <code>public/themes/&lt;name&gt;/theme.css</code>. Drop a folder
+			Themes live under <code>public/themes/&lt;name&gt;/theme.css</code> (app themes) and
+			optionally <code>supplemental-themes/</code> (Catppuccin, Dracula / Alucard, Gruvbox, waffles). Drop a folder
 			in and restart the dev server (or rebuild); PicoCrank discovers themes from
-			<code>index.json</code> and applies them with <code>useCustomTheme()</code>.
+			<code>index.json</code> and applies them with <code>useCustomTheme()</code> or
+			<code>ThemeSwitcher</code>. Supplemental themes are bundled by default but only
+			listed when <code>include-supplemental-themes</code> is enabled.
 		</p>
 
-		<label class="theme-picker">
-			<span>Active theme</span>
-			<select :value="themePreference" @change="onThemeChange">
-				<option value="">Default (Femtocrank)</option>
-				<option
-					v-for="name in availableThemes"
-					:key="name"
-					:value="name"
-				>
-					{{ name }}
-				</option>
-			</select>
-		</label>
+		<ThemeSwitcher
+			class="theme-switcher-block"
+			:include-supplemental-themes="true"
+			@change="onThemeChange"
+		/>
 
 		<p v-if="availableThemes.length === 0" class="subtle">
 			No drop-in themes found. Add <code>public/themes/&lt;name&gt;/theme.css</code>
-			and restart Vite.
+			or enable supplemental themes on <code>ThemeSwitcher</code>.
 		</p>
 		<p v-else class="subtle">
 			Preference is stored in localStorage and applies across the whole examples site.
-			Light/dark mode (header sun/moon) is separate from drop-in themes.
+			Light/dark mode (header sun/moon) switches Femtocrank defaults, or the dual-variant supplemental themes when active.
 		</p>
 	</Section>
 
@@ -118,30 +113,21 @@
 
 <script setup>
 import Section from '../components/Section.vue'
+import ThemeSwitcher from '../components/ThemeSwitcher.vue'
 import FormLayout from '../components/FormLayout.vue'
 import FormField from '../components/FormField.vue'
 import { useCustomTheme } from '../composables/useCustomTheme.js'
 
-const { availableThemes, themePreference, setTheme, discoverThemes } = useCustomTheme()
+const { availableThemes } = useCustomTheme()
 
-discoverThemes()
-
-function onThemeChange(event) {
-	setTheme(event.target.value)
+function onThemeChange() {
+	// ThemeSwitcher updates shared useCustomTheme state.
 }
 </script>
 
 <style scoped>
-.theme-picker {
-	display: flex;
-	flex-wrap: wrap;
-	align-items: center;
-	gap: 0.75rem;
+.theme-switcher-block {
 	margin: 1rem 0;
-}
-
-.theme-picker select {
-	min-width: 14rem;
 }
 
 .preview-row {

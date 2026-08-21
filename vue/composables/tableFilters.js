@@ -1,7 +1,37 @@
 const TEXT_OPERATORS = ['contains', 'equals', 'startsWith', 'empty']
 const NUMBER_OPERATORS = ['eq', 'gt', 'gte', 'lt', 'lte']
 
+const TEXT_OPERATOR_LABELS = {
+	contains: 'Contains',
+	equals: 'Equals',
+	startsWith: 'Starts with',
+	empty: 'Is empty',
+}
+
+const NUMBER_OPERATOR_LABELS = {
+	eq: 'Equals',
+	gt: 'Greater than',
+	gte: 'Greater or equal',
+	lt: 'Less than',
+	lte: 'Less or equal',
+}
+
+let filterIdCounter = 0
+
+export function createFilterId() {
+	if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+		return `filter-${crypto.randomUUID()}`
+	}
+
+	filterIdCounter += 1
+	return `filter-${filterIdCounter}-${Date.now()}`
+}
+
 export function inferFilterType(header, rows = []) {
+	if (!header) {
+		return 'text'
+	}
+
 	if (header.filterType) {
 		return header.filterType
 	}
@@ -85,6 +115,101 @@ export function normalizeFilter(header, partial, rows = []) {
 	}
 }
 
+export function filterEntrySpec(entry) {
+	if (!entry || typeof entry !== 'object') {
+		return null
+	}
+
+	const { id, name, enabled, ...filter } = entry
+	return filter
+}
+
+export function normalizeStoredFilterEntry(header, entry, rows = []) {
+	if (!entry || typeof entry !== 'object') {
+		return null
+	}
+
+	const { id, name, enabled, ...partial } = entry
+	const filter = normalizeFilter(header, partial, rows)
+	if (!filter) {
+		return null
+	}
+
+	return {
+		id: id || createFilterId(),
+		name: typeof name === 'string' ? name : '',
+		enabled: enabled !== false,
+		...filter,
+	}
+}
+
+export function normalizeColumnFilterEntries(value, header = null, rows = []) {
+	if (!value) {
+		return []
+	}
+
+	if (Array.isArray(value)) {
+		return value
+			.map((entry) => normalizeStoredFilterEntry(header, entry, rows))
+			.filter(Boolean)
+	}
+
+	if (typeof value === 'object' && value.type) {
+		const filter = header ? normalizeFilter(header, value, rows) : value
+		if (!filter || !isFilterActive(filter)) {
+			return []
+		}
+
+		return [{
+			id: value.id || createFilterId(),
+			name: typeof value.name === 'string' ? value.name : '',
+			enabled: value.enabled !== false,
+			...filter,
+		}]
+	}
+
+	return []
+}
+
+export function createFilterEntry(header, partial, rows = [], { name = '' } = {}) {
+	const filter = normalizeFilter(header, partial, rows)
+	if (!filter) {
+		return null
+	}
+
+	return {
+		id: createFilterId(),
+		name: typeof name === 'string' ? name.trim() : '',
+		enabled: true,
+		...filter,
+	}
+}
+
+export function describeFilter(header, entry) {
+	const filter = filterEntrySpec(entry)
+	if (!filter) {
+		return 'Filter'
+	}
+
+	const label = header?.label || header?.key || 'Column'
+
+	switch (filter.type) {
+		case 'text':
+			if (filter.operator === 'empty') {
+				return `${label} is empty`
+			}
+			return `${TEXT_OPERATOR_LABELS[filter.operator] || 'Contains'} “${filter.value}”`
+		case 'number':
+			return `${NUMBER_OPERATOR_LABELS[filter.operator] || 'Equals'} ${filter.value}`
+		case 'boolean':
+			return filter.value ? 'Yes' : 'No'
+		case 'select':
+			return `${filter.values.length} selected`
+		default:
+			return 'Filter'
+	}
+}
+
 export function isFilterActive(filter) {
 	if (!filter) {
 		return false
@@ -102,6 +227,29 @@ export function isFilterActive(filter) {
 		default:
 			return false
 	}
+}
+
+export function isFilterEntryActive(entry) {
+	return entry?.enabled !== false && isFilterActive(filterEntrySpec(entry))
+}
+
+export function isColumnFiltered(columnValue, header = null, rows = []) {
+	return normalizeColumnFilterEntries(columnValue, header, rows)
+		.some((entry) => isFilterEntryActive(entry))
+}
+
+export function countActiveFilters(filters = {}, headers = [], rows = []) {
+	const headerByKey = new Map(headers.map((header) => [header.key, header]))
+	let total = 0
+
+	for (const [key, value] of Object.entries(filters ?? {})) {
+		const header = headerByKey.get(key) ?? { key }
+		total += normalizeColumnFilterEntries(value, header, rows)
+			.filter((entry) => isFilterEntryActive(entry))
+			.length
+	}
+
+	return total
 }
 
 function compareText(value, filter) {
@@ -166,6 +314,18 @@ export function applyColumnFilter(row, header, filter) {
 	}
 }
 
+export function applyColumnFilterEntries(row, header, entries) {
+	const activeFilters = normalizeColumnFilterEntries(entries, header)
+		.filter((entry) => isFilterEntryActive(entry))
+		.map((entry) => filterEntrySpec(entry))
+
+	if (activeFilters.length === 0) {
+		return true
+	}
+
+	return activeFilters.every((filter) => applyColumnFilter(row, header, filter))
+}
+
 export function applyFilters(rows, headers, filters) {
 	if (!filters || Object.keys(filters).length === 0) {
 		return rows
@@ -174,12 +334,12 @@ export function applyFilters(rows, headers, filters) {
 	const headerByKey = new Map(headers.map((header) => [header.key, header]))
 
 	return rows.filter((row) => {
-		for (const [key, filter] of Object.entries(filters)) {
+		for (const [key, columnFilters] of Object.entries(filters)) {
 			const header = headerByKey.get(key)
-			if (!header || !isFilterActive(filter)) {
+			if (!header) {
 				continue
 			}
-			if (!applyColumnFilter(row, header, filter)) {
+			if (!applyColumnFilterEntries(row, header, columnFilters)) {
 				return false
 			}
 		}
@@ -221,6 +381,10 @@ export function buildSelectOptions(rows, header) {
 
 export function cloneFilters(filters = {}) {
 	return JSON.parse(JSON.stringify(filters ?? {}))
+}
+
+export function cloneColumnFilterEntries(value, header = null, rows = []) {
+	return normalizeColumnFilterEntries(value, header, rows).map((entry) => ({ ...entry }))
 }
 
 export function sortRows(rows, sortBy, sortDir) {

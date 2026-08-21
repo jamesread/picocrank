@@ -1,0 +1,258 @@
+/*
+ * Dracula / Alucard supplemental theme for PicoCrank / Femtocrank.
+ * Palettes: https://draculatheme.com/spec (Dracula Classic + Alucard Classic)
+ *
+ * Dark mode (header toggle) uses Dracula; light mode uses Alucard.
+ *
+ * Asset URLs must be absolute, e.g.:
+ *   background-image: url('/supplemental-themes/dracula-alucard/background.png');
+ */
+
+html[data-theme="dark"] {
+	color-scheme: dark;
+
+	--dt-background: #282a36;
+	--dt-surface: #21222c;
+	--dt-overlay: #44475a;
+	--dt-border: #44475a;
+	--dt-foreground: #f8f8f2;
+	--dt-muted: #6272a4;
+	--dt-selection: #44475a;
+	--dt-cyan: #8be9fd;
+	--dt-green: #50fa7b;
+	--dt-orange: #ffb86c;
+	--dt-pink: #ff79c6;
+	--dt-purple: #bd93f9;
+	--dt-red: #ff5555;
+	--dt-yellow: #f1fa8c;
+	--dt-accent: var(--dt-pink);
+	--dt-shadow: rgba(33, 34, 44, 0.85);
+	--dt-shadow-strong: rgba(33, 34, 44, 0.9);
+	--dt-good-fg: var(--dt-surface);
+	--dt-bad-fg: var(--dt-foreground);
+	--dt-warning-fg: var(--dt-surface);
+
+	--text-color: var(--dt-foreground);
+	--border-color: var(--dt-border);
+	--standout-bg-color: var(--dt-surface);
+	--hover-background-color: var(--dt-selection);
+	--hover-text-color: var(--dt-foreground);
+	--header-hover-background-color: var(--dt-selection);
+	--header-hover-text-color: var(--dt-foreground);
+	--header-text-color: var(--dt-foreground);
+	--disabled-background-color: var(--dt-overlay);
+	--disabled-text-color: var(--dt-muted);
+
+	--karma-good: var(--dt-green);
+	--karma-bad: var(--dt-red);
+	--karma-warning: var(--dt-yellow);
+	--karma-severe: var(--dt-orange);
+	--karma-important: var(--dt-purple);
+	--karma-note: var(--dt-cyan);
+	--karma-info: var(--dt-overlay);
+	--karma-old: var(--dt-muted);
+
+	--karma-good-fg: var(--dt-green);
+	--karma-bad-fg: var(--dt-red);
+	--karma-warning-fg: var(--dt-yellow);
+	--karma-severe-fg: var(--dt-orange);
+	--karma-important-fg: var(--dt-purple);
+	--karma-note-fg: var(--dt-cyan);
+	--karma-info-fg: var(--dt-muted);
+	--karma-old-fg: var(--dt-muted);
+}
+
+html[data-theme="light"] {
+	color-scheme: light;
+
+	--dt-background: #fffbeb;
+	--dt-surface: #ece9df;
+	--dt-overlay: #dedccf;
+	--dt-border: #ceccc0;
+	--dt-foreground: #1f1f1f;
+	--dt-muted: #6c664b;
+	--dt-selection: #cfcfde;
+	--dt-cyan: #036a96;
+	--dt-green: #14710a;
+	--dt-orange: #a34d14;
+	--dt-pink: #a3144d;
+	--dt-purple: #644ac9;
+	--dt-red: #cb3a2a;
+	--dt-yellow: #846e15;
+	--dt-accent: var(--dt-pink);
+	--dt-shadow: rgba(31, 31, 31, 0.12);
+	--dt-shadow-strong: rgba(31, 31, 31, 0.16);
+	--dt-good-fg: var(--dt-background);
+	--dt-bad-fg: var(--dt-background);
+	--dt-warning-fg: var(--dt-background);
+
+	--text-color: var(--dt-foreground);
+	--border-color: var(--dt-border);
+	--standout-bg-color: var(--dt-surface);
+	--hover-background-color: var(--dt-selection);
+	--hover-text-color: var(--dt-foreground);
+	--header-hover-background-color: var(--dt-overlay);
+	--header-hover-text-color: var(--dt-foreground);
+	--header-text-color: var(--dt-foreground);
+	--disabled-background-color: var(--dt-overlay);
+	--disabled-text-color: var(--dt-muted);
+
+	--karma-good: var(--dt-green);
+	--karma-bad: var(--dt-red);
+	--karma-warning: var(--dt-yellow);
+	--karma-severe: var(--dt-orange);
+	--karma-important: var(--dt-purple);
+	--karma-note: var(--dt-cyan);
+	--karma-info: var(--dt-overlay);
+	--karma-old: var(--dt-muted);
+
+	--karma-good-fg: var(--dt-green);
+	--karma-bad-fg: var(--dt-red);
+	--karma-warning-fg: var(--dt-yellow);
+	--karma-severe-fg: var(--dt-orange);
+	--karma-important-fg: var(--dt-purple);
+	--karma-note-fg: var(--dt-cyan);
+	--karma-info-fg: var(--dt-muted);
+	--karma-old-fg: var(--dt-muted);
+}
+
+body {
+	background-color: var(--dt-background);
+	color: var(--dt-foreground);
+}
+
+header {
+	background-color: var(--dt-surface);
+	border-bottom: 1px solid var(--dt-border);
+	box-shadow: none;
+	color: var(--dt-foreground);
+}
+
+header a,
+header a:visited,
+header button,
+header .button,
+header h1,
+header .topbar-link,
+header .topbar-link:visited {
+	color: var(--header-text-color, var(--dt-foreground));
+}
+
+#sidebar-toggler-button,
+#sidebar-toggler-button.neutral,
+header .theme-toggle,
+header .theme-toggle.neutral,
+header .search-trigger,
+header .search-trigger.neutral,
+header .user-info {
+	background-color: transparent;
+	border: 0;
+	color: var(--header-text-color, var(--dt-foreground));
+}
+
+#sidebar-toggler-button:hover,
+header .theme-toggle:hover,
+header .search-trigger:hover,
+header .user-info:hover {
+	background-color: var(--header-hover-background-color);
+	color: var(--header-hover-text-color);
+}
+
+aside,
+#sidebar {
+	background-color: var(--dt-surface);
+	color: var(--dt-foreground);
+	border-color: var(--dt-border);
+	box-shadow: 0.15em 0 0.6em var(--dt-shadow);
+}
+
+aside a,
+aside a:visited {
+	color: var(--dt-foreground);
+}
+
+aside a:hover,
+aside a:focus-visible,
+aside :is(ul, menu) li a:hover,
+aside :is(ul, menu) li a:focus-visible,
+aside .nav-section-header:hover,
+aside .nav-section-header:focus-visible {
+	background-color: var(--dt-selection);
+	color: var(--dt-foreground);
+}
+
+section {
+	background-color: var(--dt-surface);
+	color: var(--dt-foreground);
+	box-shadow: 0 0 0.5em var(--dt-shadow-strong);
+	border-color: var(--dt-border);
+}
+
+section .section-header,
+section .section-subheader {
+	background-color: var(--dt-surface);
+	border-bottom-color: var(--dt-border);
+	color: var(--dt-foreground);
+}
+
+button,
+.button {
+	background-color: var(--dt-overlay);
+	border: 1px solid var(--dt-muted);
+	color: var(--dt-foreground);
+}
+
+button:hover,
+.button:hover {
+	background-color: var(--dt-selection);
+	color: var(--dt-foreground);
+}
+
+button.good,
+.button.good {
+	background-color: var(--dt-green);
+	border-color: var(--dt-green);
+	color: var(--dt-good-fg);
+}
+
+button.bad,
+.button.bad {
+	background-color: var(--dt-red);
+	border-color: var(--dt-red);
+	color: var(--dt-bad-fg);
+}
+
+button.warning,
+.button.warning {
+	background-color: var(--dt-yellow);
+	border-color: var(--dt-yellow);
+	color: var(--dt-warning-fg);
+}
+
+button.neutral,
+.button.neutral {
+	background-color: var(--dt-selection);
+	border-color: var(--dt-muted);
+	color: var(--dt-foreground);
+}
+
+input,
+select,
+textarea {
+	background-color: var(--dt-background);
+	border: 1px solid var(--dt-border);
+	color: var(--dt-foreground);
+}
+
+a {
+	color: var(--dt-accent);
+}
+
+footer {
+	color: var(--dt-muted);
+	border-top-color: var(--dt-border);
+}
+
+.subtle {
+	color: var(--dt-muted);
+}

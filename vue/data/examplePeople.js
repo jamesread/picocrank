@@ -35,11 +35,7 @@ export const examplePeople = [
 	{ name: 'George', age: 29, city: 'Miami' },
 ]
 
-/** Longer list matching the previous table example volume (with repeats for pagination). */
+/** Example table rows — the full unique people list. */
 export function getExampleTableRows() {
-	return [
-		...examplePeople,
-		...examplePeople.slice(7),
-		...examplePeople.slice(7, 22),
-	]
+	return [...examplePeople]
 }

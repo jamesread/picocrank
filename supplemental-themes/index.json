@@ -1,0 +1,17 @@
+{
+  "themes": [
+    {
+      "id": "catppuccin-latte-frappe",
+      "label": "Catppuccin Latte / Frappé"
+    },
+    {
+      "id": "dracula-alucard",
+      "label": "Dracula / Alucard"
+    },
+    {
+      "id": "gruvbox-dark-light",
+      "label": "Gruvbox (Dark+Light)"
+    },
+    "waffles"
+  ]
+}

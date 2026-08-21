@@ -4,7 +4,9 @@
   "description": "A set of zero dependency Vue components built on the Femtocrank global CSS theme.",
   "main": "vite.config.js",
   "scripts": {
+    "dev": "vite",
     "build": "vite build --base './'",
+    "build:minimal": "VITE_INCLUDE_SUPPLEMENTAL_THEMES=false vite build --base './'",
     "preview": "vite preview",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -18,12 +20,12 @@
     "url": "https://github.com/jamesread/picocrank/issues"
   },
   "dependencies": {
-    "@hugeicons/core-free-icons": "^4.2.3",
-    "@hugeicons/vue": "^1.0.7",
+    "@hugeicons/core-free-icons": "^4.3.0",
+    "@hugeicons/vue": "^1.0.8",
     "@vitejs/plugin-vue": "^6.0.8",
-    "femtocrank": "^2.5.3",
+    "femtocrank": "^2.6.0",
     "unplugin-vue-components": "^32.1.0",
-    "vite": "^8.2.1",
+    "vite": "^8.2.2",
     "vue": "^3.5.41",
     "vue-router": "^5.2.0"
   },

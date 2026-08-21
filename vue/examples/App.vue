@@ -57,7 +57,7 @@
 	const topBarEnabled = ref(false);
 	const breadcrumbsEnabled = ref(false);
 
-	const { discoverThemes } = initCustomTheme();
+	const { discoverThemes } = initCustomTheme({ includeSupplementalThemes: true });
 
 	function toggleSidebar() {
 		if (sidebar.value) {

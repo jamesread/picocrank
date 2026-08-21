@@ -154,6 +154,12 @@ html[data-theme="dark"] {
 		color: #f8f9fa;
 	}
 
+	a:hover,
+	a:focus-visible {
+		background-color: var(--hover-background-color);
+		color: var(--hover-text-color, #fff);
+	}
+
 	.separator {
 		background-color: #444;
 	}
