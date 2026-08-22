@@ -2,6 +2,7 @@
 @layer components, karma, theme;
 
 @import 'femtocrank/style.css' layer(components);
+@import './styles/picocrank-extensions.css';
 @import './styles/dark-theme.css';
 
 /* Sidebar uses <menu> for nav items; mirror Femtocrank's aside ul rules. */

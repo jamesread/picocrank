@@ -1,0 +1,15 @@
+/* PicoCrank component tokens — aliases to Femtocrank semantic variables. */
+@layer components {
+:root {
+	--table-header-fg: var(--text-color);
+	--table-header-active-fg: var(--link-color);
+	--table-header-active-bg: var(--hover-background-color);
+	--tab-fg: var(--muted-text-color);
+	--tab-active-fg: var(--link-color);
+	--tab-focus-outline-color: var(--tab-active-fg);
+}
+
+table thead th {
+	color: var(--table-header-fg);
+}
+}

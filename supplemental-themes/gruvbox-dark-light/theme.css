@@ -31,20 +31,58 @@ html[data-theme="dark"] {
 	--gb-aqua: #8ec07c;
 	--gb-orange: #fe8019;
 	--gb-accent: var(--gb-blue);
-	--gb-shadow: rgba(29, 32, 33, 0.85);
 	--gb-shadow-strong: rgba(29, 32, 33, 0.9);
 	--gb-good-fg: var(--gb-bg0-hard);
 
-	--text-color: var(--gb-fg0);
-	--border-color: var(--gb-bg3);
+	--body-bg-color: var(--gb-bg0);
+	--surface-bg-color: var(--gb-bg1);
 	--standout-bg-color: var(--gb-bg1);
+	--section-header-bg-color: var(--gb-bg1);
+	--shadow-color: var(--gb-shadow-strong);
+
+	--text-color: var(--gb-fg0);
+	--muted-text-color: var(--gb-fg3);
+	--annotation-key-color: var(--gb-fg3);
+	--link-color: var(--gb-accent);
+	--border-color: var(--gb-bg3);
+
 	--hover-background-color: var(--gb-bg2);
 	--hover-text-color: var(--gb-fg0);
+
+	--header-bg-color: var(--gb-bg0-hard);
+	--header-fg-color: var(--gb-fg0);
+	--header-border-color: var(--gb-bg2);
+	--header-shadow: none;
 	--header-hover-background-color: var(--gb-bg2);
 	--header-hover-text-color: var(--gb-fg0);
-	--header-text-color: var(--gb-fg0);
+	--header-button-hover-bg-color: var(--gb-bg2);
+
+	--sidebar-bg-color: var(--gb-bg1);
+	--sidebar-link-color: var(--gb-fg0);
+	--sidebar-hover-bg-color: var(--gb-bg2);
+	--sidebar-border-color: var(--gb-bg2);
+
+	--input-bg-color: var(--gb-bg0);
+	--input-fg-color: var(--gb-fg0);
+	--control-option-bg-color: var(--gb-bg2);
+	--control-hover-bg-color: var(--gb-bg2);
+	--menu-hover-bg-color: var(--gb-bg2);
+
+	--table-row-hover-bg: var(--gb-bg2);
+	--table-row-hover-fg: var(--gb-fg0);
+	--table-uneditable-bg: var(--gb-bg2);
+	--footer-chip-bg-color: var(--gb-bg2);
+
 	--disabled-background-color: var(--gb-bg2);
 	--disabled-text-color: var(--gb-gray);
+
+	--button-good-bg: var(--gb-green);
+	--button-good-hover-bg: var(--gb-green);
+	--button-bad-bg: var(--gb-red);
+	--button-bad-hover-bg: var(--gb-red);
+	--button-warning-bg: var(--gb-yellow);
+	--button-warning-hover-bg: var(--gb-yellow);
+	--button-on-accent-fg: var(--gb-good-fg);
 
 	--karma-good: var(--gb-green);
 	--karma-bad: var(--gb-red);
@@ -88,20 +126,58 @@ html[data-theme="light"] {
 	--gb-aqua: #427b58;
 	--gb-orange: #af3a03;
 	--gb-accent: var(--gb-blue);
-	--gb-shadow: rgba(40, 40, 40, 0.12);
 	--gb-shadow-strong: rgba(40, 40, 40, 0.16);
 	--gb-good-fg: var(--gb-bg0);
 
-	--text-color: var(--gb-fg0);
-	--border-color: var(--gb-bg3);
+	--body-bg-color: var(--gb-bg0);
+	--surface-bg-color: var(--gb-bg1);
 	--standout-bg-color: var(--gb-bg1);
+	--section-header-bg-color: var(--gb-bg1);
+	--shadow-color: var(--gb-shadow-strong);
+
+	--text-color: var(--gb-fg0);
+	--muted-text-color: var(--gb-fg3);
+	--annotation-key-color: var(--gb-fg3);
+	--link-color: var(--gb-accent);
+	--border-color: var(--gb-bg3);
+
 	--hover-background-color: var(--gb-bg2);
 	--hover-text-color: var(--gb-fg0);
+
+	--header-bg-color: var(--gb-bg0-hard);
+	--header-fg-color: var(--gb-fg0);
+	--header-border-color: var(--gb-bg2);
+	--header-shadow: none;
 	--header-hover-background-color: var(--gb-bg2);
 	--header-hover-text-color: var(--gb-fg0);
-	--header-text-color: var(--gb-fg0);
+	--header-button-hover-bg-color: var(--gb-bg2);
+
+	--sidebar-bg-color: var(--gb-bg1);
+	--sidebar-link-color: var(--gb-fg0);
+	--sidebar-hover-bg-color: var(--gb-bg2);
+	--sidebar-border-color: var(--gb-bg2);
+
+	--input-bg-color: var(--gb-bg0);
+	--input-fg-color: var(--gb-fg0);
+	--control-option-bg-color: var(--gb-bg2);
+	--control-hover-bg-color: var(--gb-bg2);
+	--menu-hover-bg-color: var(--gb-bg2);
+
+	--table-row-hover-bg: var(--gb-bg2);
+	--table-row-hover-fg: var(--gb-fg0);
+	--table-uneditable-bg: var(--gb-bg2);
+	--footer-chip-bg-color: var(--gb-bg2);
+
 	--disabled-background-color: var(--gb-bg2);
 	--disabled-text-color: var(--gb-gray);
+
+	--button-good-bg: var(--gb-green);
+	--button-good-hover-bg: var(--gb-green);
+	--button-bad-bg: var(--gb-red);
+	--button-bad-hover-bg: var(--gb-red);
+	--button-warning-bg: var(--gb-yellow);
+	--button-warning-hover-bg: var(--gb-yellow);
+	--button-on-accent-fg: var(--gb-good-fg);
 
 	--karma-good: var(--gb-green);
 	--karma-bad: var(--gb-red);
@@ -120,145 +196,4 @@ html[data-theme="light"] {
 	--karma-note-fg: var(--gb-aqua);
 	--karma-info-fg: var(--gb-fg3);
 	--karma-old-fg: var(--gb-fg4);
-}
-
-body {
-	background-color: var(--gb-bg0);
-	color: var(--gb-fg0);
-}
-
-header {
-	background-color: var(--gb-bg0-hard);
-	border-bottom: 1px solid var(--gb-bg2);
-	box-shadow: none;
-	color: var(--gb-fg0);
-}
-
-header a,
-header a:visited,
-header button,
-header .button,
-header h1,
-header .topbar-link,
-header .topbar-link:visited {
-	color: var(--header-text-color, var(--gb-fg0));
-}
-
-#sidebar-toggler-button,
-#sidebar-toggler-button.neutral,
-header .theme-toggle,
-header .theme-toggle.neutral,
-header .search-trigger,
-header .search-trigger.neutral,
-header .user-info {
-	background-color: transparent;
-	border: 0;
-	color: var(--header-text-color, var(--gb-fg0));
-}
-
-#sidebar-toggler-button:hover,
-header .theme-toggle:hover,
-header .search-trigger:hover,
-header .user-info:hover {
-	background-color: var(--header-hover-background-color);
-	color: var(--header-hover-text-color);
-}
-
-aside,
-#sidebar {
-	background-color: var(--gb-bg1);
-	color: var(--gb-fg0);
-	border-color: var(--gb-bg2);
-	box-shadow: 0.15em 0 0.6em var(--gb-shadow);
-}
-
-aside a,
-aside a:visited {
-	color: var(--gb-fg0);
-}
-
-aside a:hover,
-aside a:focus-visible,
-aside :is(ul, menu) li a:hover,
-aside :is(ul, menu) li a:focus-visible,
-aside .nav-section-header:hover,
-aside .nav-section-header:focus-visible {
-	background-color: var(--gb-bg2);
-	color: var(--gb-fg0);
-}
-
-section {
-	background-color: var(--gb-bg1);
-	color: var(--gb-fg0);
-	box-shadow: 0 0 0.5em var(--gb-shadow-strong);
-	border-color: var(--gb-bg2);
-}
-
-section .section-header,
-section .section-subheader {
-	background-color: var(--gb-bg1);
-	border-bottom-color: var(--gb-bg2);
-	color: var(--gb-fg0);
-}
-
-button,
-.button {
-	background-color: var(--gb-bg2);
-	border: 1px solid var(--gb-bg3);
-	color: var(--gb-fg0);
-}
-
-button:hover,
-.button:hover {
-	background-color: var(--gb-bg3);
-	color: var(--gb-fg0);
-}
-
-button.good,
-.button.good {
-	background-color: var(--gb-green);
-	border-color: var(--gb-green);
-	color: var(--gb-good-fg);
-}
-
-button.bad,
-.button.bad {
-	background-color: var(--gb-red);
-	border-color: var(--gb-red);
-	color: var(--gb-bg0-hard);
-}
-
-button.warning,
-.button.warning {
-	background-color: var(--gb-yellow);
-	border-color: var(--gb-yellow);
-	color: var(--gb-bg0-hard);
-}
-
-button.neutral,
-.button.neutral {
-	background-color: var(--gb-bg2);
-	border-color: var(--gb-bg3);
-	color: var(--gb-fg0);
-}
-
-input,
-select,
-textarea {
-	background-color: var(--gb-bg0);
-	border: 1px solid var(--gb-bg3);
-	color: var(--gb-fg0);
-}
-
-a {
-	color: var(--gb-accent);
-}
-
-footer {
-	color: var(--gb-fg3);
-	border-top-color: var(--gb-bg2);
-}
-
-.subtle {
-	color: var(--gb-fg3);
 }

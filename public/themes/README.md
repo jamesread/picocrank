@@ -44,3 +44,18 @@ Use `ThemeSwitcher` or `useCustomTheme()`:
 - `VITE_INCLUDE_SUPPLEMENTAL_THEMES=false` — omit supplemental theme files from `dist` (`npm run build:minimal`).
 
 Light/dark mode (header sun/moon) is separate from drop-in themes.
+
+## PicoCrank component tokens
+
+Sortable/filterable `Table` headers and `Tabs` active labels use PicoCrank aliases that point at Femtocrank semantic variables. Override the underlying Femtocrank tokens in `theme.css` rather than the aliases when possible:
+
+| PicoCrank alias | Femtocrank source |
+| --- | --- |
+| `--table-header-fg` | `--text-color` |
+| `--table-header-active-fg` | `--link-color` |
+| `--table-header-active-bg` | `--hover-background-color` |
+| `--tab-fg` | `--muted-text-color` |
+| `--tab-active-fg` | `--link-color` |
+| `--tab-focus-outline-color` | `--tab-active-fg` |
+
+Defaults are defined in `styles/picocrank-extensions.css`. Built-in dark mode and supplemental themes set Femtocrank variables (`--link-color`, `--header-fg-color`, `--input-bg-color`, etc.) so tables, tabs, forms, and chrome pick up the palette automatically.

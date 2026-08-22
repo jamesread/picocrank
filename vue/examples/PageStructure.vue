@@ -62,6 +62,17 @@
 				/>
 			</FormField>
 
+			<FormField label="Theme switcher" fake>
+				<RadioGroup
+					name="ps-theme-switcher"
+					variant="boolean"
+					aria-label="Theme switcher"
+					:model-value="themeSwitcherEnabled"
+					:options="showHideOptions"
+					@update:model-value="setThemeSwitcherEnabled"
+				/>
+			</FormField>
+
 			<FormField label="Top bar" fake>
 				<div>
 					<RadioGroup
@@ -170,6 +181,8 @@ const dummySearchFetchEnabled = inject('dummySearchFetchEnabled')
 const toggleDummySearchFetchEnabled = inject('toggleDummySearchFetchEnabled')
 const themeToggleEnabled = inject('themeToggleEnabled')
 const toggleThemeToggleEnabled = inject('toggleThemeToggleEnabled')
+const themeSwitcherEnabled = inject('themeSwitcherEnabled')
+const toggleThemeSwitcherEnabled = inject('toggleThemeSwitcherEnabled')
 const topBarEnabled = inject('topBarEnabled')
 const toggleTopBarEnabled = inject('toggleTopBarEnabled')
 const breadcrumbsEnabled = inject('breadcrumbsEnabled')
@@ -198,6 +211,10 @@ function setDummySearchFetchEnabled(want) {
 
 function setThemeToggleEnabled(want) {
 	setFlag(themeToggleEnabled, toggleThemeToggleEnabled, want)
+}
+
+function setThemeSwitcherEnabled(want) {
+	setFlag(themeSwitcherEnabled, toggleThemeSwitcherEnabled, want)
 }
 
 function setTopBarEnabled(want) {

@@ -1,7 +1,13 @@
 <template>
-	<label class="theme-switcher">
+	<label :class="['theme-switcher', { 'theme-switcher--compact': compact }]">
 		<span v-if="label" class="theme-switcher-label">{{ label }}</span>
-		<select :value="themePreference" @change="onThemeChange">
+		<select
+			ref="selectRef"
+			:id="selectId || undefined"
+			:value="themePreference"
+			:aria-label="compact ? (label || 'Active theme') : undefined"
+			@change="onThemeChange"
+		>
 			<option value="">{{ defaultOptionLabel }}</option>
 			<option
 				v-for="name in availableThemes"
@@ -12,7 +18,7 @@
 			</option>
 		</select>
 	</label>
-	<p v-if="showEmptyHint && availableThemes.length === 0" class="subtle theme-switcher-hint">
+	<p v-if="showEmptyHint && !compact && availableThemes.length === 0" class="subtle theme-switcher-hint">
 		<slot name="empty">
 			No drop-in themes found. Add <code>public/themes/&lt;name&gt;/theme.css</code>
 			or set <code>include-supplemental-themes</code> to list bundled supplemental themes.
@@ -20,8 +26,12 @@
 	</p>
 </template>
 
+<script>
+export const HEADER_THEME_SWITCHER_SELECT_ID = 'picocrank-header-theme-switcher'
+</script>
+
 <script setup>
-import { onMounted, watch } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import { useCustomTheme } from '../composables/useCustomTheme.js'
 
 const props = defineProps({
@@ -31,7 +41,7 @@ const props = defineProps({
 	},
 	defaultOptionLabel: {
 		type: String,
-		default: 'Default (Femtocrank)',
+		default: 'Default (Femtocrank only)',
 	},
 	includeSupplementalThemes: {
 		type: Boolean,
@@ -53,6 +63,14 @@ const props = defineProps({
 		type: Boolean,
 		default: false,
 	},
+	compact: {
+		type: Boolean,
+		default: false,
+	},
+	selectId: {
+		type: String,
+		default: undefined,
+	},
 })
 
 const emit = defineEmits(['change'])
@@ -65,6 +83,17 @@ const {
 	discoverThemes,
 	configure,
 } = useCustomTheme()
+
+const selectRef = ref(null)
+
+function focusSelect() {
+	selectRef.value?.focus()
+	selectRef.value?.scrollIntoView({ block: 'nearest', inline: 'nearest' })
+}
+
+defineExpose({
+	focus: focusSelect,
+})
 
 function syncOptions() {
 	configure({
@@ -111,6 +140,16 @@ onMounted(() => {
 
 .theme-switcher select {
 	min-width: 14rem;
+}
+
+.theme-switcher--compact {
+	flex-wrap: nowrap;
+	gap: 0;
+}
+
+.theme-switcher--compact select {
+	min-width: 10rem;
+	max-width: 13.5rem;
 }
 
 .theme-switcher-hint {

@@ -37,20 +37,58 @@ html[data-theme="dark"] {
 	--ctp-base: #303446;
 	--ctp-mantle: #292c3c;
 	--ctp-crust: #232634;
-	--ctp-shadow: rgba(35, 38, 52, 0.65);
 	--ctp-shadow-strong: rgba(35, 38, 52, 0.9);
 	--ctp-good-fg: var(--ctp-crust);
 
-	--text-color: var(--ctp-text);
-	--border-color: var(--ctp-surface1);
+	--body-bg-color: var(--ctp-base);
+	--surface-bg-color: var(--ctp-mantle);
 	--standout-bg-color: var(--ctp-mantle);
+	--section-header-bg-color: var(--ctp-mantle);
+	--shadow-color: var(--ctp-shadow-strong);
+
+	--text-color: var(--ctp-text);
+	--muted-text-color: var(--ctp-subtext0);
+	--annotation-key-color: var(--ctp-subtext0);
+	--link-color: var(--ctp-blue);
+	--border-color: var(--ctp-surface1);
+
 	--hover-background-color: var(--ctp-surface0);
 	--hover-text-color: var(--ctp-text);
+
+	--header-bg-color: var(--ctp-crust);
+	--header-fg-color: var(--ctp-text);
+	--header-border-color: var(--ctp-surface0);
+	--header-shadow: none;
 	--header-hover-background-color: var(--ctp-surface1);
 	--header-hover-text-color: var(--ctp-text);
-	--header-text-color: var(--ctp-text);
+	--header-button-hover-bg-color: var(--ctp-surface1);
+
+	--sidebar-bg-color: var(--ctp-mantle);
+	--sidebar-link-color: var(--ctp-text);
+	--sidebar-hover-bg-color: var(--ctp-surface0);
+	--sidebar-border-color: var(--ctp-surface0);
+
+	--input-bg-color: var(--ctp-surface0);
+	--input-fg-color: var(--ctp-text);
+	--control-option-bg-color: var(--ctp-surface0);
+	--control-hover-bg-color: var(--ctp-surface0);
+	--menu-hover-bg-color: var(--ctp-surface0);
+
+	--table-row-hover-bg: var(--ctp-surface0);
+	--table-row-hover-fg: var(--ctp-text);
+	--table-uneditable-bg: var(--ctp-surface0);
+	--footer-chip-bg-color: var(--ctp-surface1);
+
 	--disabled-background-color: var(--ctp-surface0);
 	--disabled-text-color: var(--ctp-overlay0);
+
+	--button-good-bg: var(--ctp-green);
+	--button-good-hover-bg: var(--ctp-green);
+	--button-bad-bg: var(--ctp-red);
+	--button-bad-hover-bg: var(--ctp-red);
+	--button-warning-bg: var(--ctp-yellow);
+	--button-warning-hover-bg: var(--ctp-yellow);
+	--button-on-accent-fg: var(--ctp-good-fg);
 
 	--karma-good: var(--ctp-green);
 	--karma-bad: var(--ctp-red);
@@ -100,20 +138,58 @@ html[data-theme="light"] {
 	--ctp-base: #eff1f5;
 	--ctp-mantle: #e6e9ef;
 	--ctp-crust: #dce0e8;
-	--ctp-shadow: rgba(76, 79, 105, 0.12);
 	--ctp-shadow-strong: rgba(76, 79, 105, 0.16);
 	--ctp-good-fg: var(--ctp-base);
 
-	--text-color: var(--ctp-text);
-	--border-color: var(--ctp-surface1);
+	--body-bg-color: var(--ctp-base);
+	--surface-bg-color: var(--ctp-mantle);
 	--standout-bg-color: var(--ctp-mantle);
+	--section-header-bg-color: var(--ctp-mantle);
+	--shadow-color: var(--ctp-shadow-strong);
+
+	--text-color: var(--ctp-text);
+	--muted-text-color: var(--ctp-subtext0);
+	--annotation-key-color: var(--ctp-subtext0);
+	--link-color: var(--ctp-blue);
+	--border-color: var(--ctp-surface1);
+
 	--hover-background-color: var(--ctp-surface0);
 	--hover-text-color: var(--ctp-text);
+
+	--header-bg-color: var(--ctp-crust);
+	--header-fg-color: var(--ctp-text);
+	--header-border-color: var(--ctp-surface0);
+	--header-shadow: none;
 	--header-hover-background-color: var(--ctp-surface0);
 	--header-hover-text-color: var(--ctp-text);
-	--header-text-color: var(--ctp-text);
+	--header-button-hover-bg-color: var(--ctp-surface0);
+
+	--sidebar-bg-color: var(--ctp-mantle);
+	--sidebar-link-color: var(--ctp-text);
+	--sidebar-hover-bg-color: var(--ctp-surface0);
+	--sidebar-border-color: var(--ctp-surface0);
+
+	--input-bg-color: var(--ctp-surface0);
+	--input-fg-color: var(--ctp-text);
+	--control-option-bg-color: var(--ctp-surface0);
+	--control-hover-bg-color: var(--ctp-surface0);
+	--menu-hover-bg-color: var(--ctp-surface0);
+
+	--table-row-hover-bg: var(--ctp-surface0);
+	--table-row-hover-fg: var(--ctp-text);
+	--table-uneditable-bg: var(--ctp-surface0);
+	--footer-chip-bg-color: var(--ctp-surface1);
+
 	--disabled-background-color: var(--ctp-surface0);
 	--disabled-text-color: var(--ctp-overlay0);
+
+	--button-good-bg: var(--ctp-green);
+	--button-good-hover-bg: var(--ctp-green);
+	--button-bad-bg: var(--ctp-red);
+	--button-bad-hover-bg: var(--ctp-red);
+	--button-warning-bg: var(--ctp-yellow);
+	--button-warning-hover-bg: var(--ctp-yellow);
+	--button-on-accent-fg: var(--ctp-good-fg);
 
 	--karma-good: var(--ctp-green);
 	--karma-bad: var(--ctp-red);
@@ -132,145 +208,4 @@ html[data-theme="light"] {
 	--karma-note-fg: var(--ctp-sapphire);
 	--karma-info-fg: var(--ctp-subtext0);
 	--karma-old-fg: var(--ctp-overlay1);
-}
-
-body {
-	background-color: var(--ctp-base);
-	color: var(--ctp-text);
-}
-
-header {
-	background-color: var(--ctp-crust);
-	border-bottom: 1px solid var(--ctp-surface0);
-	box-shadow: none;
-	color: var(--ctp-text);
-}
-
-header a,
-header a:visited,
-header button,
-header .button,
-header h1,
-header .topbar-link,
-header .topbar-link:visited {
-	color: var(--header-text-color, var(--ctp-text));
-}
-
-#sidebar-toggler-button,
-#sidebar-toggler-button.neutral,
-header .theme-toggle,
-header .theme-toggle.neutral,
-header .search-trigger,
-header .search-trigger.neutral,
-header .user-info {
-	background-color: transparent;
-	border: 0;
-	color: var(--header-text-color, var(--ctp-text));
-}
-
-#sidebar-toggler-button:hover,
-header .theme-toggle:hover,
-header .search-trigger:hover,
-header .user-info:hover {
-	background-color: var(--header-hover-background-color);
-	color: var(--header-hover-text-color);
-}
-
-aside,
-#sidebar {
-	background-color: var(--ctp-mantle);
-	color: var(--ctp-text);
-	border-color: var(--ctp-surface0);
-	box-shadow: 0.15em 0 0.6em var(--ctp-shadow);
-}
-
-aside a,
-aside a:visited {
-	color: var(--ctp-text);
-}
-
-aside a:hover,
-aside a:focus-visible,
-aside :is(ul, menu) li a:hover,
-aside :is(ul, menu) li a:focus-visible,
-aside .nav-section-header:hover,
-aside .nav-section-header:focus-visible {
-	background-color: var(--ctp-surface0);
-	color: var(--ctp-text);
-}
-
-section {
-	background-color: var(--ctp-mantle);
-	color: var(--ctp-text);
-	box-shadow: 0 0 0.5em var(--ctp-shadow-strong);
-	border-color: var(--ctp-surface0);
-}
-
-section .section-header,
-section .section-subheader {
-	background-color: var(--ctp-mantle);
-	border-bottom-color: var(--ctp-surface0);
-	color: var(--ctp-text);
-}
-
-button,
-.button {
-	background-color: var(--ctp-surface0);
-	border: 1px solid var(--ctp-surface1);
-	color: var(--ctp-text);
-}
-
-button:hover,
-.button:hover {
-	background-color: var(--ctp-surface1);
-	color: var(--ctp-text);
-}
-
-button.good,
-.button.good {
-	background-color: var(--ctp-green);
-	border-color: var(--ctp-green);
-	color: var(--ctp-good-fg);
-}
-
-button.bad,
-.button.bad {
-	background-color: var(--ctp-red);
-	border-color: var(--ctp-red);
-	color: var(--ctp-crust);
-}
-
-button.warning,
-.button.warning {
-	background-color: var(--ctp-yellow);
-	border-color: var(--ctp-yellow);
-	color: var(--ctp-crust);
-}
-
-button.neutral,
-.button.neutral {
-	background-color: var(--ctp-surface1);
-	border-color: var(--ctp-surface2);
-	color: var(--ctp-text);
-}
-
-input,
-select,
-textarea {
-	background-color: var(--ctp-surface0);
-	border: 1px solid var(--ctp-surface1);
-	color: var(--ctp-text);
-}
-
-a {
-	color: var(--ctp-blue);
-}
-
-footer {
-	color: var(--ctp-subtext0);
-	border-top-color: var(--ctp-surface0);
-}
-
-.subtle {
-	color: var(--ctp-subtext0);
 }

@@ -26,22 +26,60 @@ html[data-theme="dark"] {
 	--dt-red: #ff5555;
 	--dt-yellow: #f1fa8c;
 	--dt-accent: var(--dt-pink);
-	--dt-shadow: rgba(33, 34, 44, 0.85);
 	--dt-shadow-strong: rgba(33, 34, 44, 0.9);
 	--dt-good-fg: var(--dt-surface);
 	--dt-bad-fg: var(--dt-foreground);
 	--dt-warning-fg: var(--dt-surface);
 
-	--text-color: var(--dt-foreground);
-	--border-color: var(--dt-border);
+	--body-bg-color: var(--dt-background);
+	--surface-bg-color: var(--dt-surface);
 	--standout-bg-color: var(--dt-surface);
+	--section-header-bg-color: var(--dt-surface);
+	--shadow-color: var(--dt-shadow-strong);
+
+	--text-color: var(--dt-foreground);
+	--muted-text-color: var(--dt-muted);
+	--annotation-key-color: var(--dt-muted);
+	--link-color: var(--dt-accent);
+	--border-color: var(--dt-border);
+
 	--hover-background-color: var(--dt-selection);
 	--hover-text-color: var(--dt-foreground);
+
+	--header-bg-color: var(--dt-surface);
+	--header-fg-color: var(--dt-foreground);
+	--header-border-color: var(--dt-border);
+	--header-shadow: none;
 	--header-hover-background-color: var(--dt-selection);
 	--header-hover-text-color: var(--dt-foreground);
-	--header-text-color: var(--dt-foreground);
+	--header-button-hover-bg-color: var(--dt-selection);
+
+	--sidebar-bg-color: var(--dt-surface);
+	--sidebar-link-color: var(--dt-foreground);
+	--sidebar-hover-bg-color: var(--dt-selection);
+	--sidebar-border-color: var(--dt-border);
+
+	--input-bg-color: var(--dt-background);
+	--input-fg-color: var(--dt-foreground);
+	--control-option-bg-color: var(--dt-overlay);
+	--control-hover-bg-color: var(--dt-selection);
+	--menu-hover-bg-color: var(--dt-selection);
+
+	--table-row-hover-bg: var(--dt-selection);
+	--table-row-hover-fg: var(--dt-foreground);
+	--table-uneditable-bg: var(--dt-overlay);
+	--footer-chip-bg-color: var(--dt-overlay);
+
 	--disabled-background-color: var(--dt-overlay);
 	--disabled-text-color: var(--dt-muted);
+
+	--button-good-bg: var(--dt-green);
+	--button-good-hover-bg: var(--dt-green);
+	--button-bad-bg: var(--dt-red);
+	--button-bad-hover-bg: var(--dt-red);
+	--button-warning-bg: var(--dt-yellow);
+	--button-warning-hover-bg: var(--dt-yellow);
+	--button-on-accent-fg: var(--dt-good-fg);
 
 	--karma-good: var(--dt-green);
 	--karma-bad: var(--dt-red);
@@ -80,22 +118,60 @@ html[data-theme="light"] {
 	--dt-red: #cb3a2a;
 	--dt-yellow: #846e15;
 	--dt-accent: var(--dt-pink);
-	--dt-shadow: rgba(31, 31, 31, 0.12);
 	--dt-shadow-strong: rgba(31, 31, 31, 0.16);
 	--dt-good-fg: var(--dt-background);
 	--dt-bad-fg: var(--dt-background);
 	--dt-warning-fg: var(--dt-background);
 
-	--text-color: var(--dt-foreground);
-	--border-color: var(--dt-border);
+	--body-bg-color: var(--dt-background);
+	--surface-bg-color: var(--dt-surface);
 	--standout-bg-color: var(--dt-surface);
+	--section-header-bg-color: var(--dt-surface);
+	--shadow-color: var(--dt-shadow-strong);
+
+	--text-color: var(--dt-foreground);
+	--muted-text-color: var(--dt-muted);
+	--annotation-key-color: var(--dt-muted);
+	--link-color: var(--dt-accent);
+	--border-color: var(--dt-border);
+
 	--hover-background-color: var(--dt-selection);
 	--hover-text-color: var(--dt-foreground);
+
+	--header-bg-color: var(--dt-surface);
+	--header-fg-color: var(--dt-foreground);
+	--header-border-color: var(--dt-border);
+	--header-shadow: none;
 	--header-hover-background-color: var(--dt-overlay);
 	--header-hover-text-color: var(--dt-foreground);
-	--header-text-color: var(--dt-foreground);
+	--header-button-hover-bg-color: var(--dt-overlay);
+
+	--sidebar-bg-color: var(--dt-surface);
+	--sidebar-link-color: var(--dt-foreground);
+	--sidebar-hover-bg-color: var(--dt-selection);
+	--sidebar-border-color: var(--dt-border);
+
+	--input-bg-color: var(--dt-background);
+	--input-fg-color: var(--dt-foreground);
+	--control-option-bg-color: var(--dt-overlay);
+	--control-hover-bg-color: var(--dt-selection);
+	--menu-hover-bg-color: var(--dt-selection);
+
+	--table-row-hover-bg: var(--dt-selection);
+	--table-row-hover-fg: var(--dt-foreground);
+	--table-uneditable-bg: var(--dt-overlay);
+	--footer-chip-bg-color: var(--dt-overlay);
+
 	--disabled-background-color: var(--dt-overlay);
 	--disabled-text-color: var(--dt-muted);
+
+	--button-good-bg: var(--dt-green);
+	--button-good-hover-bg: var(--dt-green);
+	--button-bad-bg: var(--dt-red);
+	--button-bad-hover-bg: var(--dt-red);
+	--button-warning-bg: var(--dt-yellow);
+	--button-warning-hover-bg: var(--dt-yellow);
+	--button-on-accent-fg: var(--dt-good-fg);
 
 	--karma-good: var(--dt-green);
 	--karma-bad: var(--dt-red);
@@ -114,145 +190,4 @@ html[data-theme="light"] {
 	--karma-note-fg: var(--dt-cyan);
 	--karma-info-fg: var(--dt-muted);
 	--karma-old-fg: var(--dt-muted);
-}
-
-body {
-	background-color: var(--dt-background);
-	color: var(--dt-foreground);
-}
-
-header {
-	background-color: var(--dt-surface);
-	border-bottom: 1px solid var(--dt-border);
-	box-shadow: none;
-	color: var(--dt-foreground);
-}
-
-header a,
-header a:visited,
-header button,
-header .button,
-header h1,
-header .topbar-link,
-header .topbar-link:visited {
-	color: var(--header-text-color, var(--dt-foreground));
-}
-
-#sidebar-toggler-button,
-#sidebar-toggler-button.neutral,
-header .theme-toggle,
-header .theme-toggle.neutral,
-header .search-trigger,
-header .search-trigger.neutral,
-header .user-info {
-	background-color: transparent;
-	border: 0;
-	color: var(--header-text-color, var(--dt-foreground));
-}
-
-#sidebar-toggler-button:hover,
-header .theme-toggle:hover,
-header .search-trigger:hover,
-header .user-info:hover {
-	background-color: var(--header-hover-background-color);
-	color: var(--header-hover-text-color);
-}
-
-aside,
-#sidebar {
-	background-color: var(--dt-surface);
-	color: var(--dt-foreground);
-	border-color: var(--dt-border);
-	box-shadow: 0.15em 0 0.6em var(--dt-shadow);
-}
-
-aside a,
-aside a:visited {
-	color: var(--dt-foreground);
-}
-
-aside a:hover,
-aside a:focus-visible,
-aside :is(ul, menu) li a:hover,
-aside :is(ul, menu) li a:focus-visible,
-aside .nav-section-header:hover,
-aside .nav-section-header:focus-visible {
-	background-color: var(--dt-selection);
-	color: var(--dt-foreground);
-}
-
-section {
-	background-color: var(--dt-surface);
-	color: var(--dt-foreground);
-	box-shadow: 0 0 0.5em var(--dt-shadow-strong);
-	border-color: var(--dt-border);
-}
-
-section .section-header,
-section .section-subheader {
-	background-color: var(--dt-surface);
-	border-bottom-color: var(--dt-border);
-	color: var(--dt-foreground);
-}
-
-button,
-.button {
-	background-color: var(--dt-overlay);
-	border: 1px solid var(--dt-muted);
-	color: var(--dt-foreground);
-}
-
-button:hover,
-.button:hover {
-	background-color: var(--dt-selection);
-	color: var(--dt-foreground);
-}
-
-button.good,
-.button.good {
-	background-color: var(--dt-green);
-	border-color: var(--dt-green);
-	color: var(--dt-good-fg);
-}
-
-button.bad,
-.button.bad {
-	background-color: var(--dt-red);
-	border-color: var(--dt-red);
-	color: var(--dt-bad-fg);
-}
-
-button.warning,
-.button.warning {
-	background-color: var(--dt-yellow);
-	border-color: var(--dt-yellow);
-	color: var(--dt-warning-fg);
-}
-
-button.neutral,
-.button.neutral {
-	background-color: var(--dt-selection);
-	border-color: var(--dt-muted);
-	color: var(--dt-foreground);
-}
-
-input,
-select,
-textarea {
-	background-color: var(--dt-background);
-	border: 1px solid var(--dt-border);
-	color: var(--dt-foreground);
-}
-
-a {
-	color: var(--dt-accent);
-}
-
-footer {
-	color: var(--dt-muted);
-	border-top-color: var(--dt-border);
-}
-
-.subtle {
-	color: var(--dt-muted);
 }

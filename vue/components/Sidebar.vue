@@ -414,7 +414,7 @@ button {
 	text-align: left;
 	font-weight: 600;
 	font-size: 1em;
-	color: inherit;
+	color: var(--text-color);
 	background: transparent;
 	border-radius: 0;
 	cursor: pointer;
@@ -422,7 +422,7 @@ button {
 
 .nav-section-header:hover,
 .nav-section-header:focus-visible {
-	background-color: var(--hover-background-color);
+	background-color: var(--sidebar-hover-bg-color);
 	color: var(--hover-text-color);
 }
 
@@ -437,14 +437,8 @@ button {
 	text-align: center;
 }
 
-html[data-theme="dark"] {
-	.nav-section-header {
-		color: #f8f9fa;
-	}
-
-	.supplemental-links {
-		border-top: 1px solid #444;
-	}
+.supplemental-links {
+	border-top: 1px solid var(--border-color);
 }
 
 @media (max-width: 768px) {

@@ -146,7 +146,7 @@ defineExpose({
 	border-radius: 0;
 	cursor: pointer;
 	font-size: 1em;
-	color: var(--text-muted, #666);
+	color: var(--tab-fg);
 	transition: all 0.2s ease;
 	white-space: nowrap;
 	position: relative;
@@ -158,13 +158,13 @@ defineExpose({
 }
 
 .tab-button.active {
-	color: var(--primary-color, #007bff);
-	border-bottom-color: var(--primary-color, #007bff);
+	color: var(--tab-active-fg);
+	border-bottom-color: var(--tab-active-fg);
 	font-weight: bold;
 }
 
 .tab-button:focus {
-	outline: 2px solid var(--primary-color, #007bff);
+	outline: 2px solid var(--tab-focus-outline-color);
 	outline-offset: -2px;
 	border-radius: 0;
 }
@@ -193,27 +193,6 @@ defineExpose({
 	to {
 		opacity: 1;
 		transform: translateY(0);
-	}
-}
-
-/* Dark theme support */
-html[data-theme="dark"] {
-	.tabs-header {
-		border-bottom-color: var(--border-color, #444);
-	}
-
-	.tab-button {
-		color: var(--text-muted, #999);
-	}
-
-	.tab-button:hover {
-		color: var(--text-color, #fff);
-		background-color: var(--hover-background-color, #333);
-	}
-
-	.tab-button.active {
-		color: var(--primary-color, #60a5fa);
-		border-bottom-color: var(--primary-color, #60a5fa);
 	}
 }
 

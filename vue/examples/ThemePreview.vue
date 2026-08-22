@@ -8,24 +8,24 @@
 			optionally <code>supplemental-themes/</code> (Catppuccin, Dracula / Alucard, Gruvbox, waffles). Drop a folder
 			in and restart the dev server (or rebuild); PicoCrank discovers themes from
 			<code>index.json</code> and applies them with <code>useCustomTheme()</code> or
-			<code>ThemeSwitcher</code>. Supplemental themes are bundled by default but only
+			<code>ThemeSwitcher</code> in the examples app header toolbar. Supplemental themes are bundled by default but only
 			listed when <code>include-supplemental-themes</code> is enabled.
 		</p>
 
-		<ThemeSwitcher
-			class="theme-switcher-block"
-			:include-supplemental-themes="true"
-			@change="onThemeChange"
-		/>
-
-		<p v-if="availableThemes.length === 0" class="subtle">
-			No drop-in themes found. Add <code>public/themes/&lt;name&gt;/theme.css</code>
-			or enable supplemental themes on <code>ThemeSwitcher</code>.
-		</p>
-		<p v-else class="subtle">
+		<p class="subtle">
+			Use the theme dropdown in the header (next to the light/dark toggle) to switch drop-in themes.
 			Preference is stored in localStorage and applies across the whole examples site.
-			Light/dark mode (header sun/moon) switches Femtocrank defaults, or the dual-variant supplemental themes when active.
+			Light/dark mode switches Femtocrank defaults, or the dual-variant supplemental themes when active.
 		</p>
+
+		<button
+			type="button"
+			class="neutral open-theme-switcher-button"
+			:disabled="!themeSwitcherEnabled"
+			@click="openThemeSwitcher"
+		>
+			Open theme switcher
+		</button>
 	</Section>
 
 	<Section title="Buttons" subtitle="Default and karma variants">
@@ -106,28 +106,49 @@
 					<td><code>--karma-*</code></td>
 					<td>Status backgrounds and accents</td>
 				</tr>
+				<tr>
+					<td><code>--link-color</code></td>
+					<td>Links, active tabs, sort/filter column headers</td>
+				</tr>
+				<tr>
+					<td><code>--muted-text-color</code></td>
+					<td>Secondary text and inactive tab labels</td>
+				</tr>
+				<tr>
+					<td><code>--header-fg-color</code></td>
+					<td>Header chrome text and icons</td>
+				</tr>
+				<tr>
+					<td><code>--input-bg-color</code> / <code>--input-fg-color</code></td>
+					<td>Form fields</td>
+				</tr>
 			</tbody>
 		</table>
 	</Section>
 </template>
 
 <script setup>
+import { inject } from 'vue'
 import Section from '../components/Section.vue'
-import ThemeSwitcher from '../components/ThemeSwitcher.vue'
 import FormLayout from '../components/FormLayout.vue'
 import FormField from '../components/FormField.vue'
-import { useCustomTheme } from '../composables/useCustomTheme.js'
+import { HEADER_THEME_SWITCHER_SELECT_ID } from '../components/ThemeSwitcher.vue'
 
-const { availableThemes } = useCustomTheme()
+const themeSwitcherEnabled = inject('themeSwitcherEnabled')
 
-function onThemeChange() {
-	// ThemeSwitcher updates shared useCustomTheme state.
+function openThemeSwitcher() {
+	const select = document.getElementById(HEADER_THEME_SWITCHER_SELECT_ID)
+	if (!(select instanceof HTMLSelectElement)) {
+		return
+	}
+	select.focus()
+	select.scrollIntoView({ block: 'nearest', inline: 'nearest' })
 }
 </script>
 
 <style scoped>
-.theme-switcher-block {
-	margin: 1rem 0;
+.open-theme-switcher-button {
+	margin-top: 0.75rem;
 }
 
 .preview-row {

@@ -105,6 +105,7 @@ a {
 	padding: .75em;
 	border-radius: 0;
 	position: relative;
+	color: var(--text-color);
 }
 
 a.active {
@@ -145,23 +146,13 @@ li.disabled a {
 
 .separator {
 	height: 1px;
-	background-color: #eee;
+	background-color: var(--border-color);
 	margin: 0.5rem 0.75rem;
 }
 
-html[data-theme="dark"] {
-	a {
-		color: #f8f9fa;
-	}
-
-	a:hover,
-	a:focus-visible {
-		background-color: var(--hover-background-color);
-		color: var(--hover-text-color, #fff);
-	}
-
-	.separator {
-		background-color: #444;
-	}
+a:hover,
+a:focus-visible {
+	background-color: var(--sidebar-hover-bg-color);
+	color: var(--hover-text-color);
 }
 </style>

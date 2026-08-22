@@ -1361,7 +1361,7 @@ onBeforeUnmount(() => {
 <style scoped>
 table thead th.sortable:hover {
 	cursor: pointer;
-	color: #0366d6;
+	color: var(--table-header-active-fg);
 }
 
 table thead th.filterable {
@@ -1369,12 +1369,12 @@ table thead th.filterable {
 }
 
 table thead th.filtered {
-	color: #0366d6;
+	color: var(--table-header-active-fg);
 }
 
 table thead th.menu-open {
-	background-color: var(--hover-background-color, rgba(3, 102, 214, 0.08));
-	color: var(--text-color, inherit);
+	background-color: var(--table-header-active-bg);
+	color: var(--table-header-fg);
 }
 
 table.loading tbody {

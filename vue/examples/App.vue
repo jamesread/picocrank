@@ -2,6 +2,10 @@
 	<Navigation ref="navigation">
 		<Header username = "Guest" @toggleSidebar="toggleSidebar" @logoClick="goToIndex" @userClick="goToUserDetails" title = "PicoCrank" :logoUrl="logoUrl" :sidebarEnabled="sidebarEnabled" :navigation="navigation" :topBarEnabled="topBarEnabled" :showBranding="brandingEnabled" :breadcrumbs="breadcrumbsEnabled" :themeToggleEnabled="themeToggleEnabled">
 			<template #toolbar>
+				<ExampleHeaderThemeSwitcher
+					v-if="themeSwitcherEnabled"
+					:include-supplemental-themes="includeSupplementalThemes"
+				/>
 				<QuickSearch
 					v-if="quickSearchEnabled"
 					ref="quickSearchRef"
@@ -37,6 +41,7 @@
 	import { Pin02Icon, UserIcon } from '@hugeicons/core-free-icons'
 
 	import QuickSearch from './../components/QuickSearch.vue'
+	import ExampleHeaderThemeSwitcher from './ExampleHeaderThemeSwitcher.vue'
 	import Navigation from './../components/Navigation.vue'
 	import NotificationPopups from './../components/NotificationPopups.vue'
 	import '../../styles.css'
@@ -54,6 +59,8 @@
 	const quickSearchEnabled = ref(true);
 	const dummySearchFetchEnabled = ref(false);
 	const themeToggleEnabled = ref(true);
+	const themeSwitcherEnabled = ref(true);
+	const includeSupplementalThemes = ref(true);
 	const topBarEnabled = ref(false);
 	const breadcrumbsEnabled = ref(false);
 
@@ -91,6 +98,10 @@
 
 	function toggleThemeToggleEnabled() {
 		themeToggleEnabled.value = !themeToggleEnabled.value;
+	}
+
+	function toggleThemeSwitcherEnabled() {
+		themeSwitcherEnabled.value = !themeSwitcherEnabled.value;
 	}
 
 	function toggleTopBarEnabled() {
@@ -161,6 +172,8 @@
 	provide('toggleDummySearchFetchEnabled', toggleDummySearchFetchEnabled);
 	provide('themeToggleEnabled', themeToggleEnabled);
 	provide('toggleThemeToggleEnabled', toggleThemeToggleEnabled);
+	provide('themeSwitcherEnabled', themeSwitcherEnabled);
+	provide('toggleThemeSwitcherEnabled', toggleThemeSwitcherEnabled);
 	provide('topBarEnabled', topBarEnabled);
 	provide('toggleTopBarEnabled', toggleTopBarEnabled);
 	provide('breadcrumbsEnabled', breadcrumbsEnabled);

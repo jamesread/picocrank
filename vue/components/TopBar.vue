@@ -97,7 +97,7 @@ function handleLinkClick(callback = null) {
 	padding: 0.5em 0.75em;
 	border-radius: 0.25em;
 	text-decoration: none;
-	color: var(--header-text-color, inherit);
+	color: var(--header-fg-color, var(--header-text-color, inherit));
 	transition: background-color 0.15s ease;
 	white-space: nowrap;
 	border: 0;
@@ -124,7 +124,7 @@ function handleLinkClick(callback = null) {
 
 html[data-theme="dark"] {
 	.topbar-link {
-		color: var(--header-text-color, #f8f9fa);
+		color: var(--header-fg-color, var(--header-text-color, #f8f9fa));
 	}
 	
 	.separator {

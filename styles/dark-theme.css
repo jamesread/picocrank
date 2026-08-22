@@ -1,219 +1,60 @@
+/* Built-in dark mode — variable overrides only (mirrors femtocrank/dark.css). */
 @layer components {
 html[data-theme="dark"] {
-  color-scheme: dark;
+	color-scheme: dark;
 
-  --border-color: #595959;
-  --hover-background-color: #1d345c;
-  --hover-text-color: #fff;
-  --text-color: #ddd;
-  --header-hover-background-color: #1d345c;
-  --standout-bg-color: #1f1f1f;
-  --disabled-background-color: #333;
-  --disabled-text-color: #999;
+	--body-bg-color: #262626;
+	--surface-bg-color: #343434;
+	--standout-bg-color: #1f1f1f;
+	--section-header-bg-color: var(--surface-bg-color);
 
-  & header {
-    background-color: black;
-    box-shadow: 0px 0px 1em #1c1c1c;
-    border-bottom: 1px solid #222;
-  }
+	--header-bg-color: #000;
+	--header-border-color: #222;
+	--header-shadow: 0px 0px 1em #1c1c1c;
+	--header-hover-background-color: #1d345c;
 
-  & body {
-    background-color: #262626;
-    color: #ddd;
-  }
+	--sidebar-bg-color: #000;
+	--sidebar-link-color: var(--link-color);
+	--sidebar-hover-bg-color: var(--hover-background-color);
 
-  & section {
-    background-color: #343434;
-    color: #ddd;
-    box-shadow: 0 0 .5em #121212;
-  }
+	--footer-chip-bg-color: #444;
 
-  & section .section-header {
-    background-color: #343434;
-    border-bottom-color: var(--border-color);
-  }
+	--text-color: #ddd;
+	--link-color: lightblue;
+	--annotation-key-color: #aaa;
+	--focus-outline-color: #fff;
 
-  & section .section-subheader {
-    border-bottom-color: var(--border-color);
-  }
+	--border-color: #595959;
+	--shadow-color: #121212;
 
-  & button,
-  & .button {
-    color: #ddd;
-    border: 1px solid var(--border-color);
-  }
+	--hover-background-color: #1d345c;
+	--hover-text-color: var(--on-accent-fg);
 
-  & button:hover,
-  & .button:hover,
-  & .button:visited {
-    background-color: var(--hover-background-color);
-    color: white;
-  }
+	--disabled-background-color: #333;
+	--disabled-text-color: #999;
 
-  & footer a,
-  & footer a:visited {
-    color: lightblue;
-  }
+	--input-bg-color: #4e4e4e;
+	--input-fg-color: var(--text-color);
+	--control-option-bg-color: #555;
+	--control-hover-bg-color: var(--hover-background-color);
 
-  & header ul[role="menubar"] a,
-  & header ul[role="menubar"] a:visited {
-    background-color: black;
-  }
+	--menu-item-hover-background-color: var(--hover-background-color);
+	--menu-dropdown-background-color: var(--surface-bg-color);
+	--menu-dropdown-shadow: 0 0 .5em var(--shadow-color);
+	--menu-dropdown-link-hover-background-color: var(--hover-background-color);
+	--header-menu-dropdown-link-hover-background-color: var(--header-hover-background-color);
 
-  & header ul[role="menubar"] a:hover {
-    background-color: var(--hover-background-color);
-  }
+	--table-sticky-bg: var(--surface-bg-color);
+	--table-row-hover-bg: var(--hover-background-color);
+	--table-row-hover-fg: var(--on-accent-fg);
+	--table-sticky-hover-bg: var(--table-row-hover-bg);
+	--table-uneditable-bg: #555;
+	--table-sticky-uneditable-bg: var(--table-uneditable-bg);
 
-  & header div > ul > li > a {
-    background-color: black;
-    color: white;
-  }
-
-  & ul[role="menubar"] div ul a:hover {
-    background-color: var(--hover-background-color);
-    color: white;
-  }
-
-  & ul[role="menubar"] li:hover {
-    background-color: var(--hover-background-color);
-  }
-
-  & label:has(input[type="checkbox"]):hover,
-  & label:has(input[type="radio"]):hover {
-    background-color: var(--hover-background-color);
-    color: white;
-  }
-
-  & label:has(input:checked) {
-    background-color: #488448;
-    color: white;
-  }
-
-  & label:has(input:checked):hover {
-    background-color: #3a6f3a;
-    color: white;
-  }
-
-  & a,
-  & a:visited,
-  & aside a,
-  & aside a:visited {
-    color: lightblue;
-  }
-
-  & table,
-  & th,
-  & td {
-    border-color: var(--border-color) !important;
-  }
-
-  & table.row-hover tr:hover td {
-    background-color: var(--hover-background-color);
-    color: white;
-  }
-
-  & table thead th.sortable:hover,
-  & table thead th.filtered,
-  & table thead th.menu-open {
-    color: var(--text-color);
-  }
-
-  & th.actions .actions-menu-trigger button:hover,
-  & th.actions .actions-menu-trigger button:focus-visible {
-    background-color: var(--hover-background-color);
-    color: var(--text-color);
-  }
-
-  & footer span {
-    background-color: #444;
-  }
-
-  & input[type="text"],
-  & input[type="email"],
-  & input[type="password"],
-  & input[type="url"],
-  & input[type="number"],
-  & input[type="color"],
-  & input[type="datetime-local"] {
-    background-color: #4e4e4e;
-    color: #ddd;
-    border-color: var(--border-color);
-  }
-
-  & select {
-    background-color: #4e4e4e;
-    color: #ddd;
-    border-color: var(--border-color);
-  }
-
-  & textarea {
-    background-color: #4e4e4e;
-    color: #ddd;
-    border-color: var(--border-color);
-  }
-
-  & .grid-boxed .stat-display {
-    background-color: var(--standout-bg-color);
-    border-color: var(--border-color) !important;
-  }
-
-  & pre {
-    background-color: var(--standout-bg-color);
-    color: #ddd;
-    border: 1px solid var(--border-color);
-  }
-
-  & .radio-group {
-    border-color: var(--border-color);
-  }
-
-  & .radio-group label {
-    background-color: #555;
-  }
-
-  & .radio-group label:hover,
-  & .radio-group label:has(input:focus-visible) {
-    background-color: var(--hover-background-color);
-    color: white;
-  }
-
-  & .multiple-checklist {
-    border-color: var(--border-color);
-  }
-
-  & .multiple-checklist label {
-    background-color: #555;
-  }
-
-  & aside {
-    background-color: #000;
-    box-shadow: 0 0 .5em #121212;
-  }
-
-  & aside :is(ul, menu) li a:hover,
-  & aside :is(ul, menu) li a:focus-visible {
-    background-color: var(--hover-background-color);
-    color: var(--hover-text-color, #fff);
-  }
-
-  & dt {
-    border-color: var(--border-color);
-  }
-
-  & .annotation,
-  & .tag,
-  & .inline-notification {
-    background-color: var(--standout-bg-color);
-    color: #ddd;
-    border-color: var(--border-color);
-  }
-
-  & .annotation-val {
-    color: #ddd;
-  }
-}
+	--progress-track-bg-color: var(--table-uneditable-bg);
 }
 
 html[data-theme="light"] {
-  color-scheme: light;
+	color-scheme: light;
+}
 }
