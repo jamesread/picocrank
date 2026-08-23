@@ -41,6 +41,8 @@ html[data-theme="dark"] {
 	--muted-text-color: var(--dt-muted);
 	--annotation-key-color: var(--dt-muted);
 	--link-color: var(--dt-accent);
+	--nav-grid-accent-fg: var(--link-color);
+	--nav-grid-accent-bg: var(--link-color);
 	--border-color: var(--dt-border);
 
 	--hover-background-color: var(--dt-selection);
@@ -61,8 +63,8 @@ html[data-theme="dark"] {
 
 	--input-bg-color: var(--dt-background);
 	--input-fg-color: var(--dt-foreground);
-	--control-option-bg-color: var(--dt-overlay);
-	--control-hover-bg-color: var(--dt-selection);
+	--control-option-bg-color: var(--dt-background);
+	--control-hover-bg-color: var(--dt-overlay);
 	--menu-hover-bg-color: var(--dt-selection);
 
 	--table-row-hover-bg: var(--dt-selection);
@@ -133,6 +135,8 @@ html[data-theme="light"] {
 	--muted-text-color: var(--dt-muted);
 	--annotation-key-color: var(--dt-muted);
 	--link-color: var(--dt-accent);
+	--nav-grid-accent-fg: var(--link-color);
+	--nav-grid-accent-bg: var(--link-color);
 	--border-color: var(--dt-border);
 
 	--hover-background-color: var(--dt-selection);

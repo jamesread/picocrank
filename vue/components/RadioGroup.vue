@@ -147,7 +147,7 @@ function select(option) {
 }
 
 .radio-group label:has(input:focus-visible) {
-	outline: 2px solid black;
+	outline: 2px solid var(--radio-group-focus-outline);
 	outline-offset: 2px;
 	z-index: 2;
 }
@@ -155,8 +155,8 @@ function select(option) {
 /* Beat Femtocrank's gray .radio-group focus/hover when the option is selected. */
 .radio-group label:has(input:checked):hover,
 .radio-group label:has(input:checked:focus-visible) {
-	background-color: #3a6f3a;
-	color: white;
+	background-color: var(--radio-group-checked-hover-bg);
+	color: var(--radio-group-checked-hover-fg);
 }
 
 .radio-group.disabled {
@@ -185,7 +185,7 @@ function select(option) {
 
 .radio-group label.disabled:has(input:focus-visible),
 .radio-group.disabled label:has(input:focus-visible) {
-	outline: 2px solid black;
+	outline: 2px solid var(--radio-group-focus-outline);
 	outline-offset: 2px;
 }
 </style>

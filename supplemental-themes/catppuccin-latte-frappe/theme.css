@@ -50,6 +50,8 @@ html[data-theme="dark"] {
 	--muted-text-color: var(--ctp-subtext0);
 	--annotation-key-color: var(--ctp-subtext0);
 	--link-color: var(--ctp-blue);
+	--nav-grid-accent-fg: var(--link-color);
+	--nav-grid-accent-bg: var(--link-color);
 	--border-color: var(--ctp-surface1);
 
 	--hover-background-color: var(--ctp-surface0);
@@ -71,7 +73,7 @@ html[data-theme="dark"] {
 	--input-bg-color: var(--ctp-surface0);
 	--input-fg-color: var(--ctp-text);
 	--control-option-bg-color: var(--ctp-surface0);
-	--control-hover-bg-color: var(--ctp-surface0);
+	--control-hover-bg-color: var(--ctp-surface1);
 	--menu-hover-bg-color: var(--ctp-surface0);
 
 	--table-row-hover-bg: var(--ctp-surface0);
@@ -151,6 +153,8 @@ html[data-theme="light"] {
 	--muted-text-color: var(--ctp-subtext0);
 	--annotation-key-color: var(--ctp-subtext0);
 	--link-color: var(--ctp-blue);
+	--nav-grid-accent-fg: var(--link-color);
+	--nav-grid-accent-bg: var(--link-color);
 	--border-color: var(--ctp-surface1);
 
 	--hover-background-color: var(--ctp-surface0);
@@ -172,7 +176,7 @@ html[data-theme="light"] {
 	--input-bg-color: var(--ctp-surface0);
 	--input-fg-color: var(--ctp-text);
 	--control-option-bg-color: var(--ctp-surface0);
-	--control-hover-bg-color: var(--ctp-surface0);
+	--control-hover-bg-color: var(--ctp-surface1);
 	--menu-hover-bg-color: var(--ctp-surface0);
 
 	--table-row-hover-bg: var(--ctp-surface0);

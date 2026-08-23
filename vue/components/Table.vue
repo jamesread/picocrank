@@ -1414,7 +1414,7 @@ tbody tr.row-clickable {
 	min-height: 6rem;
 	padding: 2rem 1rem;
 	text-align: center;
-	color: var(--text-muted, #666);
+	color: var(--table-muted-fg);
 }
 
 .table-empty-state.loading {
@@ -1436,7 +1436,7 @@ tbody tr.row-clickable {
 	gap: 0.75rem;
 	padding: 2rem 1rem;
 	text-align: center;
-	color: var(--text-muted, #666);
+	color: var(--table-muted-fg);
 }
 
 .table-filtered-empty-message {
@@ -1473,7 +1473,7 @@ td.table-column-options-cell {
 
 .table-layout-label {
 	font-size: 0.85rem;
-	color: var(--text-muted, #666);
+	color: var(--table-muted-fg);
 	max-width: 10rem;
 	overflow: hidden;
 	text-overflow: ellipsis;

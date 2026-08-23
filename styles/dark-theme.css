@@ -52,6 +52,9 @@ html[data-theme="dark"] {
 	--table-sticky-uneditable-bg: var(--table-uneditable-bg);
 
 	--progress-track-bg-color: var(--table-uneditable-bg);
+
+	--nav-grid-accent-fg: var(--link-color);
+	--nav-grid-accent-bg: var(--link-color);
 }
 
 html[data-theme="light"] {

@@ -497,10 +497,10 @@ onBeforeUnmount(() => {
 	max-width: min(24rem, calc(100vw - 1rem));
 	max-height: calc(100vh - 1rem);
 	padding: 0.75rem;
-	border: 1px solid var(--border-color, #e1e5e9);
+	border: 1px solid var(--table-popover-border);
 	border-radius: 0.4rem;
-	background: var(--background-color, #fff);
-	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+	background: var(--table-popover-bg);
+	box-shadow: var(--table-popover-shadow);
 	overflow: hidden;
 }
 
@@ -552,7 +552,7 @@ onBeforeUnmount(() => {
 
 .field-label {
 	font-size: 0.85rem;
-	color: var(--text-muted, #666);
+	color: var(--table-popover-muted-fg);
 }
 
 .popover-actions {
@@ -563,21 +563,21 @@ onBeforeUnmount(() => {
 	gap: 0.5rem;
 	margin-top: 0.75rem;
 	padding-top: 0.75rem;
-	border-top: 1px solid var(--border-color, #e1e5e9);
+	border-top: 1px solid var(--table-popover-divider);
 }
 
 .saved-filters {
 	flex-shrink: 0;
 	margin-top: 0.75rem;
 	padding-top: 0.75rem;
-	border-top: 1px solid var(--border-color, #e1e5e9);
+	border-top: 1px solid var(--table-popover-divider);
 	min-height: 0;
 }
 
 .saved-filters-heading {
 	margin: 0 0 0.5rem;
 	font-size: 0.85rem;
-	color: var(--text-muted, #666);
+	color: var(--table-popover-muted-fg);
 }
 
 .saved-filters-list {
@@ -626,15 +626,5 @@ onBeforeUnmount(() => {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-}
-
-html[data-theme="dark"] .table-column-filter-popover {
-	background: var(--background-color, #1e1e1e);
-	border-color: var(--border-color, #444);
-}
-
-html[data-theme="dark"] .popover-actions,
-html[data-theme="dark"] .saved-filters {
-	border-top-color: var(--border-color, #444);
 }
 </style>

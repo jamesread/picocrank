@@ -44,6 +44,8 @@ html[data-theme="dark"] {
 	--muted-text-color: var(--gb-fg3);
 	--annotation-key-color: var(--gb-fg3);
 	--link-color: var(--gb-accent);
+	--nav-grid-accent-fg: var(--link-color);
+	--nav-grid-accent-bg: var(--link-color);
 	--border-color: var(--gb-bg3);
 
 	--hover-background-color: var(--gb-bg2);
@@ -65,7 +67,7 @@ html[data-theme="dark"] {
 	--input-bg-color: var(--gb-bg0);
 	--input-fg-color: var(--gb-fg0);
 	--control-option-bg-color: var(--gb-bg2);
-	--control-hover-bg-color: var(--gb-bg2);
+	--control-hover-bg-color: var(--gb-bg3);
 	--menu-hover-bg-color: var(--gb-bg2);
 
 	--table-row-hover-bg: var(--gb-bg2);
@@ -139,6 +141,8 @@ html[data-theme="light"] {
 	--muted-text-color: var(--gb-fg3);
 	--annotation-key-color: var(--gb-fg3);
 	--link-color: var(--gb-accent);
+	--nav-grid-accent-fg: var(--link-color);
+	--nav-grid-accent-bg: var(--link-color);
 	--border-color: var(--gb-bg3);
 
 	--hover-background-color: var(--gb-bg2);
@@ -160,7 +164,7 @@ html[data-theme="light"] {
 	--input-bg-color: var(--gb-bg0);
 	--input-fg-color: var(--gb-fg0);
 	--control-option-bg-color: var(--gb-bg2);
-	--control-hover-bg-color: var(--gb-bg2);
+	--control-hover-bg-color: var(--gb-bg3);
 	--menu-hover-bg-color: var(--gb-bg2);
 
 	--table-row-hover-bg: var(--gb-bg2);

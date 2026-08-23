@@ -839,10 +839,10 @@ onBeforeUnmount(() => {
 	min-width: min(30rem, calc(100vw - 1rem));
 	max-height: calc(100vh - 1rem);
 	padding: 0.75rem;
-	border: 1px solid var(--border-color, #e1e5e9);
+	border: 1px solid var(--table-popover-border);
 	border-radius: 0.4rem;
-	background: var(--background-color, #fff);
-	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+	background: var(--table-popover-bg);
+	box-shadow: var(--table-popover-shadow);
 	overflow: hidden;
 	box-sizing: border-box;
 }
@@ -923,19 +923,19 @@ onBeforeUnmount(() => {
 
 .field-label {
 	font-size: 0.85rem;
-	color: var(--text-muted, #666);
+	color: var(--table-popover-muted-fg);
 }
 
 .column-options-tab-error {
 	margin: 0;
 	font-size: 0.85rem;
-	color: var(--bad-color, #c62828);
+	color: var(--table-popover-error-fg);
 }
 
 .column-options-tab-success {
 	margin: 0;
 	font-size: 0.85rem;
-	color: var(--good-color, #2e7d32);
+	color: var(--table-popover-success-fg);
 }
 
 .column-options-load-panel {
@@ -948,7 +948,7 @@ onBeforeUnmount(() => {
 	display: flex;
 	justify-content: center;
 	padding-top: 0.25rem;
-	border-top: 1px solid var(--border-color, #e1e5e9);
+	border-top: 1px solid var(--table-popover-divider);
 }
 
 .column-options-preset-list {
@@ -968,7 +968,7 @@ onBeforeUnmount(() => {
 	gap: 0.5rem;
 	align-items: start;
 	padding-bottom: 0.65rem;
-	border-bottom: 1px solid var(--border-color, #e1e5e9);
+	border-bottom: 1px solid var(--table-popover-divider);
 }
 
 .column-options-preset-item:last-child {
@@ -1014,9 +1014,9 @@ onBeforeUnmount(() => {
 	align-items: center;
 	gap: 0.5rem;
 	padding: 0.25rem 0.45rem;
-	border: 1px solid var(--border-color, #e1e5e9);
+	border: 1px solid var(--table-popover-border);
 	border-radius: 0.35rem;
-	background: var(--standout-bg-color, #f8f9fa);
+	background: var(--table-popover-item-bg);
 }
 
 .column-options-item.is-dragging {
@@ -1024,7 +1024,7 @@ onBeforeUnmount(() => {
 }
 
 .column-options-item.is-drag-over {
-	border-color: var(--text-color, #334155);
+	border-color: var(--table-popover-item-drag-border);
 }
 
 .column-options-item.is-fixed {
@@ -1034,7 +1034,7 @@ onBeforeUnmount(() => {
 .column-options-drag-handle {
 	display: inline-flex;
 	align-items: center;
-	color: var(--text-color, inherit);
+	color: var(--table-popover-fg, inherit);
 	opacity: 0.65;
 	cursor: grab;
 }
@@ -1097,20 +1097,6 @@ onBeforeUnmount(() => {
 	gap: 0.5rem;
 	margin-top: 0.75rem;
 	padding-top: 0.75rem;
-	border-top: 1px solid var(--border-color, #e1e5e9);
-}
-
-html[data-theme="dark"] .table-column-options-popover {
-	background: var(--background-color, #1e1e1e);
-	border-color: var(--border-color, #444);
-}
-
-html[data-theme="dark"] .column-options-item {
-	background: var(--standout-bg-color, #1f1f1f);
-	border-color: var(--border-color, #444);
-}
-
-html[data-theme="dark"] .popover-actions {
-	border-top-color: var(--border-color, #444);
+	border-top: 1px solid var(--table-popover-divider);
 }
 </style>

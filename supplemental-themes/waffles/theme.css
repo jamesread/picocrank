@@ -26,6 +26,8 @@ html {
 	--text-color: var(--waffle-syrup);
 	--muted-text-color: #a88860;
 	--link-color: var(--waffle-accent);
+	--nav-grid-accent-fg: var(--link-color);
+	--nav-grid-accent-bg: var(--link-color);
 	--border-color: #e0c896;
 
 	--hover-background-color: #f0d9a8;
@@ -138,6 +140,8 @@ html[data-theme="dark"] {
 	--text-color: var(--waffle-foreground);
 	--muted-text-color: var(--waffle-foreground-muted);
 	--link-color: var(--waffle-accent-dark);
+	--nav-grid-accent-fg: var(--link-color);
+	--nav-grid-accent-bg: var(--link-color);
 	--border-color: #c9a66a;
 	--standout-bg-color: var(--waffle-batter);
 	--hover-background-color: #f0d9a8;

@@ -10,8 +10,8 @@
 </template>
 
 <style scoped>
-span {
-    color: #bbb;
+.separator {
+    color: var(--breadcrumbs-separator-fg);
 }
 
 a {
@@ -22,7 +22,7 @@ a {
 
 a:hover {
     text-decoration: underline;
-    background-color: #000;
+    background-color: var(--breadcrumbs-link-hover-bg);
 }
 
 </style>

@@ -247,10 +247,9 @@ defineExpose({
 	box-sizing: border-box;
 }
 
-.local-login-form input:focus {
-	outline: none;
-	border-color: var(--primary-color, #007bff);
-	box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+.local-login-form input:focus-visible {
+	outline: 2px solid var(--login-input-focus-outline);
+	outline-offset: 2px;
 }
 
 .local-login-form button {
@@ -303,8 +302,8 @@ defineExpose({
 
 .error-message {
 	padding: 0.75rem;
-	background-color: var(--error-bg, #fee);
-	color: var(--error-color, #c33);
+	background-color: var(--login-error-bg);
+	color: var(--login-error-fg);
 	border-radius: 4px;
 	font-size: 0.9em;
 	margin-top: 0.5rem;
@@ -314,7 +313,7 @@ defineExpose({
 .no-providers {
 	padding: 2rem;
 	text-align: center;
-	color: var(--text-muted, #666);
+	color: var(--login-muted-fg);
 }
 
 @media (min-width: 768px) {

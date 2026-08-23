@@ -116,7 +116,7 @@ defineExpose({
 
 .tabs-header {
 	display: flex;
-	border-bottom: 2px solid var(--border-color, #e1e5e9);
+	border-bottom: 2px solid var(--tab-border);
 	gap: 0.25rem;
 	overflow-x: auto;
 	scrollbar-width: thin;
@@ -131,7 +131,7 @@ defineExpose({
 }
 
 .tabs-header::-webkit-scrollbar-thumb {
-	background: var(--border-color, #ccc);
+	background: var(--tab-border);
 	border-radius: 2px;
 }
 
@@ -153,8 +153,8 @@ defineExpose({
 }
 
 .tab-button:hover {
-	color: var(--text-color, #000);
-	background-color: var(--hover-background-color, #f5f5f5);
+	color: var(--tab-hover-fg);
+	background-color: var(--tab-hover-bg);
 }
 
 .tab-button.active {

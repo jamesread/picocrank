@@ -48,24 +48,6 @@
 	</Section>
 
 	<Section
-		title="Popular examples"
-		subtitle="A few good places to begin"
-	>
-		<div class="grid-boxed welcome-popular-grid">
-			<router-link
-				v-for="example in popularExamples"
-				:key="example.name"
-				:to="{ name: example.name }"
-				class="stat-display welcome-popular-card"
-			>
-				<span class="subtle">{{ example.category }}</span>
-				<span class="stat">{{ example.label }}</span>
-				<span class="welcome-popular-description">{{ example.description }}</span>
-			</router-link>
-		</div>
-	</Section>
-
-	<Section
 		title="Try it"
 		subtitle="Small interactions you can trigger right now"
 	>
@@ -108,33 +90,6 @@ import logoUrl from '/logo.png'
 
 const { show: showPopup } = useNotificationPopups()
 const welcomeNavigation = ref(null)
-
-const popularExamples = [
-	{
-		name: 'ThemePreview',
-		category: 'Layouts',
-		label: 'Theme Switcher',
-		description: 'Switch drop-in themes live',
-	},
-	{
-		name: 'TableExample',
-		category: 'Data display',
-		label: 'Table',
-		description: 'Sorting, pagination, and column filters',
-	},
-	{
-		name: 'CalendarExample',
-		category: 'Data display',
-		label: 'Calendar',
-		description: 'Events, drag-and-drop, and date ranges',
-	},
-	{
-		name: 'ButtonsExample',
-		category: 'Forms & input',
-		label: 'Buttons',
-		description: 'Variants, toolbars, and form actions',
-	},
-]
 
 function showWelcomeToast() {
 	showPopup({
@@ -211,32 +166,5 @@ onMounted(() => {
 	flex-wrap: wrap;
 	gap: 0.5rem;
 	margin-bottom: 0.75rem;
-}
-
-.welcome-popular-grid {
-	grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
-}
-
-.welcome-popular-card {
-	display: flex;
-	flex-direction: column;
-	gap: 0.35rem;
-	text-decoration: none;
-	color: inherit;
-	transition: transform 0.15s ease, box-shadow 0.15s ease;
-}
-
-.welcome-popular-card:hover {
-	transform: translateY(-2px);
-	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
-}
-
-.welcome-popular-description {
-	font-size: 0.85rem;
-	color: #666;
-}
-
-html[data-theme="dark"] .welcome-popular-description {
-	color: #bbb;
 }
 </style>

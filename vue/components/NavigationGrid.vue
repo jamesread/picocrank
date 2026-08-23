@@ -181,7 +181,7 @@ function handleLinkClick(link) {
 	gap: 0.75rem;
 	padding: 1.25rem 0.75rem;
 	background: transparent;
-	border: 1px solid var(--border-color, #e1e5e9);
+	border: 1px solid var(--nav-grid-border);
 	border-radius: 8px;
 	cursor: pointer;
 	transition: all 0.2s ease;
@@ -195,37 +195,38 @@ function handleLinkClick(link) {
 }
 
 .nav-button:hover {
-	border-color: var(--primary-color, #007bff);
+	border-color: var(--nav-grid-accent-fg);
+	background: var(--nav-grid-hover-bg);
 	transform: translateY(-2px);
-	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+	box-shadow: 0 4px 8px var(--nav-grid-hover-shadow);
 }
 
 .nav-button:active {
 	transform: translateY(0);
-	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+	box-shadow: 0 2px 4px var(--nav-grid-shadow);
 }
 
 .nav-button.active {
-	background: var(--primary-color, #007bff);
-	border-color: var(--primary-color, #007bff);
-	color: #fff;
+	background: var(--nav-grid-accent-bg);
+	border-color: var(--nav-grid-accent-bg);
+	color: var(--nav-grid-active-fg);
 }
 
 .nav-button.active .nav-button-icon {
-	color: #fff;
+	color: var(--nav-grid-active-fg);
 }
 
 .nav-button-icon {
 	display: flex;
 	align-items: start;
 	justify-content: start;
-	color: var(--primary-color, #007bff);
+	color: var(--nav-grid-accent-fg);
 	transition: color 0.2s ease;
 	flex-shrink: 0;
 }
 
 .nav-button.active .nav-button-icon {
-	color: #fff;
+	color: var(--nav-grid-active-fg);
 }
 
 .nav-button:disabled,
@@ -236,7 +237,7 @@ function handleLinkClick(link) {
 
 .nav-button:disabled:hover,
 .nav-button.disabled:hover {
-	border-color: var(--border-color, #e1e5e9);
+	border-color: var(--nav-grid-border);
 	transform: none;
 	box-shadow: none;
 	background: transparent;
@@ -244,7 +245,7 @@ function handleLinkClick(link) {
 
 .nav-button:disabled .nav-button-icon,
 .nav-button.disabled .nav-button-icon {
-	color: var(--text-muted, #999);
+	color: var(--nav-grid-disabled-fg);
 }
 
 .nav-button-indicator {
@@ -254,8 +255,8 @@ function handleLinkClick(link) {
 	width: 0.625rem;
 	height: 0.625rem;
 	border-radius: 50%;
-	background: var(--indicator-color, #dc3545);
-	box-shadow: 0 0 0 2px var(--background-color, #fff);
+	background: var(--nav-grid-indicator-bg);
+	box-shadow: 0 0 0 2px var(--nav-grid-ring-bg);
 	flex-shrink: 0;
 }
 
@@ -266,13 +267,13 @@ function handleLinkClick(link) {
 	min-width: 1.25rem;
 	padding: 0.1rem 0.4rem;
 	border-radius: 999px;
-	background: var(--indicator-color, #dc3545);
-	color: #fff;
+	background: var(--nav-grid-indicator-bg);
+	color: var(--nav-grid-indicator-fg);
 	font-size: 0.75em;
 	font-weight: 600;
 	line-height: 1.2;
 	text-align: center;
-	box-shadow: 0 0 0 2px var(--background-color, #fff);
+	box-shadow: 0 0 0 2px var(--nav-grid-ring-bg);
 	flex-shrink: 0;
 }
 
@@ -288,7 +289,7 @@ function handleLinkClick(link) {
 
 .nav-button.active .nav-button-indicator,
 .nav-button.active .nav-button-count {
-	box-shadow: 0 0 0 2px var(--primary-color, #007bff);
+	box-shadow: 0 0 0 2px var(--nav-grid-accent-bg);
 }
 
 .nav-button-label {
@@ -300,50 +301,25 @@ function handleLinkClick(link) {
 }
 
 .nav-button.active .nav-button-label {
-	color: #fff;
+	color: var(--nav-grid-active-fg);
 }
 
 .nav-button-description {
 	font-weight: normal;
-	color: var(--text-muted, #666);
+	color: var(--nav-grid-muted-fg);
 	word-break: break-word;
 	text-align: left;
 	line-height: 1.5;
 }
 
 .nav-button.active .nav-button-description {
-	color: rgba(255, 255, 255, 0.9);
+	color: var(--nav-grid-active-fg);
 }
 
 .no-links {
 	padding: 2rem;
 	text-align: center;
-	color: var(--text-muted, #666);
-}
-
-/* Dark theme support */
-html[data-theme="dark"] {
-	.nav-button {
-		background: transparent;
-	}
-
-	.nav-button:hover {
-		background: var(--hover-background-color, rgba(96, 165, 250, 0.1));
-		border-color: var(--primary-color, #60a5fa);
-	}
-
-	.nav-button.active {
-		background: var(--primary-color, #60a5fa);
-		border-color: var(--primary-color, #60a5fa);
-	}
-
-	.nav-button-description {
-		color: var(--text-muted, #999);
-	}
-
-	.nav-button-icon {
-		color: var(--primary-color, #60a5fa);
-	}
+	color: var(--nav-grid-muted-fg);
 }
 
 @media (max-width: 768px) {
