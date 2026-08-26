@@ -121,7 +121,7 @@ a.active {
 	width: 0.5rem;
 	height: 0.5rem;
 	border-radius: 50%;
-	background: var(--indicator-color, #dc3545);
+	background: var(--karma-bad-tint);
 	flex-shrink: 0;
 }
 
@@ -129,8 +129,8 @@ a.active {
 	min-width: 1.25rem;
 	padding: 0.1rem 0.4rem;
 	border-radius: 999px;
-	background: var(--indicator-color, #dc3545);
-	color: #fff;
+	background: var(--karma-bad-tint);
+	color: var(--text-color);
 	font-size: 0.75em;
 	font-weight: 600;
 	line-height: 1.2;

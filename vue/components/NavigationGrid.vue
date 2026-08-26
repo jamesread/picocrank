@@ -19,20 +19,22 @@
 					class="nav-button-indicator"
 					aria-label="Requires attention"
 				/>
-				<div class="nav-button-icon" :style="getIconStyle(link)">
-					<HugeiconsIcon
-						:icon="link.icon"
-						:width="iconSize"
-						:height="iconSize"
-					/>
-				</div>
-					<div class="nav-button-label">{{ link.title }}</div>
-					<div v-if="link.description" class="nav-button-description">
-						{{ link.description }}
+				<div class="nav-button-heading">
+					<div class="nav-button-icon" :style="getIconStyle(link)">
+						<HugeiconsIcon
+							:icon="link.icon"
+							:width="iconSize"
+							:height="iconSize"
+						/>
 					</div>
+					<div class="nav-button-label">{{ link.title }}</div>
+				</div>
+				<div v-if="link.description" class="nav-button-description">
+					{{ link.description }}
+				</div>
 			</button>
 		</div>
-		<div v-if="filteredLinks.length === 0" class="no-links">
+		<div v-if="filteredLinks.length === 0" class="navigation-grid-empty">
 			<p>No navigation links available</p>
 		</div>
 	</div>
@@ -40,7 +42,7 @@
 
 <script setup>
 import { computed, inject, ref } from 'vue';
-import { useRouter, useRoute } from 'vue-router';
+import { useRouter } from 'vue-router';
 import { HugeiconsIcon } from '@hugeicons/vue';
 
 const props = defineProps({
@@ -63,7 +65,7 @@ const props = defineProps({
 	// Icon size
 	iconSize: {
 		type: String,
-		default: '2em'
+		default: '1.5em'
 	},
 	// Exclude separator and html items
 	excludeNonButtons: {
@@ -73,7 +75,6 @@ const props = defineProps({
 });
 
 const router = useRouter();
-const route = useRoute();
 
 // Inject navigation from Navigation component
 const navigation = inject('navigation', null);
@@ -157,179 +158,24 @@ function handleLinkClick(link) {
 </script>
 
 <style scoped>
-.navigation-grid-container {
-	width: 100%;
-}
-
-.navigation-grid {
-	display: grid;
-	grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-	gap: 1rem;
-	padding: 1rem 0;
-}
-
-.navigation-grid.compact {
-	grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-	gap: 0.75rem;
-}
-
-.nav-button {
+.nav-button-heading {
 	display: flex;
-	flex-direction: column;
-	align-items: top;
-	justify-content: flex-start;
-	gap: 0.75rem;
-	padding: 1.25rem 0.75rem;
-	background: transparent;
-	border: 1px solid var(--nav-grid-border);
-	border-radius: 8px;
-	cursor: pointer;
-	transition: all 0.2s ease;
-	text-align: left;
-	position: relative;
-}
-
-.navigation-grid.compact .nav-button {
-	padding: 0.75rem 0.5rem;
+	align-items: center;
 	gap: 0.5rem;
+	width: 100%;
+	min-width: 0;
 }
 
-.nav-button:hover {
-	border-color: var(--nav-grid-accent-fg);
-	background: var(--nav-grid-hover-bg);
-	transform: translateY(-2px);
-	box-shadow: 0 4px 8px var(--nav-grid-hover-shadow);
+.navigation-grid.compact .nav-button-heading {
+	gap: 0.4rem;
 }
 
-.nav-button:active {
-	transform: translateY(0);
-	box-shadow: 0 2px 4px var(--nav-grid-shadow);
+.nav-button-heading .nav-button-icon {
+	align-items: center;
 }
 
-.nav-button.active {
-	background: var(--nav-grid-accent-bg);
-	border-color: var(--nav-grid-accent-bg);
-	color: var(--nav-grid-active-fg);
-}
-
-.nav-button.active .nav-button-icon {
-	color: var(--nav-grid-active-fg);
-}
-
-.nav-button-icon {
-	display: flex;
-	align-items: start;
-	justify-content: start;
-	color: var(--nav-grid-accent-fg);
-	transition: color 0.2s ease;
-	flex-shrink: 0;
-}
-
-.nav-button.active .nav-button-icon {
-	color: var(--nav-grid-active-fg);
-}
-
-.nav-button:disabled,
-.nav-button.disabled {
-	cursor: not-allowed;
-	opacity: 0.6;
-}
-
-.nav-button:disabled:hover,
-.nav-button.disabled:hover {
-	border-color: var(--nav-grid-border);
-	transform: none;
-	box-shadow: none;
-	background: transparent;
-}
-
-.nav-button:disabled .nav-button-icon,
-.nav-button.disabled .nav-button-icon {
-	color: var(--nav-grid-disabled-fg);
-}
-
-.nav-button-indicator {
-	position: absolute;
-	top: 0.75rem;
-	right: 0.75rem;
-	width: 0.625rem;
-	height: 0.625rem;
-	border-radius: 50%;
-	background: var(--nav-grid-indicator-bg);
-	box-shadow: 0 0 0 2px var(--nav-grid-ring-bg);
-	flex-shrink: 0;
-}
-
-.nav-button-count {
-	position: absolute;
-	top: 0.5rem;
-	right: 0.5rem;
-	min-width: 1.25rem;
-	padding: 0.1rem 0.4rem;
-	border-radius: 999px;
-	background: var(--nav-grid-indicator-bg);
-	color: var(--nav-grid-indicator-fg);
-	font-size: 0.75em;
-	font-weight: 600;
-	line-height: 1.2;
-	text-align: center;
-	box-shadow: 0 0 0 2px var(--nav-grid-ring-bg);
-	flex-shrink: 0;
-}
-
-.navigation-grid.compact .nav-button-indicator {
-	top: 0.5rem;
-	right: 0.5rem;
-}
-
-.navigation-grid.compact .nav-button-count {
-	top: 0.35rem;
-	right: 0.35rem;
-}
-
-.nav-button.active .nav-button-indicator,
-.nav-button.active .nav-button-count {
-	box-shadow: 0 0 0 2px var(--nav-grid-accent-bg);
-}
-
-.nav-button-label {
-	font-weight: bold;
-	font-size: 1.125rem;
-	word-break: break-word;
-	text-align: left;
-	line-height: 1.2;
-}
-
-.nav-button.active .nav-button-label {
-	color: var(--nav-grid-active-fg);
-}
-
-.nav-button-description {
-	font-weight: normal;
-	color: var(--nav-grid-muted-fg);
-	word-break: break-word;
-	text-align: left;
-	line-height: 1.5;
-}
-
-.nav-button.active .nav-button-description {
-	color: var(--nav-grid-active-fg);
-}
-
-.no-links {
-	padding: 2rem;
-	text-align: center;
-	color: var(--nav-grid-muted-fg);
-}
-
-@media (max-width: 768px) {
-	.navigation-grid {
-		grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-		gap: 0.75rem;
-	}
-
-	.nav-button {
-		padding: 1rem 0.5rem;
-	}
+.nav-button-heading .nav-button-label {
+	flex: 1;
+	min-width: 0;
 }
 </style>

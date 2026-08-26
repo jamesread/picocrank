@@ -1,6 +1,21 @@
 <template>
 	<Navigation ref="navigation">
-		<Header username = "Guest" @toggleSidebar="toggleSidebar" @logoClick="goToIndex" @userClick="goToUserDetails" title = "PicoCrank" :logoUrl="logoUrl" :sidebarEnabled="sidebarEnabled" :navigation="navigation" :topBarEnabled="topBarEnabled" :showBranding="brandingEnabled" :breadcrumbs="breadcrumbsEnabled" :themeToggleEnabled="themeToggleEnabled">
+		<Navigation ref="topBarNavigation">
+			<Header
+				username="Guest"
+				@toggleSidebar="toggleSidebar"
+				@logoClick="goToIndex"
+				@userClick="goToUserDetails"
+				title="PicoCrank"
+				:logoUrl="logoUrl"
+				:sidebarEnabled="sidebarEnabled"
+				:navigation="navigation"
+				:topBarNavigation="topBarNavigation"
+				:topBarEnabled="topBarEnabled"
+				:showBranding="brandingEnabled"
+				:breadcrumbs="breadcrumbsEnabled"
+				:themeToggleEnabled="themeToggleEnabled"
+			>
 			<template #toolbar>
 				<ExampleHeaderThemeSwitcher
 					v-if="themeSwitcherEnabled"
@@ -16,6 +31,7 @@
 				/>
 			</template>
 		</Header>
+		</Navigation>
 
 		<div id = "layout">
 			<Sidebar v-if="sidebarEnabled" ref = "sidebar" />
@@ -38,7 +54,7 @@
 <script setup>
 	import { ref, onMounted, provide, watch } from 'vue';
 	import { useRouter } from 'vue-router';
-	import { Pin02Icon, UserIcon } from '@hugeicons/core-free-icons'
+	import { UserIcon } from '@hugeicons/core-free-icons'
 
 	import QuickSearch from './../components/QuickSearch.vue'
 	import ExampleHeaderThemeSwitcher from './ExampleHeaderThemeSwitcher.vue'
@@ -48,12 +64,18 @@
 	import '../composables/useTheme.js'
 	import { initCustomTheme } from '../composables/useCustomTheme.js'
 	import { examplePeople } from '../data/examplePeople.js'
+	import {
+		helloWorld,
+		registerSidebarNavigation,
+		registerTopBarNavigation,
+	} from '../data/navSectionHubs.js'
 	import logoUrl from '/logo.png';
 
 	const router = useRouter();
 	const quickSearchRef = ref(null)
 	const sidebar = ref(null);
 	const navigation = ref(null);
+	const topBarNavigation = ref(null);
 	const sidebarEnabled = ref(true);
 	const brandingEnabled = ref(true);
 	const quickSearchEnabled = ref(true);
@@ -62,7 +84,7 @@
 	const themeSwitcherEnabled = ref(true);
 	const includeSupplementalThemes = ref(true);
 	const topBarEnabled = ref(false);
-	const breadcrumbsEnabled = ref(false);
+	const breadcrumbsEnabled = ref(true);
 
 	const { discoverThemes } = initCustomTheme({ includeSupplementalThemes: true });
 
@@ -188,35 +210,8 @@
 	onMounted(() => {
 		discoverThemes()
 
-		if (navigation.value) {
-			navigation.value.addRouterLink('Welcome')
-
-			navigation.value.addSection('Layouts', { name: 'nav-layouts' })
-			navigation.value.addRouterLink('PageStructure', 'Page structure')
-			navigation.value.addRouterLink('ThemePreview', 'Theme Switcher')
-			navigation.value.addRouterLink('ViewItem', 'View item', { params: { id: 1 } })
-			navigation.value.addRouterLink('NavigationGridExample', 'Navigation Grid')
-			navigation.value.addRouterLink('Admin')
-			navigation.value.addRouterLink('TabsExample', 'Tabs')
-
-			navigation.value.addSection('Data display', { name: 'nav-data' })
-			navigation.value.addRouterLink('TableExample', 'Table')
-			navigation.value.addRouterLink('TableRemoteExample', 'Remote table')
-			navigation.value.addRouterLink('CalendarExample', 'Calendar')
-			navigation.value.addRouterLink('ReadOnlyTextAreaExample', 'Read-only output')
-
-			navigation.value.addSection('Forms & input', { name: 'nav-forms' })
-			navigation.value.addRouterLink('ButtonsExample', 'Buttons')
-			navigation.value.addRouterLink('FormExample', 'Forms')
-			navigation.value.addRouterLink('LoginExample', 'Login')
-
-			navigation.value.addSection('Feedback & status', { name: 'nav-feedback' })
-			navigation.value.addRouterLink('StatusExample', 'Status & notifications')
-			navigation.value.addRouterLink('DialogExample', 'Dialog')
-
-			navigation.value.addSection('Patterns', { name: 'nav-patterns' })
-			navigation.value.addCallback('Callback example', helloWorld, { icon: Pin02Icon })
-		}
+		registerSidebarNavigation(navigation.value, { onHelloWorld: helloWorld })
+		registerTopBarNavigation(topBarNavigation.value)
 
 		if (sidebar.value) {
 			sidebar.value.open();
@@ -225,9 +220,5 @@
 
 		registerQuickSearchItems()
 	});
-
-	function helloWorld() {
-		alert('Hello World')
-	}
 
 </script>

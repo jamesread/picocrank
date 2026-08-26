@@ -18,7 +18,7 @@ html {
 	--waffle-accent: #a05020;
 
 	--body-bg-color: var(--waffle-cream);
-	--surface-bg-color: #fffdf6;
+	--section-bg-color: #fffdf6;
 	--standout-bg-color: var(--waffle-batter);
 	--section-header-bg-color: var(--waffle-batter);
 	--shadow-color: rgba(139, 69, 19, 0.12);
@@ -26,8 +26,6 @@ html {
 	--text-color: var(--waffle-syrup);
 	--muted-text-color: #a88860;
 	--link-color: var(--waffle-accent);
-	--nav-grid-accent-fg: var(--link-color);
-	--nav-grid-accent-bg: var(--link-color);
 	--border-color: #e0c896;
 
 	--hover-background-color: #f0d9a8;
@@ -61,19 +59,9 @@ html {
 	--karma-bad: #f0a0a8;
 	--karma-warning: var(--waffle-butter);
 	--karma-severe: #e08a6a;
-	--karma-important: #ffe8a3;
 	--karma-note: #a8d4e8;
 	--karma-info: var(--waffle-batter);
 	--karma-old: #d4c4a0;
-
-	--karma-good-fg: #4a7a28;
-	--karma-bad-fg: var(--waffle-berry);
-	--karma-warning-fg: #9a6b00;
-	--karma-severe-fg: #a04020;
-	--karma-important-fg: #8a6800;
-	--karma-note-fg: #2a6a88;
-	--karma-info-fg: #7a6540;
-	--karma-old-fg: #6a5840;
 }
 
 body {
@@ -140,8 +128,6 @@ html[data-theme="dark"] {
 	--text-color: var(--waffle-foreground);
 	--muted-text-color: var(--waffle-foreground-muted);
 	--link-color: var(--waffle-accent-dark);
-	--nav-grid-accent-fg: var(--link-color);
-	--nav-grid-accent-bg: var(--link-color);
 	--border-color: #c9a66a;
 	--standout-bg-color: var(--waffle-batter);
 	--hover-background-color: #f0d9a8;
@@ -149,7 +135,7 @@ html[data-theme="dark"] {
 	--disabled-text-color: #7a6548;
 
 	--body-bg-color: var(--waffle-cream);
-	--surface-bg-color: var(--waffle-batter);
+	--section-bg-color: var(--waffle-batter);
 	--section-header-bg-color: var(--waffle-section);
 	--sidebar-bg-color: var(--waffle-sidebar);
 	--sidebar-link-color: var(--waffle-foreground);

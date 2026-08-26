@@ -5,7 +5,6 @@
 				<h2 :title="item.subtitle">{{ item.title }}</h2>
 			</div>
 			<div role="toolbar">
-				<router-link :to="{ name: 'TableExample' }" class="button neutral">Back to table</router-link>
 				<button type="button" class="good">Edit</button>
 			</div>
 		</div>
@@ -83,10 +82,23 @@
 			</ul>
 		</div>
 	</section>
+
+	<DangerZone
+		title="Danger zone"
+		subtitle="Destructive actions for this record"
+		description="Show destructive actions"
+	>
+		<div role="toolbar" class="danger-zone-actions">
+			<button type="button" class="bad" @click="deleteItem">
+				Delete {{ item.name }}
+			</button>
+		</div>
+	</DangerZone>
 </template>
 
 <script setup>
 import { computed } from 'vue'
+import DangerZone from '../components/DangerZone.vue'
 
 const props = defineProps({
 	id: {
@@ -102,7 +114,7 @@ const itemsById = {
 		summary: 'Read-only detail view for a single record, using Femtocrank definition lists and section subheaders.',
 		name: 'Acme deployment',
 		status: 'Active',
-		statusClass: 'fg-good',
+		statusClass: 'good',
 		role: 'Release',
 		location: 'us-east-1',
 		email: 'releases@example.com',
@@ -124,7 +136,7 @@ const itemsById = {
 		summary: 'Example person record linked from the table example.',
 		name: 'Alice',
 		status: 'Active',
-		statusClass: 'fg-good',
+		statusClass: 'good',
 		role: 'Senior analyst',
 		location: 'New York',
 		email: 'alice@example.com',
@@ -145,7 +157,7 @@ const itemsById = {
 		summary: 'Example person record linked from the table example.',
 		name: 'Bob',
 		status: 'Away',
-		statusClass: 'fg-warning',
+		statusClass: 'warning',
 		role: 'Support specialist',
 		location: 'Los Angeles',
 		email: 'bob@example.com',
@@ -175,7 +187,7 @@ const item = computed(() => {
 		summary: 'Generic detail view for records opened from the table or navigation.',
 		name: label,
 		status: 'Unknown',
-		statusClass: 'fg-note',
+		statusClass: 'note',
 		role: '—',
 		location: '—',
 		email: `${key.toLowerCase()}@example.com`,
@@ -188,4 +200,19 @@ const item = computed(() => {
 		activity: [{ when: '—', text: 'No activity recorded for this item.' }],
 	}
 })
+
+function deleteItem() {
+	const name = item.value.name
+	if (window.confirm(`Delete “${name}”? This action cannot be undone.`)) {
+		window.alert(`“${name}” would be deleted. (Demo only — no request was sent.)`)
+	}
+}
 </script>
+
+<style scoped>
+.danger-zone-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+}
+</style>

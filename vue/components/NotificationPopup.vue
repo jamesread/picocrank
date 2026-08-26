@@ -1,9 +1,34 @@
 <template>
-	<div
-		class="notification-popup notification show"
-		:class="popup.class"
-		role="status"
-	>
+	<div class="notification-popup" role="status">
+		<NotificationBlock
+			:type="notificationType"
+			:label="popup.label || ''"
+		>
+			<span class="notification-popup-content">
+				<span class="notification-popup-message">{{ popup.message }}</span>
+
+				<RouterLink
+					v-if="popup.linkTo && !isExternalLink"
+					:to="popup.linkTo"
+					class="notification-popup-link"
+					@click="emit('dismiss', popup.id)"
+				>
+					{{ popup.linkLabel || 'View' }}
+				</RouterLink>
+
+				<a
+					v-else-if="popup.linkTo && isExternalLink"
+					:href="popup.linkTo"
+					class="notification-popup-link"
+					target="_blank"
+					rel="noopener noreferrer"
+					@click="emit('dismiss', popup.id)"
+				>
+					{{ popup.linkLabel || 'View' }}
+				</a>
+			</span>
+		</NotificationBlock>
+
 		<button
 			type="button"
 			class="notification-popup-dismiss"
@@ -12,33 +37,6 @@
 		>
 			<HugeiconsIcon :icon="Cancel01Icon" width="1em" height="1em" />
 		</button>
-
-		<div class="notification-popup-body">
-			<p class="notification-popup-message">
-				<strong v-if="popup.label">{{ popup.label }}:</strong>
-				{{ popup.message }}
-			</p>
-
-			<RouterLink
-				v-if="popup.linkTo && !isExternalLink"
-				:to="popup.linkTo"
-				class="notification-popup-link"
-				@click="emit('dismiss', popup.id)"
-			>
-				{{ popup.linkLabel || 'View' }}
-			</RouterLink>
-
-			<a
-				v-else-if="popup.linkTo && isExternalLink"
-				:href="popup.linkTo"
-				class="notification-popup-link"
-				target="_blank"
-				rel="noopener noreferrer"
-				@click="emit('dismiss', popup.id)"
-			>
-				{{ popup.linkLabel || 'View' }}
-			</a>
-		</div>
 	</div>
 </template>
 
@@ -47,6 +45,7 @@ import { computed } from 'vue'
 import { RouterLink } from 'vue-router'
 import { HugeiconsIcon } from '@hugeicons/vue'
 import { Cancel01Icon } from '@hugeicons/core-free-icons'
+import NotificationBlock from './NotificationBlock.vue'
 
 const props = defineProps({
 	popup: {
@@ -56,6 +55,8 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['dismiss'])
+
+const notificationType = computed(() => props.popup.class || 'info')
 
 const isExternalLink = computed(() =>
 	typeof props.popup.linkTo === 'string' && /^https?:\/\//.test(props.popup.linkTo)
@@ -67,30 +68,32 @@ const isExternalLink = computed(() =>
 	position: relative;
 	width: min(22rem, calc(100vw - 2rem));
 	margin: 0;
-	padding: 0.75rem 2.25rem 0.75rem 0.75rem;
-	cursor: default;
-	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+	box-shadow: 0 4px 12px color-mix(in srgb, var(--shadow-color) 60%, transparent);
 }
 
-.notification-popup-message {
+.notification-popup :deep(.notification) {
 	margin: 0;
 }
 
-.notification-popup-body {
+.notification-popup-content {
 	display: flex;
 	flex-direction: column;
 	gap: 0.5rem;
 }
 
+.notification-popup-message {
+	display: block;
+}
+
 .notification-popup-link {
-	color: inherit;
+	color: var(--link-color);
 	font-weight: bold;
 	text-decoration: underline;
 	align-self: flex-start;
 }
 
 .notification-popup-link:hover {
-	opacity: 0.85;
+	text-decoration-thickness: 2px;
 }
 
 .notification-popup-dismiss {
@@ -106,13 +109,13 @@ const isExternalLink = computed(() =>
 	border: 0;
 	border-radius: 0.35rem;
 	background: transparent;
-	color: inherit;
+	color: var(--text-color);
 	cursor: pointer;
 	opacity: 0.75;
 }
 
 .notification-popup-dismiss:hover {
 	opacity: 1;
-	background: rgba(0, 0, 0, 0.08);
+	background: var(--hover-background-color);
 }
 </style>

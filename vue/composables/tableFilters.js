@@ -120,7 +120,7 @@ export function filterEntrySpec(entry) {
 		return null
 	}
 
-	const { id, name, enabled, ...filter } = entry
+	const { id: _id, name: _name, enabled: _enabled, ...filter } = entry
 	return filter
 }
 

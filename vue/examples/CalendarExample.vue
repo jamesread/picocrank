@@ -53,6 +53,20 @@ import {
 	AlertCircleIcon,
 } from '@hugeicons/core-free-icons'
 
+/** Static event palette — background + accessible dark foreground for light pastels in any theme. */
+const EVENT_COLORS = {
+	weekend: { color: '#e8d5f5', foregroundColor: '#4a2d6b' },
+	teamMeeting: { color: '#d1fae5', foregroundColor: '#14532d' },
+	clientCall: { color: '#e0f2fe', foregroundColor: '#075985' },
+	projectReview: { color: '#ede9fe', foregroundColor: '#5b21b6' },
+	lunchBreak: { color: '#ffedd5', foregroundColor: '#9a3412' },
+	codeReview: { color: '#ccfbf1', foregroundColor: '#115e59' },
+	conference: { color: '#d6e8ff', foregroundColor: '#1e40af' },
+	vacation: { color: '#fff0d6', foregroundColor: '#92400e' },
+	holiday: { color: '#ffe0e0', foregroundColor: '#991b1b' },
+	deadline: { color: '#fde8e8', foregroundColor: '#7f1d1d' },
+}
+
 const events = ref([])
 const loading = ref(false)
 const error = ref(null)
@@ -99,30 +113,32 @@ function generateDummyEventsForMonth(monthIndex, year) {
 				date: new Date(year, monthIndex, day, 10, 0),
 				description: 'Relaxing weekend activity',
 				icon: PartyIcon,
-				color: '#e8d5f5',
+				...EVENT_COLORS.weekend,
 			})
 		}
 		
 		// Add some random events
 		if (random() > 0.7) {
 			const eventTypes = [
-				{ title: 'Team Meeting', time: [9, 0], duration: 1 },
-				{ title: 'Client Call', time: [14, 30], duration: 0.5 },
-				{ title: 'Project Review', time: [16, 0], duration: 2 },
-				{ title: 'Lunch Break', time: [12, 0], duration: 1 },
-				{ title: 'Code Review', time: [10, 0], duration: 1.5 }
+				{ title: 'Team Meeting', time: [9, 0], duration: 1, ...EVENT_COLORS.teamMeeting },
+				{ title: 'Client Call', time: [14, 30], duration: 0.5, ...EVENT_COLORS.clientCall },
+				{ title: 'Project Review', time: [16, 0], duration: 2, ...EVENT_COLORS.projectReview },
+				{ title: 'Lunch Break', time: [12, 0], duration: 1, ...EVENT_COLORS.lunchBreak },
+				{ title: 'Code Review', time: [10, 0], duration: 1.5, ...EVENT_COLORS.codeReview },
 			]
 			
 			const eventType = eventTypes[Math.floor(random() * eventTypes.length)]
-			const [hours, minutes] = eventType.time
+			const { title, time, color, foregroundColor } = eventType
+			const [hours, minutes] = time
 			
 			dummyEvents.push({
 				id: `event-${year}-${monthIndex}-${day}-${Math.random().toString(36).substr(2, 9)}`,
-				title: eventType.title,
+				title,
 				date: new Date(year, monthIndex, day, hours, minutes),
-				description: `Scheduled ${eventType.title.toLowerCase()}`,
-				icon: eventType.title === 'Team Meeting' ? MeetingRoomIcon : undefined,
-				color: eventType.title === 'Client Call' ? '#e0f2fe' : undefined,
+				description: `Scheduled ${title.toLowerCase()}`,
+				icon: title === 'Team Meeting' ? MeetingRoomIcon : undefined,
+				color,
+				foregroundColor,
 			})
 		}
 	}
@@ -135,7 +151,7 @@ function generateDummyEventsForMonth(monthIndex, year) {
 		endDate: new Date(year, monthIndex, 7, 17, 0),
 		description: 'Annual technology conference',
 		icon: Calendar01Icon,
-		color: '#d6e8ff',
+		...EVENT_COLORS.conference,
 	})
 	
 	dummyEvents.push({
@@ -145,7 +161,7 @@ function generateDummyEventsForMonth(monthIndex, year) {
 		endDate: new Date(year, monthIndex, 18, 23, 59),
 		description: 'Family vacation time',
 		icon: BeachIcon,
-		color: '#fff0d6',
+		...EVENT_COLORS.vacation,
 	})
 	
 	// Add some all-day events
@@ -155,7 +171,7 @@ function generateDummyEventsForMonth(monthIndex, year) {
 		date: new Date(year, monthIndex, 1, 0, 0),
 		description: 'National holiday - office closed',
 		icon: PartyIcon,
-		color: '#ffe0e0',
+		...EVENT_COLORS.holiday,
 	})
 	
 	if (daysInMonth >= 25) {
@@ -165,7 +181,7 @@ function generateDummyEventsForMonth(monthIndex, year) {
 			date: new Date(year, monthIndex, 25, 0, 0),
 			description: 'Important project deadline',
 			icon: AlertCircleIcon,
-			color: '#fde8e8',
+			...EVENT_COLORS.deadline,
 		})
 	}
 	
@@ -204,12 +220,6 @@ function getEventsForSurroundingMonths(monthIndex, year) {
 	]
 }
 
-// Generate dummy events for the current month (backward compatibility wrapper)
-function generateDummyEvents() {
-    const now = new Date()
-    return getEventsForMonth(now.getMonth(), now.getFullYear())
-}
-
 function handleEventClick(event) {
     console.log('Event clicked:', event)
     alert(`Event: ${event.title}\nDescription: ${event.description || 'No description'}`)
@@ -232,7 +242,7 @@ function handleDateRangeSelect(start, end) {
 function handleEventMoveRequest({ respond, event, sourceDate, targetDate }) {
 	window.setTimeout(() => {
 		const ok = window.confirm(
-			`Move "${event.title}" to ${targetDate.toLocaleDateString()}? (Cancel = decline)`
+			`Move "${event.title}" from ${sourceDate.toLocaleDateString()} to ${targetDate.toLocaleDateString()}? (Cancel = decline)`
 		)
 		respond(ok)
 	}, 50)

@@ -37,27 +37,24 @@
 						v-if="showColumnOptionsButton"
 						class="actions table-column-options-header"
 					>
-						<div class="table-column-options-header-content">
-							<span v-if="activeLayoutLabel" class="table-layout-label">{{ activeLayoutLabel }}</span>
-							<span class="actions-menu-trigger">
-								<button
-									ref="columnOptionsButtonRef"
-									type="button"
-									aria-haspopup="dialog"
-									aria-label="Column options"
-									:aria-expanded="columnOptionsOpen ? 'true' : 'false'"
-									@click="openColumnOptions"
-								>
-									<HugeiconsIcon
-										:icon="LayoutGridIcon"
-										width="0.95em"
-										height="0.95em"
-										:strokeWidth="2"
-										aria-hidden="true"
-									/>
-								</button>
-							</span>
-						</div>
+						<span class="actions-menu-trigger">
+							<button
+								ref="columnOptionsButtonRef"
+								type="button"
+								aria-haspopup="dialog"
+								aria-label="Column options"
+								:aria-expanded="columnOptionsOpen ? 'true' : 'false'"
+								@click.stop="openColumnOptions"
+							>
+								<HugeiconsIcon
+									:icon="LayoutGridIcon"
+									width="0.95em"
+									height="0.95em"
+									:strokeWidth="2"
+									aria-hidden="true"
+								/>
+							</button>
+						</span>
 					</th>
 				</tr>
 			</thead>
@@ -71,7 +68,12 @@
 					<td
 						v-for="(header, cellIndex) in visibleHeaders"
 						:key="header.key || cellIndex"
-						:class="[cellClasses(header), header.class]"
+						:colspan="bodyColumnColspan(cellIndex) || undefined"
+						:class="[
+							cellClasses(header),
+							header.class,
+							isLastColumnWithOptions(cellIndex) ? 'table-last-column-with-options' : null,
+						]"
 					>
 						<slot
 							v-if="slots[`cell-${header.key}`]"
@@ -89,11 +91,6 @@
 							{{ row[header.key] }}
 						</span>
 					</td>
-					<td
-						v-if="showColumnOptionsButton"
-						class="actions table-column-options-cell"
-						aria-hidden="true"
-					/>
 				</tr>
 			</tbody>
 		</table>
@@ -135,6 +132,7 @@
 		:column-keys="resolvedColumnOrder"
 		:visible-keys="visibleColumnKeys"
 		:column-priorities="resolvedColumnPriorities"
+		:default-column-priorities="defaultColumnPriorities"
 		:filters="activeFilters"
 		:rows="props.data"
 		:table-id="props.tableId"
@@ -161,11 +159,9 @@ import TableColumnFilterPopover from './TableColumnFilterPopover.vue'
 import TableColumnOptionsPopover from './TableColumnOptionsPopover.vue'
 import { useLongPress } from '../composables/useLongPress.js'
 import {
-	applyFilters,
 	buildSelectOptions,
 	cloneColumnFilterEntries,
 	cloneFilters,
-	countActiveFilters,
 	isColumnFiltered,
 	isFilterEntryActive,
 	normalizeColumnFilterEntries,
@@ -186,6 +182,10 @@ import {
 	sanitizePresetState,
 	layoutStatesEqual,
 } from '../composables/tableColumnPresets.js'
+import {
+	defaultColumnPriorityForIndex,
+	isValidColPriority,
+} from '../composables/tableColumnPriorities.js'
 
 const DEFAULT_PAGE_SIZE = 10
 
@@ -230,6 +230,10 @@ const props = defineProps({
 	horizontalScroll: {
 		type: Boolean,
 		default: false,
+	},
+	responsiveColumns: {
+		type: Boolean,
+		default: true,
 	},
 	stickyCols: {
 		type: Number,
@@ -286,6 +290,8 @@ const emit = defineEmits([
 	'column-order-change',
 	'update:columnPriorities',
 	'column-priorities-change',
+	'update:layoutLabel',
+	'layout-label-change',
 ])
 
 const attrs = useAttrs()
@@ -368,6 +374,18 @@ const showColumnOptionsButton = computed(() =>
 	props.columnOptions && manageableColumnKeys.value.length > 0,
 )
 
+function isLastVisibleColumn(index) {
+	return index === visibleHeaders.value.length - 1
+}
+
+function isLastColumnWithOptions(index) {
+	return showColumnOptionsButton.value && isLastVisibleColumn(index)
+}
+
+function bodyColumnColspan(index) {
+	return isLastColumnWithOptions(index) ? 2 : null
+}
+
 function isHeaderHidden(header) {
 	if (header.hidden) {
 		return true
@@ -386,9 +404,13 @@ const visibleColumnKeys = computed(() =>
 		.map((header) => header.key),
 )
 
-function defaultColumnPriority(header) {
-	return isValidColPriority(header?.colPriority) ? header.colPriority : null
-}
+const hasHorizontalScroll = computed(() =>
+	props.horizontalScroll || (props.stickyCols >= 1 && props.stickyCols <= 3),
+)
+
+const useResponsiveColumns = computed(() =>
+	props.responsiveColumns && !hasHorizontalScroll.value,
+)
 
 function resolvedColumnPriority(header) {
 	if (!header?.key) {
@@ -404,8 +426,34 @@ function resolvedColumnPriority(header) {
 		return isValidColPriority(override) ? override : null
 	}
 
-	return defaultColumnPriority(header)
+	if (!useResponsiveColumns.value) {
+		return null
+	}
+
+	const index = visibleHeaders.value.findIndex((item) => item.key === header.key)
+	if (index < 0) {
+		return null
+	}
+
+	return defaultColumnPriorityForIndex(header, index, useResponsiveColumns.value)
 }
+
+const defaultColumnPriorities = computed(() => {
+	if (!useResponsiveColumns.value) {
+		return Object.fromEntries(
+			visibleHeaders.value
+				.filter((header) => isValidColPriority(header?.colPriority))
+				.map((header) => [header.key, header.colPriority]),
+		)
+	}
+
+	return Object.fromEntries(
+		visibleHeaders.value.flatMap((header, index) => {
+			const priority = defaultColumnPriorityForIndex(header, index, true)
+			return isValidColPriority(priority) ? [[header.key, priority]] : []
+		}),
+	)
+})
 
 const resolvedColumnPriorities = computed(() =>
 	Object.fromEntries(
@@ -418,10 +466,6 @@ const resolvedColumnPriorities = computed(() =>
 
 const hasColPriorities = computed(() =>
 	orderedHeaders.value.some((header) => isValidColPriority(resolvedColumnPriority(header))),
-)
-
-const hasHorizontalScroll = computed(() =>
-	props.horizontalScroll || (props.stickyCols >= 1 && props.stickyCols <= 3),
 )
 
 const needsTableWrapper = computed(() => hasColPriorities.value || hasHorizontalScroll.value)
@@ -527,10 +571,6 @@ const queryParams = computed(() => {
 
 	return params
 })
-
-function isValidColPriority(priority) {
-	return Number.isInteger(priority) && priority >= 1 && priority <= 5
-}
 
 function colPriorityClass(priority) {
 	return isValidColPriority(priority) ? `col-priority-${priority}` : null
@@ -1105,6 +1145,11 @@ const activeLayoutLabel = computed(() => {
 	return 'Custom'
 })
 
+function emitLayoutLabelChange(label) {
+	emit('update:layoutLabel', label)
+	emit('layout-label-change', label)
+}
+
 function loadDeveloperDefaults() {
 	setFilters({})
 	sortBy.value = null
@@ -1313,6 +1358,10 @@ watch(
 	{ deep: true },
 )
 
+watch(activeLayoutLabel, (label) => {
+	emitLayoutLabelChange(label)
+}, { immediate: true })
+
 watch(sortedItems, () => {
 	if (!isRemote.value) {
 		page.value = 1
@@ -1355,6 +1404,11 @@ onBeforeUnmount(() => {
 	if (fetchDebounceTimer.value !== null) {
 		clearTimeout(fetchDebounceTimer.value)
 	}
+})
+
+defineExpose({
+	layoutLabel: activeLayoutLabel,
+	loadDeveloperDefaults,
 })
 </script>
 
@@ -1443,41 +1497,19 @@ tbody tr.row-clickable {
 	margin: 0;
 }
 
-th.table-column-options-header,
-td.table-column-options-cell {
+th.table-column-options-header {
 	padding-right: 1rem;
 	text-align: right;
 	vertical-align: middle;
-}
-
-th.table-column-options-header {
 	width: auto;
 	min-width: 2.5rem;
 	max-width: none;
 	white-space: nowrap;
 }
 
-td.table-column-options-cell {
-	width: 2.5rem;
-	min-width: 2.5rem;
-	max-width: 2.5rem;
-}
-
-.table-column-options-header-content {
-	display: inline-flex;
-	align-items: center;
-	justify-content: flex-end;
-	gap: 0.5rem;
-	width: 100%;
-}
-
-.table-layout-label {
-	font-size: 0.85rem;
-	color: var(--table-muted-fg);
-	max-width: 10rem;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
+td.table-last-column-with-options {
+	padding-right: 1rem;
+	vertical-align: middle;
 }
 
 th.table-column-options-header .actions-menu-trigger {
@@ -1486,22 +1518,18 @@ th.table-column-options-header .actions-menu-trigger {
 	flex: 0 0 auto;
 }
 
-.table-scroll th.table-column-options-header,
-.table-scroll td.table-column-options-cell {
+.table-scroll {
+	min-width: 0;
+	max-width: 100%;
+	contain: inline-size;
+}
+
+.table-scroll th.table-column-options-header {
 	position: sticky;
 	right: 0;
-	z-index: 1;
+	z-index: 2;
 	background-color: var(--table-sticky-bg);
 	box-shadow: -1px 0 0 var(--border-color);
-}
-
-.table-scroll thead th.table-column-options-header {
-	z-index: 2;
-}
-
-.table-scroll table.row-hover tbody tr:hover td.table-column-options-cell,
-.table-scroll table.row-hover tbody tr:focus-within td.table-column-options-cell {
-	background-color: var(--table-sticky-hover-bg);
 }
 
 th.actions .actions-menu-trigger button {

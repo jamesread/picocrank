@@ -1,70 +1,128 @@
 <template>
 	<Section
 		title="Notifications"
-		subtitle="Block-level status messages using Femtocrank .notification with karma background classes"
+		subtitle="Block-level status messages using Femtocrank .notification-key and .notification-body"
 	>
-		<template #toolbar>
-			<button type="button" @click="resetNotifications">Reset notifications</button>
-			<button type="button" class="good" @click="showSampleNotification">Show sample</button>
-		</template>
-
-		<p>Click a notification to dismiss it.</p>
-
-		<div
-			v-for="notification in visibleNotifications"
-			:key="notification.id"
-			class="notification show"
-			:class="notification.class"
-			role="status"
-			@click="dismissNotification(notification.id)"
-		>
-			<strong>{{ notification.label }}:</strong>
-			{{ notification.message }}
-		</div>
-
-		<p v-if="visibleNotifications.length === 0" class="subtle">
-			All notifications dismissed. Use the toolbar to restore them.
+		<p>
+			Each block uses a karma type class for the key tint
+			(<code>.notification.info</code>, <code>.notification.warning</code>, …).
+			Add <code>clickable</code> when the whole notification is interactive.
 		</p>
+
+		<FormLayout class="notification-builder" @submit.prevent="addBuiltNotification">
+			<FormField label="Type" for="notification-type">
+				<select id="notification-type" v-model="builder.type">
+					<option
+						v-for="option in notificationTypeOptions"
+						:key="option.value"
+						:value="option.value"
+					>
+						{{ option.label }}
+					</option>
+				</select>
+			</FormField>
+
+			<FormField label="Key label" for="notification-label">
+				<input
+					id="notification-label"
+					v-model="builder.label"
+					type="text"
+					placeholder="Defaults from type, e.g. INFO:"
+				/>
+			</FormField>
+
+			<FormField
+				:label="builderFeatures.includes('link') ? 'Text before link' : 'Body message'"
+				for="notification-message"
+			>
+				<textarea
+					id="notification-message"
+					v-model="builder.message"
+					rows="2"
+					placeholder="Notification body text"
+					required
+				/>
+			</FormField>
+
+			<CheckGroup
+				v-model="builderFeatures"
+				:options="builderFeatureOptions"
+				name="notification-builder-features"
+			/>
+
+			<template v-if="builderFeatures.includes('link')">
+				<FormField label="Link text" for="notification-link-label">
+					<input
+						id="notification-link-label"
+						v-model="builder.linkLabel"
+						type="text"
+						placeholder="e.g. New version available"
+					/>
+				</FormField>
+
+				<FormField label="Text after link" for="notification-link-suffix">
+					<input
+						id="notification-link-suffix"
+						v-model="builder.messageSuffix"
+						type="text"
+						placeholder="e.g. — click to view release notes."
+					/>
+				</FormField>
+			</template>
+
+			<template #actions>
+				<button type="submit" class="good">Add notification</button>
+				<button type="button" @click="resetNotifications">Reset</button>
+				<button type="button" class="bad" @click="clearNotifications">Clear all</button>
+			</template>
+		</FormLayout>
+
+		<p v-if="dismissibleNotifications" class="subtle">
+			Click a dismissible notification to remove it.
+		</p>
+
+		<NotificationBlock
+			v-for="notification in notifications"
+			:key="notification.id"
+			v-bind="notificationProps(notification)"
+			:dismissible="notification.dismissible"
+			@dismiss="dismissNotification(notification.id)"
+		/>
 	</Section>
 
 	<Section
-		title="Inline notifications"
-		subtitle="Status embedded in content flow using .inline-notification with karma foreground or background classes"
+		title="Inline karma"
+		subtitle="Annotations and tags for inline status (Femtocrank 2.7)"
 	>
-		<p class="fg-info show inline-notification">
-			<strong>INFO:</strong>
-			This is an informational message.
+		<p>
+			Inline status no longer uses <code>.inline-notification</code>. Use
+			<code>.annotation</code> key/value pairs or <code>.tag</code> chips with karma type classes.
 		</p>
 
-		<p class="fg-note show inline-notification">
-			<strong>NOTE:</strong>
-			This is a note.
-		</p>
+		<span class="annotation">
+			<span class="annotation-key">fyi</span>
+			<span class="annotation-val">This is an annotation.</span>
+		</span>
 
-		<p class="fg-success show inline-notification">
-			<strong>SUCCESS:</strong>
-			This is a success message.
-		</p>
+		<span class="annotation note">
+			<span class="annotation-key">scheduled</span>
+			<span class="annotation-val">next release</span>
+		</span>
 
-		<p class="fg-important show inline-notification">
-			<strong>IMPORTANT:</strong>
-			This is an important message.
-		</p>
+		<span class="annotation good">
+			<span class="annotation-key">status</span>
+			<span class="annotation-val">active</span>
+		</span>
 
-		<p class="fg-warning show inline-notification">
-			<strong>WARNING:</strong>
-			This is a warning message.
-		</p>
+		<br /><br />
 
-		<p class="fg-severe show inline-notification">
-			<strong>SEVERE:</strong>
-			This is a severe message.
-		</p>
-
-		<p class="critical show inline-notification">
-			<strong>CRITICAL:</strong>
-			This is a critical message using a background karma class.
-		</p>
+		<span class="tag">Neutral tag</span>
+		<span class="tag info">info</span>
+		<span class="tag note">note</span>
+		<span class="tag good">good/success</span>
+		<span class="tag warning">warning</span>
+		<span class="tag severe">severe</span>
+		<span class="tag bad">bad/critical</span>
 	</Section>
 
 	<Section
@@ -87,7 +145,7 @@
 
 	<Section
 		title="In context"
-		subtitle="Inline notifications beside or below form fields"
+		subtitle="Block notifications beside form fields"
 	>
 		<FormLayout class="status-form" @submit.prevent="submitForm">
 			<FormField label="Email" for="status-email">
@@ -100,15 +158,10 @@
 				/>
 			</FormField>
 
-			<p
-				v-if="formMessage"
-				class="show inline-notification"
-				:class="formMessageClass"
-				role="status"
-			>
-				<strong>{{ formMessageLabel }}:</strong>
-				{{ formMessage }}
-			</p>
+			<NotificationBlock
+				v-if="formNotification"
+				v-bind="formNotification"
+			/>
 
 			<template #actions>
 				<button type="submit" class="good">Save</button>
@@ -123,111 +176,176 @@ import { ref, computed } from 'vue'
 import Section from '../components/Section.vue'
 import FormLayout from '../components/FormLayout.vue'
 import FormField from '../components/FormField.vue'
+import CheckGroup from '../components/CheckGroup.vue'
+import NotificationBlock from '../components/NotificationBlock.vue'
 import { useNotificationPopups } from '../composables/useNotificationPopups.js'
 
 const { show: showPopup, dismissAll: dismissAllPopups } = useNotificationPopups()
 
-const blockNotifications = ref([
-	{
-		id: 'info',
-		class: 'info',
-		label: 'INFO',
-		message: 'This is an informational message.',
-	},
-	{
-		id: 'note',
-		class: 'note',
-		label: 'NOTE',
-		message: 'This is a note.',
-	},
-	{
-		id: 'success',
-		class: 'success',
-		label: 'SUCCESS',
-		message: 'The operation completed successfully.',
-	},
-	{
-		id: 'important',
-		class: 'important',
-		label: 'IMPORTANT',
-		message: 'Please review this before continuing.',
-	},
-	{
-		id: 'warning',
-		class: 'warning',
-		label: 'WARNING',
-		message: 'This action may have side effects.',
-	},
-	{
-		id: 'severe',
-		class: 'severe',
-		label: 'SEVERE',
-		message: 'A severe problem was detected.',
-	},
-	{
-		id: 'critical',
-		class: 'critical',
-		label: 'CRITICAL',
-		message: 'Immediate attention is required.',
-	},
-])
+const notificationTypeOptions = [
+	{ value: 'info', label: 'Info' },
+	{ value: 'note', label: 'Note' },
+	{ value: 'success', label: 'Success' },
+	{ value: 'warning', label: 'Warning' },
+	{ value: 'severe', label: 'Severe' },
+	{ value: 'critical', label: 'Critical' },
+	{ value: 'old', label: 'Old' },
+]
 
-const initialNotificationIds = blockNotifications.value.map((notification) => notification.id)
+const builderFeatureOptions = [
+	{ value: 'link', label: 'Include inline link in body' },
+	{ value: 'clickable', label: 'Whole notification is clickable' },
+	{ value: 'dismissible', label: 'Dismiss on click' },
+]
 
-const visibleNotificationIds = ref([...initialNotificationIds])
-const sampleCounter = ref(0)
+const referenceNotifications = [
+	{
+		id: 'ref-info',
+		type: 'info',
+		linkLabel: 'New version available',
+		linkHref: '#',
+		messageSuffix: ' — click to view release notes.',
+	},
+	{
+		id: 'ref-note',
+		type: 'note',
+		messagePrefix: 'See the ',
+		linkLabel: 'release notes',
+		linkHref: '#',
+		messageSuffix: ' for what changed.',
+	},
+	{
+		id: 'ref-success',
+		type: 'success',
+		message: 'This is a success message.',
+	},
+	{
+		id: 'ref-warning',
+		type: 'warning',
+		messagePrefix: 'Disk usage is high — ',
+		linkLabel: 'manage storage',
+		linkHref: '#',
+		messageSuffix: ' before continuing.',
+	},
+	{
+		id: 'ref-severe',
+		type: 'severe',
+		messagePrefix: 'Service is degraded. Check the ',
+		linkLabel: 'status page',
+		linkHref: '#',
+		messageSuffix: ' for updates.',
+	},
+	{
+		id: 'ref-critical',
+		type: 'critical',
+		clickable: true,
+		linkLabel: 'Database unreachable',
+		linkHref: '#',
+		messageSuffix: ' — follow the recovery runbook immediately.',
+	},
+]
 
-const visibleNotifications = computed(() =>
-	blockNotifications.value.filter((notification) => visibleNotificationIds.value.includes(notification.id))
+let nextNotificationId = 1
+
+const builder = ref({
+	type: 'info',
+	label: '',
+	message: '',
+	linkLabel: '',
+	messageSuffix: '',
+})
+
+const builderFeatures = ref([])
+
+const notifications = ref(referenceNotifications.map(cloneNotification))
+
+const dismissibleNotifications = computed(() =>
+	notifications.value.some((notification) => notification.dismissible)
 )
 
 const formEmail = ref('')
-const formMessage = ref('')
-const formMessageClass = ref('fg-note')
-const formMessageLabel = ref('NOTE')
+const formNotification = ref(null)
 
-function dismissNotification(id) {
-	visibleNotificationIds.value = visibleNotificationIds.value.filter((visibleId) => visibleId !== id)
+function cloneNotification(notification) {
+	return { ...notification }
+}
+
+function notificationProps(notification) {
+	return {
+		type: notification.type,
+		label: notification.label,
+		message: notification.message,
+		messagePrefix: notification.messagePrefix,
+		linkLabel: notification.linkLabel,
+		linkHref: notification.linkHref,
+		linkTo: notification.linkTo,
+		messageSuffix: notification.messageSuffix,
+		clickable: notification.clickable,
+	}
+}
+
+function createNotificationFromBuilder() {
+	const includeLink = builderFeatures.value.includes('link')
+	const id = `custom-${nextNotificationId++}`
+	const trimmedMessage = builder.value.message.trim()
+
+	return {
+		id,
+		type: builder.value.type,
+		label: builder.value.label.trim(),
+		message: includeLink ? '' : trimmedMessage,
+		messagePrefix: includeLink ? trimmedMessage : '',
+		linkLabel: includeLink ? builder.value.linkLabel.trim() : '',
+		linkHref: includeLink ? '#' : '',
+		messageSuffix: includeLink ? builder.value.messageSuffix : '',
+		clickable: builderFeatures.value.includes('clickable'),
+		dismissible: builderFeatures.value.includes('dismissible'),
+	}
+}
+
+function addBuiltNotification() {
+	notifications.value.push(createNotificationFromBuilder())
 }
 
 function resetNotifications() {
-	blockNotifications.value = blockNotifications.value.filter((notification) =>
-		initialNotificationIds.includes(notification.id)
-	)
-	visibleNotificationIds.value = [...initialNotificationIds]
-	sampleCounter.value = 0
+	notifications.value = referenceNotifications.map(cloneNotification)
+	builder.value = {
+		type: 'info',
+		label: '',
+		message: '',
+		linkLabel: '',
+		messageSuffix: '',
+	}
+	builderFeatures.value = []
+	nextNotificationId = 1
 }
 
-function showSampleNotification() {
-	sampleCounter.value += 1
-	const sample = {
-		id: `sample-${sampleCounter.value}`,
-		class: 'info',
-		label: 'INFO',
-		message: `Sample notification #${sampleCounter.value}.`,
-	}
-	blockNotifications.value.push(sample)
-	visibleNotificationIds.value = [...visibleNotificationIds.value, sample.id]
+function clearNotifications() {
+	notifications.value = []
+}
+
+function dismissNotification(id) {
+	notifications.value = notifications.value.filter((notification) => notification.id !== id)
 }
 
 function submitForm() {
 	if (!formEmail.value.trim()) {
-		formMessageClass.value = 'fg-warning'
-		formMessageLabel.value = 'WARNING'
-		formMessage.value = 'Please enter an email address.'
+		formNotification.value = {
+			type: 'warning',
+			message: 'Please enter an email address.',
+		}
 		return
 	}
 
-	formMessageClass.value = 'fg-success'
-	formMessageLabel.value = 'SUCCESS'
-	formMessage.value = `Saved preferences for ${formEmail.value.trim()}.`
+	formNotification.value = {
+		type: 'success',
+		message: `Saved preferences for ${formEmail.value.trim()}.`,
+	}
 }
 
 function clearForm() {
 	formEmail.value = ''
-	formMessage.value = ''
-	formMessageClass.value = 'fg-note'
-	formMessageLabel.value = 'NOTE'
+	formNotification.value = null
 }
 
 function showSuccessPopup() {
@@ -270,7 +388,8 @@ function showStackedPopups() {
 </script>
 
 <style scoped>
+.notification-builder,
 .status-form {
-	max-width: 32rem;
+	max-width: 36rem;
 }
 </style>

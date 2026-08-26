@@ -41,7 +41,7 @@ html[data-theme="dark"] {
 	--ctp-good-fg: var(--ctp-crust);
 
 	--body-bg-color: var(--ctp-base);
-	--surface-bg-color: var(--ctp-mantle);
+	--section-bg-color: var(--ctp-mantle);
 	--standout-bg-color: var(--ctp-mantle);
 	--section-header-bg-color: var(--ctp-mantle);
 	--shadow-color: var(--ctp-shadow-strong);
@@ -50,8 +50,6 @@ html[data-theme="dark"] {
 	--muted-text-color: var(--ctp-subtext0);
 	--annotation-key-color: var(--ctp-subtext0);
 	--link-color: var(--ctp-blue);
-	--nav-grid-accent-fg: var(--link-color);
-	--nav-grid-accent-bg: var(--link-color);
 	--border-color: var(--ctp-surface1);
 
 	--hover-background-color: var(--ctp-surface0);
@@ -74,6 +72,9 @@ html[data-theme="dark"] {
 	--input-fg-color: var(--ctp-text);
 	--control-option-bg-color: var(--ctp-surface0);
 	--control-hover-bg-color: var(--ctp-surface1);
+	--control-checked-bg: color-mix(in srgb, var(--ctp-green) 28%, var(--standout-bg-color));
+	--control-checked-hover-bg: color-mix(in srgb, var(--ctp-green) 36%, var(--standout-bg-color));
+	--control-checked-fg: var(--ctp-text);
 	--menu-hover-bg-color: var(--ctp-surface0);
 
 	--table-row-hover-bg: var(--ctp-surface0);
@@ -96,19 +97,11 @@ html[data-theme="dark"] {
 	--karma-bad: var(--ctp-red);
 	--karma-warning: var(--ctp-yellow);
 	--karma-severe: var(--ctp-maroon);
-	--karma-important: var(--ctp-peach);
 	--karma-note: var(--ctp-sapphire);
 	--karma-info: var(--ctp-surface1);
 	--karma-old: var(--ctp-overlay0);
 
-	--karma-good-fg: var(--ctp-green);
-	--karma-bad-fg: var(--ctp-red);
-	--karma-warning-fg: var(--ctp-yellow);
-	--karma-severe-fg: var(--ctp-maroon);
-	--karma-important-fg: var(--ctp-peach);
-	--karma-note-fg: var(--ctp-sapphire);
-	--karma-info-fg: var(--ctp-subtext0);
-	--karma-old-fg: var(--ctp-overlay1);
+	--karma-on-bg-fg: var(--ctp-good-fg);
 }
 
 html[data-theme="light"] {
@@ -144,7 +137,7 @@ html[data-theme="light"] {
 	--ctp-good-fg: var(--ctp-base);
 
 	--body-bg-color: var(--ctp-base);
-	--surface-bg-color: var(--ctp-mantle);
+	--section-bg-color: var(--ctp-mantle);
 	--standout-bg-color: var(--ctp-mantle);
 	--section-header-bg-color: var(--ctp-mantle);
 	--shadow-color: var(--ctp-shadow-strong);
@@ -153,8 +146,6 @@ html[data-theme="light"] {
 	--muted-text-color: var(--ctp-subtext0);
 	--annotation-key-color: var(--ctp-subtext0);
 	--link-color: var(--ctp-blue);
-	--nav-grid-accent-fg: var(--link-color);
-	--nav-grid-accent-bg: var(--link-color);
 	--border-color: var(--ctp-surface1);
 
 	--hover-background-color: var(--ctp-surface0);
@@ -177,6 +168,9 @@ html[data-theme="light"] {
 	--input-fg-color: var(--ctp-text);
 	--control-option-bg-color: var(--ctp-surface0);
 	--control-hover-bg-color: var(--ctp-surface1);
+	--control-checked-bg: color-mix(in srgb, var(--ctp-green) 20%, var(--standout-bg-color));
+	--control-checked-hover-bg: color-mix(in srgb, var(--ctp-green) 28%, var(--standout-bg-color));
+	--control-checked-fg: var(--ctp-text);
 	--menu-hover-bg-color: var(--ctp-surface0);
 
 	--table-row-hover-bg: var(--ctp-surface0);
@@ -199,17 +193,9 @@ html[data-theme="light"] {
 	--karma-bad: var(--ctp-red);
 	--karma-warning: var(--ctp-yellow);
 	--karma-severe: var(--ctp-maroon);
-	--karma-important: var(--ctp-peach);
 	--karma-note: var(--ctp-sapphire);
 	--karma-info: var(--ctp-surface1);
 	--karma-old: var(--ctp-overlay0);
 
-	--karma-good-fg: var(--ctp-green);
-	--karma-bad-fg: var(--ctp-red);
-	--karma-warning-fg: var(--ctp-yellow);
-	--karma-severe-fg: var(--ctp-maroon);
-	--karma-important-fg: var(--ctp-peach);
-	--karma-note-fg: var(--ctp-sapphire);
-	--karma-info-fg: var(--ctp-subtext0);
-	--karma-old-fg: var(--ctp-overlay1);
+	--karma-on-bg-fg: var(--ctp-good-fg);
 }

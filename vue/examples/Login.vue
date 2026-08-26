@@ -9,11 +9,8 @@
 </template>
 
 <script setup>
-import { useRouter } from 'vue-router';
 import Section from '../components/Section.vue';
 import Login from '../components/Login.vue';
-
-const router = useRouter();
 
 // Handle local login
 function handleLocalLogin(credentials) {

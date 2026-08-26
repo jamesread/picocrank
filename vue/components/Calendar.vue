@@ -12,6 +12,8 @@ export interface CalendarEvent {
   icon?: unknown
   /** Optional CSS color overriding the default event background. */
   color?: string
+  /** Optional CSS color for event title/time when using a custom background. */
+  foregroundColor?: string
   [key: string]: any
 }
 
@@ -23,7 +25,7 @@ export interface CalendarEventMoveRequest {
   /** Calendar cell where the event was dropped. */
   targetDate: Date
   /** Invoke exactly once with the outcome. If omitted until timeout, the move is treated as rejected. */
-  respond: (accepted: boolean) => void
+  respond: (_accepted: boolean) => void
 }
 
 export interface CalendarProps {
@@ -41,9 +43,9 @@ export interface CalendarProps {
    */
   eventMoveResponseTimeoutMs?: number
   // Formatter functions
-  getEventDate?: (event: CalendarEvent) => Date | null
-  getEventDateRange?: (event: CalendarEvent) => { start: Date | null; end: Date | null }
-  formatEventTime?: (event: CalendarEvent, date: Date) => string
+  getEventDate?: (_event: CalendarEvent) => Date | null
+  getEventDateRange?: (_event: CalendarEvent) => { start: Date | null; end: Date | null }
+  formatEventTime?: (_event: CalendarEvent, _date: Date) => string
   // Customization
   showNavigation?: boolean
   /** When true, day titles show ordinal + full month name (e.g. "21st July") instead of the day number alone. */
@@ -87,8 +89,8 @@ const currentDate = computed(() => {
   return internalCurrentDate.value
 })
 
-const currentMonth = computed(() => currentDate.value.getMonth())
-const currentYear = computed(() => currentDate.value.getFullYear())
+const viewMonth = computed(() => currentDate.value.getMonth())
+const viewYear = computed(() => currentDate.value.getFullYear())
 
 // Compute the first visible day (Monday) for the current month view
 function getStartOfGrid(date: Date): Date {
@@ -130,7 +132,7 @@ function isPastDay(date: Date): boolean {
 }
 
 // Get event date range
-function getEventDateRange(event: CalendarEvent): { start: Date | null; end: Date | null } {
+function resolveEventDateRange(event: CalendarEvent): { start: Date | null; end: Date | null } {
   if (props.getEventDateRange) {
     return props.getEventDateRange(event)
   }
@@ -158,7 +160,7 @@ function getEventsForDate(date: Date): CalendarEvent[] {
   targetDate.setHours(0, 0, 0, 0)
 
   return props.events.filter(event => {
-    const { start, end } = getEventDateRange(event)
+    const { start, end } = resolveEventDateRange(event)
     
     if (!start) return false
     
@@ -177,7 +179,7 @@ function getEventsForDate(date: Date): CalendarEvent[] {
 
 // Check if an event is a multi-day event
 function isMultiDayEvent(event: CalendarEvent): boolean {
-  const { start, end } = getEventDateRange(event)
+  const { start, end } = resolveEventDateRange(event)
   
   if (!start || !end) return false
 
@@ -192,7 +194,7 @@ function isMultiDayEvent(event: CalendarEvent): boolean {
 
 // Get the position of an event within a multi-day range for a specific date
 function getMultiDayPosition(event: CalendarEvent, date: Date): 'start' | 'middle' | 'end' | 'single' {
-  const { start, end } = getEventDateRange(event)
+  const { start, end } = resolveEventDateRange(event)
   
   if (!start || !end) return 'single'
 
@@ -218,7 +220,7 @@ function formatEventTimeDefault(event: CalendarEvent, date: Date): string {
     return props.formatEventTime(event, date)
   }
   
-  const { start, end } = getEventDateRange(event)
+  const { start, end } = resolveEventDateRange(event)
   const position = getMultiDayPosition(event, date)
 
   if (!start || !end) return 'No time'
@@ -237,8 +239,14 @@ function formatEventTimeDefault(event: CalendarEvent, date: Date): string {
 }
 
 function getEventStyle(event: CalendarEvent): Record<string, string> | undefined {
-  if (!event.color) return undefined
-  return { '--event-color': event.color }
+  const style: Record<string, string> = {}
+  if (event.color) {
+    style['--event-color'] = event.color
+  }
+  if (event.foregroundColor) {
+    style['--event-foreground-color'] = event.foregroundColor
+  }
+  return Object.keys(style).length > 0 ? style : undefined
 }
 
 // Get ordinal suffix for a number (1st, 2nd, 3rd, 4th, etc.)
@@ -275,25 +283,25 @@ const calendarDays = computed(() => {
 // Navigation functions
 function previousMonth() {
   if (props.currentMonth !== undefined && props.currentYear !== undefined) {
-    const newMonth = currentMonth.value === 0 ? 11 : currentMonth.value - 1
-    const newYear = currentMonth.value === 0 ? currentYear.value - 1 : currentYear.value
+    const newMonth = viewMonth.value === 0 ? 11 : viewMonth.value - 1
+    const newYear = viewMonth.value === 0 ? viewYear.value - 1 : viewYear.value
     emit('month-change', newMonth, newYear)
     // Optimistically update grid anchor for smooth transition
     gridStartDate.value = getStartOfGrid(new Date(newYear, newMonth, 1))
   } else {
-    internalCurrentDate.value = new Date(currentYear.value, currentMonth.value - 1, 1)
+    internalCurrentDate.value = new Date(viewYear.value, viewMonth.value - 1, 1)
     gridStartDate.value = getStartOfGrid(internalCurrentDate.value)
   }
 }
 
 function nextMonth() {
   if (props.currentMonth !== undefined && props.currentYear !== undefined) {
-    const newMonth = currentMonth.value === 11 ? 0 : currentMonth.value + 1
-    const newYear = currentMonth.value === 11 ? currentYear.value + 1 : currentYear.value
+    const newMonth = viewMonth.value === 11 ? 0 : viewMonth.value + 1
+    const newYear = viewMonth.value === 11 ? viewYear.value + 1 : viewYear.value
     emit('month-change', newMonth, newYear)
     gridStartDate.value = getStartOfGrid(new Date(newYear, newMonth, 1))
   } else {
-    internalCurrentDate.value = new Date(currentYear.value, currentMonth.value + 1, 1)
+    internalCurrentDate.value = new Date(viewYear.value, viewMonth.value + 1, 1)
     gridStartDate.value = getStartOfGrid(internalCurrentDate.value)
   }
 }
@@ -325,7 +333,7 @@ function adjustByWeeks(weeks: number): void {
 
   if (props.currentMonth !== undefined && props.currentYear !== undefined) {
     const { month, year } = getVisibleMonthYear(newStart)
-    if (month !== currentMonth.value || year !== currentYear.value) {
+    if (month !== viewMonth.value || year !== viewYear.value) {
       emit('month-change', month, year)
       // Set flag to prevent watcher from resetting our scroll position
       isScrolling.value = true
@@ -589,9 +597,9 @@ function onDayDrop(dayDate: Date, ev: DragEvent): void {
 }
 
 // Sync grid start when controlled month/year props change (but not during scrolling)
-watch([currentMonth, currentYear], () => {
+watch([viewMonth, viewYear], () => {
   if (isScrolling.value) return
-  const anchor = new Date(currentYear.value, currentMonth.value, 1)
+  const anchor = new Date(viewYear.value, viewMonth.value, 1)
   gridStartDate.value = getStartOfGrid(anchor)
 })
 
@@ -600,7 +608,7 @@ watch([currentMonth, currentYear], () => {
 <template>
   <div class="calendar-wrapper">
     <div v-if="showNavigation" class="calendar-header-nav">
-      <h2 class="calendar-title">{{ monthNames[currentMonth] }} {{ currentYear }}</h2>
+      <h2 class="calendar-title">{{ monthNames[viewMonth] }} {{ viewYear }}</h2>
       <div class="calendar-nav-buttons">
         <slot name="nav-buttons">
           <button @click="previousMonth" class="button neutral">‹</button>
@@ -638,8 +646,8 @@ watch([currentMonth, currentYear], () => {
           :class="{
             'today': day.date.toDateString() === new Date().toDateString(),
             'weekend': day.date.getDay() === 0 || day.date.getDay() === 6,
-            'prev-month': day.date.getMonth() !== currentMonth && day.date.getMonth() !== (currentMonth + 1) % 12,
-            'next-month': day.date.getMonth() !== currentMonth && day.date.getMonth() === (currentMonth + 1) % 12,
+            'prev-month': day.date.getMonth() !== viewMonth && day.date.getMonth() !== (viewMonth + 1) % 12,
+            'next-month': day.date.getMonth() !== viewMonth && day.date.getMonth() === (viewMonth + 1) % 12,
             'past': isPastDay(day.date),
             'range-single': rangeHighlightForDate(day.date) === 'single',
             'range-start': rangeHighlightForDate(day.date) === 'start',
@@ -978,6 +986,18 @@ watch([currentMonth, currentYear], () => {
   background: var(--event-color);
   border-color: color-mix(in srgb, var(--event-color) 75%, var(--calendar-event-custom-border-mix));
   filter: brightness(0.92);
+}
+
+.calendar-event.has-custom-color .event-title {
+  color: var(--event-foreground-color, var(--calendar-event-title-fg));
+}
+
+.calendar-event.has-custom-color .event-time {
+  color: var(--event-foreground-color, var(--calendar-muted-fg));
+}
+
+.calendar-event.has-custom-color .multi-day-indicator {
+  color: var(--event-foreground-color, var(--calendar-accent-fg));
 }
 
 .event-icon {

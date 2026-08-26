@@ -8,7 +8,7 @@
 			@tab-change="onTabChange"
 		>
 			<!-- Custom tab: Magic Link Login -->
-			<template #tab-magic-link="{ tab }">
+			<template #tab-magic-link>
 				<div class="login-section">
 					<form @submit.prevent="handleMagicLinkLogin" class="magic-link-form">
 						<input
@@ -30,7 +30,7 @@
 			</template>
 
 			<!-- Custom tab: SSO Login -->
-			<template #tab-sso="{ tab }">
+			<template #tab-sso>
 				<div class="login-section">
 					<div class="sso-providers">
 						<button
@@ -54,11 +54,8 @@
 
 <script setup>
 import { ref } from 'vue';
-import { useRouter } from 'vue-router';
 import Section from '../components/Section.vue';
 import Login from '../components/Login.vue';
-
-const router = useRouter();
 
 // Custom tabs configuration
 const customTabs = ref([
@@ -232,17 +229,8 @@ function handleSSOLogin(provider) {
 }
 
 .magic-link-form input {
-	padding: 0.75rem;
-	border-radius: 4px;
-	font-size: 1em;
 	width: 100%;
 	box-sizing: border-box;
-}
-
-.magic-link-form input:focus {
-	outline: none;
-	border-color: var(--primary-color, #007bff);
-	box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
 }
 
 .magic-link-form button,

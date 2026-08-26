@@ -5,22 +5,13 @@
 	--table-header-active-fg: var(--link-color);
 	--table-header-active-bg: var(--hover-background-color);
 	--tab-fg: var(--muted-text-color);
-	--tab-active-fg: var(--link-color);
-	--tab-focus-outline-color: var(--tab-active-fg);
+	--tab-active-fg: var(--control-checked-fg);
+	--tab-active-bg: var(--control-checked-bg);
+	--tab-active-hover-bg: var(--control-checked-hover-bg);
 
-	/* Default light: bright bold blues for icons and active fill. */
-	--nav-grid-accent-fg: #007dff;
-	--nav-grid-accent-bg: #0066cc;
-	--nav-grid-active-fg: var(--button-on-accent-fg);
-	--nav-grid-muted-fg: var(--muted-text-color);
-	--nav-grid-border: var(--border-color);
-	--nav-grid-hover-bg: var(--hover-background-color);
-	--nav-grid-indicator-bg: var(--button-bad-bg);
-	--nav-grid-indicator-fg: var(--button-on-accent-fg);
-	--nav-grid-ring-bg: var(--surface-bg-color);
-	--nav-grid-disabled-fg: var(--disabled-text-color);
-	--nav-grid-shadow: var(--shadow-color);
-	--nav-grid-hover-shadow: color-mix(in srgb, var(--nav-grid-shadow) 50%, transparent);
+	--hover-background-color: color-mix(in srgb, var(--body-bg-color) 45%, var(--section-bg-color));
+	--control-hover-bg-color: var(--hover-background-color);
+	--sidebar-hover-bg-color: var(--hover-background-color);
 
 	--quick-search-dialog-bg: var(--standout-bg-color);
 	--quick-search-dialog-fg: var(--text-color);
@@ -31,12 +22,9 @@
 	--quick-search-muted-fg: var(--muted-text-color);
 	--quick-search-subtle-fg: var(--annotation-key-color);
 	--quick-search-focus-outline: var(--focus-outline-color);
-	--quick-search-highlight-bg: var(--karma-important);
+	--quick-search-highlight-bg: var(--karma-warning-tint);
 	--quick-search-hover-bg: var(--hover-background-color);
 	--quick-search-hover-fg: var(--hover-text-color);
-
-	--breadcrumbs-separator-fg: var(--muted-text-color);
-	--breadcrumbs-link-hover-bg: var(--hover-background-color);
 
 	--radio-group-focus-outline: var(--focus-outline-color);
 	--radio-group-checked-hover-bg: var(--control-checked-hover-bg);
@@ -44,12 +32,12 @@
 
 	--login-input-focus-outline: var(--focus-outline-color);
 	--login-error-bg: var(--karma-bad);
-	--login-error-fg: var(--karma-bad-fg);
+	--login-error-fg: var(--karma-on-bg-fg);
 	--login-muted-fg: var(--muted-text-color);
 
 	--table-muted-fg: var(--muted-text-color);
 
-	--table-popover-bg: var(--surface-bg-color);
+	--table-popover-bg: var(--section-bg-color);
 	--table-popover-border: var(--border-color);
 	--table-popover-shadow: 0 8px 24px color-mix(in srgb, var(--shadow-color) 60%, transparent);
 	--table-popover-muted-fg: var(--muted-text-color);
@@ -57,17 +45,17 @@
 	--table-popover-item-bg: var(--standout-bg-color);
 	--table-popover-item-drag-border: var(--text-color);
 	--table-popover-divider: var(--border-color);
-	--table-popover-error-fg: var(--karma-bad-fg);
-	--table-popover-success-fg: var(--karma-good-fg);
+	--table-popover-error-fg: var(--karma-bad);
+	--table-popover-success-fg: var(--karma-good);
 
 	--tab-border: var(--border-color);
 	--tab-hover-fg: var(--text-color);
 	--tab-hover-bg: var(--hover-background-color);
 
 	--calendar-chrome-bg: var(--standout-bg-color);
-	--calendar-surface-bg: var(--surface-bg-color);
+	--calendar-surface-bg: var(--section-bg-color);
 	--calendar-border: var(--border-color);
-	--calendar-error-fg: var(--karma-bad-fg);
+	--calendar-error-fg: var(--karma-bad);
 	--calendar-loading-overlay-bg: color-mix(in srgb, var(--calendar-surface-bg) 60%, transparent);
 	--calendar-day-fg: var(--text-color);
 	--calendar-muted-fg: var(--muted-text-color);
@@ -75,23 +63,82 @@
 	--calendar-day-hover-bg: color-mix(in srgb, var(--link-color) 8%, var(--calendar-surface-bg));
 	--calendar-day-muted-bg: var(--standout-bg-color);
 	--calendar-day-muted-hover-bg: var(--table-uneditable-bg);
-	--calendar-today-bg: var(--karma-important);
-	--calendar-today-hover-bg: var(--karma-note);
+	--calendar-today-bg: var(--karma-warning-tint);
+	--calendar-today-hover-bg: var(--karma-note-tint);
 	--calendar-range-accent: var(--link-color);
 	--calendar-range-bg-strong: color-mix(in srgb, var(--link-color) 22%, transparent);
 	--calendar-range-bg: color-mix(in srgb, var(--link-color) 14%, transparent);
 	--calendar-range-bg-subtle: color-mix(in srgb, var(--link-color) 10%, transparent);
 	--calendar-event-bg: var(--karma-good);
-	--calendar-event-border: color-mix(in srgb, var(--karma-good-fg) 35%, var(--karma-good));
-	--calendar-event-hover-bg: color-mix(in srgb, var(--karma-good) 80%, var(--karma-good-fg));
+	--calendar-event-border: color-mix(in srgb, var(--karma-on-bg-fg) 35%, var(--karma-good));
+	--calendar-event-hover-bg: color-mix(in srgb, var(--karma-good) 80%, var(--karma-on-bg-fg));
 	--calendar-event-title-fg: var(--text-color);
 	--calendar-event-shadow: 0 1px 2px color-mix(in srgb, var(--shadow-color) 50%, transparent);
 	--calendar-event-hover-shadow: 0 2px 4px color-mix(in srgb, var(--shadow-color) 60%, transparent);
 	--calendar-more-bg: var(--standout-bg-color);
 	--calendar-event-custom-border-mix: var(--karma-on-bg-fg);
+
+	--danger-zone-border: color-mix(in srgb, var(--karma-bad) 35%, var(--border-color));
+	--danger-zone-bg: var(--standout-bg-color);
+	--danger-zone-summary-hover-bg: var(--karma-bad-tint);
+	--danger-zone-warning-fg: var(--muted-text-color);
+	--danger-zone-focus-outline: var(--karma-bad-border);
 }
 
 table thead th {
 	color: var(--table-header-fg);
 }
+
+/* Flex children default to min-width: auto, which lets wide tables expand the page. */
+#content,
+#content main,
+section .section-content {
+	min-width: 0;
+}
+
+/* Femtocrank 2.7 compacts section toolbars; keep pre-upgrade default button padding. */
+section .section-header [role="toolbar"] button,
+section .section-header [role="toolbar"] .button {
+	padding-top: .4em;
+	padding-bottom: .4em;
+	padding-left: 1em;
+	padding-right: 1em;
+	min-width: 0;
+	line-height: normal;
+}
+}
+
+/*
+ * Responsive column priorities: classes col-priority-1 … col-priority-5 on th/td only
+ * take effect inside a .responsive-cols wrapper via container queries (not standalone
+ * class rules). Mirrored here (outside @layer) so they win the cascade and are easy to find.
+ * See also node_modules/femtocrank/style.css (.responsive-cols / @container responsive-cols).
+ */
+.responsive-cols {
+	container-type: inline-size;
+	container-name: responsive-cols;
+	display: block;
+	width: 100%;
+	min-width: 0;
+	max-width: 100%;
+}
+
+@container responsive-cols (max-width: 38rem) {
+	:is(th, td).col-priority-1 { display: none; }
+}
+
+@container responsive-cols (max-width: 34rem) {
+	:is(th, td).col-priority-2 { display: none; }
+}
+
+@container responsive-cols (max-width: 30rem) {
+	:is(th, td).col-priority-3 { display: none; }
+}
+
+@container responsive-cols (max-width: 26rem) {
+	:is(th, td).col-priority-4 { display: none; }
+}
+
+@container responsive-cols (max-width: 22rem) {
+	:is(th, td).col-priority-5 { display: none; }
 }

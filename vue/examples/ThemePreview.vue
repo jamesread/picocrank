@@ -40,21 +40,26 @@
 	</Section>
 
 	<Section title="Notifications" subtitle="Block-level karma status">
-		<div class="notification show good" role="status">
-			<strong>GOOD:</strong> Theme tokens are applying to karma backgrounds.
-		</div>
-		<div class="notification show bad" role="status">
-			<strong>BAD:</strong> Check contrast on error surfaces.
-		</div>
-		<div class="notification show warning" role="status">
-			<strong>WARNING:</strong> Accent and border colors should stay readable.
-		</div>
-		<p class="fg-success show inline-notification">
-			<strong>SUCCESS:</strong> Inline notification with foreground karma.
-		</p>
-		<p class="fg-warning show inline-notification">
-			<strong>WARNING:</strong> Another inline status line.
-		</p>
+		<NotificationBlock
+			type="success"
+			message="Theme tokens are applying to karma backgrounds."
+		/>
+		<NotificationBlock
+			type="critical"
+			message="Check contrast on error surfaces."
+		/>
+		<NotificationBlock
+			type="warning"
+			message="Accent and border colors should stay readable."
+		/>
+		<span class="annotation good">
+			<span class="annotation-key">success</span>
+			<span class="annotation-val">Inline annotation with karma tint.</span>
+		</span>
+		<span class="annotation warning">
+			<span class="annotation-key">warning</span>
+			<span class="annotation-val">Another inline status chip.</span>
+		</span>
 	</Section>
 
 	<Section title="Form controls" subtitle="Inputs inherit theme variables">
@@ -132,6 +137,7 @@ import { inject } from 'vue'
 import Section from '../components/Section.vue'
 import FormLayout from '../components/FormLayout.vue'
 import FormField from '../components/FormField.vue'
+import NotificationBlock from '../components/NotificationBlock.vue'
 import { HEADER_THEME_SWITCHER_SELECT_ID } from '../components/ThemeSwitcher.vue'
 
 const themeSwitcherEnabled = inject('themeSwitcherEnabled')
@@ -167,13 +173,5 @@ function openThemeSwitcher() {
 	text-align: left;
 	padding: 0.5rem 0.75rem;
 	border-bottom: 1px solid var(--border-color, #d7d7d7);
-}
-
-.notification {
-	margin-bottom: 0.5rem;
-}
-
-.inline-notification {
-	margin: 0.5rem 0;
 }
 </style>

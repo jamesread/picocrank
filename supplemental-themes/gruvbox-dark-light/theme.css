@@ -35,7 +35,7 @@ html[data-theme="dark"] {
 	--gb-good-fg: var(--gb-bg0-hard);
 
 	--body-bg-color: var(--gb-bg0);
-	--surface-bg-color: var(--gb-bg1);
+	--section-bg-color: var(--gb-bg1);
 	--standout-bg-color: var(--gb-bg1);
 	--section-header-bg-color: var(--gb-bg1);
 	--shadow-color: var(--gb-shadow-strong);
@@ -44,8 +44,6 @@ html[data-theme="dark"] {
 	--muted-text-color: var(--gb-fg3);
 	--annotation-key-color: var(--gb-fg3);
 	--link-color: var(--gb-accent);
-	--nav-grid-accent-fg: var(--link-color);
-	--nav-grid-accent-bg: var(--link-color);
 	--border-color: var(--gb-bg3);
 
 	--hover-background-color: var(--gb-bg2);
@@ -68,6 +66,9 @@ html[data-theme="dark"] {
 	--input-fg-color: var(--gb-fg0);
 	--control-option-bg-color: var(--gb-bg2);
 	--control-hover-bg-color: var(--gb-bg3);
+	--control-checked-bg: color-mix(in srgb, var(--gb-green) 35%, var(--standout-bg-color));
+	--control-checked-hover-bg: color-mix(in srgb, var(--gb-green) 45%, var(--standout-bg-color));
+	--control-checked-fg: var(--gb-fg0);
 	--menu-hover-bg-color: var(--gb-bg2);
 
 	--table-row-hover-bg: var(--gb-bg2);
@@ -90,19 +91,11 @@ html[data-theme="dark"] {
 	--karma-bad: var(--gb-red);
 	--karma-warning: var(--gb-yellow);
 	--karma-severe: var(--gb-orange);
-	--karma-important: var(--gb-purple);
 	--karma-note: var(--gb-aqua);
 	--karma-info: var(--gb-bg2);
 	--karma-old: var(--gb-gray);
 
-	--karma-good-fg: var(--gb-green);
-	--karma-bad-fg: var(--gb-red);
-	--karma-warning-fg: var(--gb-yellow);
-	--karma-severe-fg: var(--gb-orange);
-	--karma-important-fg: var(--gb-purple);
-	--karma-note-fg: var(--gb-aqua);
-	--karma-info-fg: var(--gb-fg3);
-	--karma-old-fg: var(--gb-fg4);
+	--karma-on-bg-fg: var(--gb-good-fg);
 }
 
 html[data-theme="light"] {
@@ -132,7 +125,7 @@ html[data-theme="light"] {
 	--gb-good-fg: var(--gb-bg0);
 
 	--body-bg-color: var(--gb-bg0);
-	--surface-bg-color: var(--gb-bg1);
+	--section-bg-color: var(--gb-bg1);
 	--standout-bg-color: var(--gb-bg1);
 	--section-header-bg-color: var(--gb-bg1);
 	--shadow-color: var(--gb-shadow-strong);
@@ -141,8 +134,6 @@ html[data-theme="light"] {
 	--muted-text-color: var(--gb-fg3);
 	--annotation-key-color: var(--gb-fg3);
 	--link-color: var(--gb-accent);
-	--nav-grid-accent-fg: var(--link-color);
-	--nav-grid-accent-bg: var(--link-color);
 	--border-color: var(--gb-bg3);
 
 	--hover-background-color: var(--gb-bg2);
@@ -165,6 +156,9 @@ html[data-theme="light"] {
 	--input-fg-color: var(--gb-fg0);
 	--control-option-bg-color: var(--gb-bg2);
 	--control-hover-bg-color: var(--gb-bg3);
+	--control-checked-bg: color-mix(in srgb, var(--gb-green) 20%, var(--standout-bg-color));
+	--control-checked-hover-bg: color-mix(in srgb, var(--gb-green) 28%, var(--standout-bg-color));
+	--control-checked-fg: var(--gb-fg0);
 	--menu-hover-bg-color: var(--gb-bg2);
 
 	--table-row-hover-bg: var(--gb-bg2);
@@ -187,17 +181,9 @@ html[data-theme="light"] {
 	--karma-bad: var(--gb-red);
 	--karma-warning: var(--gb-yellow);
 	--karma-severe: var(--gb-orange);
-	--karma-important: var(--gb-purple);
 	--karma-note: var(--gb-aqua);
 	--karma-info: var(--gb-bg2);
 	--karma-old: var(--gb-gray);
 
-	--karma-good-fg: var(--gb-green);
-	--karma-bad-fg: var(--gb-red);
-	--karma-warning-fg: var(--gb-yellow);
-	--karma-severe-fg: var(--gb-orange);
-	--karma-important-fg: var(--gb-purple);
-	--karma-note-fg: var(--gb-aqua);
-	--karma-info-fg: var(--gb-fg3);
-	--karma-old-fg: var(--gb-fg4);
+	--karma-on-bg-fg: var(--gb-good-fg);
 }

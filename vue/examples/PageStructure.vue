@@ -84,8 +84,10 @@
 						@update:model-value="setTopBarEnabled"
 					/>
 					<p class="subtle">
-						On narrow screens: if both are on, the sidebar takes precedence and the top bar is hidden.
-						If only the top bar is on, Header collapses it into a mobile sidebar automatically.
+						When enabled, example categories appear in the header; each opens a hub page with a
+						navigation grid of related examples. On narrow screens: if both sidebar and top bar are
+						on, the sidebar takes precedence and the top bar is hidden. If only the top bar is on,
+						Header collapses it into a mobile sidebar automatically.
 					</p>
 				</div>
 			</FormField>
@@ -116,7 +118,8 @@
 						@update:model-value="setSidebarEnabled"
 					/>
 					<p class="subtle">
-						When enabled, use the menu button in the header to open and pin the sidebar.
+						When enabled, use the menu button in the header to open and pin the sidebar. The sidebar
+						lists every example directly — hub routes are for top-bar navigation only.
 					</p>
 				</div>
 			</FormField>

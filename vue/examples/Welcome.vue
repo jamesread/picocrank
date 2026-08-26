@@ -40,7 +40,7 @@
 	<Section
 		id="start-here"
 		title="Start here"
-		subtitle="Jump into the example areas"
+		subtitle="Browse example categories — use the sidebar for direct links, or the top bar when hubs are enabled"
 	>
 		<Navigation ref="welcomeNavigation">
 			<NavigationGrid />
@@ -86,6 +86,7 @@ import Section from '../components/Section.vue'
 import Navigation from '../components/Navigation.vue'
 import NavigationGrid from '../components/NavigationGrid.vue'
 import { useNotificationPopups } from '../composables/useNotificationPopups.js'
+import { registerWelcomeHubGrid } from '../data/navSectionHubs.js'
 import logoUrl from '/logo.png'
 
 const { show: showPopup } = useNotificationPopups()
@@ -102,45 +103,7 @@ function showWelcomeToast() {
 }
 
 onMounted(() => {
-	if (!welcomeNavigation.value) {
-		return
-	}
-
-	const nav = welcomeNavigation.value
-
-	nav.addRouterLink('PageStructure', 'Page structure', {
-		description: 'Sidebar, header, QuickSearch, and breadcrumbs',
-	})
-	nav.addRouterLink('ThemePreview', 'Theme Switcher', {
-		description: 'Drop-in themes on Femtocrank',
-	})
-	nav.addRouterLink('TableExample', 'Table', {
-		description: 'Lists with sorting, pagination, and filters',
-	})
-	nav.addRouterLink('TableRemoteExample', 'Remote table', {
-		description: 'Server-style fetchRows pagination and filters',
-	})
-	nav.addRouterLink('CalendarExample', 'Calendar', {
-		description: 'Month view with events',
-	})
-	nav.addRouterLink('ButtonsExample', 'Buttons', {
-		description: 'Button variants and toolbars',
-	})
-	nav.addRouterLink('FormExample', 'Forms', {
-		description: 'Labels, inputs, and fieldsets',
-	})
-	nav.addRouterLink('LoginExample', 'Login', {
-		description: 'Auth form with OAuth tabs',
-	})
-	nav.addRouterLink('StatusExample', 'Status', {
-		description: 'Notifications and inline status',
-	})
-	nav.addRouterLink('NavigationGridExample', 'Navigation grid', {
-		description: 'Icon grid for settings hubs',
-	})
-	nav.addRouterLink('TabsExample', 'Tabs', {
-		description: 'Tabbed content regions',
-	})
+	registerWelcomeHubGrid(welcomeNavigation.value)
 })
 </script>
 

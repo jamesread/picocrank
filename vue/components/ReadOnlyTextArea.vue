@@ -144,7 +144,7 @@ async function copy() {
 		await navigator.clipboard.writeText(text)
 		markCopied()
 		emit('copy', text)
-	} catch (error) {
+	} catch (_error) {
 		try {
 			textareaRef.value?.select()
 			document.execCommand('copy')

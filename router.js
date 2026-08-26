@@ -16,6 +16,13 @@ import { PaintBoardIcon } from '@hugeicons/core-free-icons';
 import { UserIcon } from '@hugeicons/core-free-icons';
 import { InformationCircleIcon } from '@hugeicons/core-free-icons';
 
+import {
+	hubChildBreadcrumbs,
+	hubSectionBreadcrumbs,
+	standaloneBreadcrumbs,
+	viewItemBreadcrumbs,
+} from './vue/data/routeBreadcrumbs.js';
+
 const routes = [
   {
     name: 'Welcome',
@@ -33,6 +40,7 @@ const routes = [
     meta: {
       title: 'Page structure',
       icon: LayoutGridIcon,
+      breadcrumbs: hubChildBreadcrumbs('NavLayoutsHub', 'PageStructure', 'Page structure'),
     }
   },
   {
@@ -42,6 +50,7 @@ const routes = [
     meta: {
       title: 'Theme Switcher',
       icon: PaintBoardIcon,
+      breadcrumbs: hubChildBreadcrumbs('NavLayoutsHub', 'ThemePreview', 'Theme Switcher'),
     }
   },
   {
@@ -51,6 +60,7 @@ const routes = [
     meta: {
       title: 'User details',
       icon: UserIcon,
+      breadcrumbs: standaloneBreadcrumbs('UserDetails', 'User details'),
     }
   },
   {
@@ -61,6 +71,7 @@ const routes = [
     meta: {
       title: 'Table',
       icon: TableIcon,
+      breadcrumbs: hubChildBreadcrumbs('NavDataDisplayHub', 'TableExample', 'Table'),
     }
   },
   {
@@ -70,6 +81,7 @@ const routes = [
     meta: {
       title: 'Remote table',
       icon: TableIcon,
+      breadcrumbs: hubChildBreadcrumbs('NavDataDisplayHub', 'TableRemoteExample', 'Remote table'),
     }
   },
   {
@@ -80,6 +92,7 @@ const routes = [
     meta: {
       title: 'View item',
       icon: ViewIcon,
+      breadcrumbs: viewItemBreadcrumbs,
     }
   },
   {
@@ -89,6 +102,7 @@ const routes = [
     meta: {
       title: 'Admin',
       icon: SecurityValidationIcon,
+      breadcrumbs: hubChildBreadcrumbs('NavLayoutsHub', 'Admin', 'Admin'),
     }
   },
   {
@@ -99,6 +113,7 @@ const routes = [
     meta: {
       title: 'Calendar',
       icon: CalendarIcon,
+      breadcrumbs: hubChildBreadcrumbs('NavDataDisplayHub', 'CalendarExample', 'Calendar'),
     }
   },
   {
@@ -108,6 +123,7 @@ const routes = [
     meta: {
       title: 'Login',
       icon: SecurityValidationIcon,
+      breadcrumbs: standaloneBreadcrumbs('Login', 'Login'),
     }
   },
   {
@@ -117,6 +133,7 @@ const routes = [
     meta: {
       title: 'Buttons',
       icon: CursorPointer01Icon,
+      breadcrumbs: hubChildBreadcrumbs('NavFormsInputHub', 'ButtonsExample', 'Buttons'),
     }
   },
   {
@@ -126,6 +143,7 @@ const routes = [
     meta: {
       title: 'Forms',
       icon: EditIcon,
+      breadcrumbs: hubChildBreadcrumbs('NavFormsInputHub', 'FormExample', 'Forms'),
     }
   },
   {
@@ -135,6 +153,7 @@ const routes = [
     meta: {
       title: 'Read-only output',
       icon: ClipboardCopyIcon,
+      breadcrumbs: hubChildBreadcrumbs('NavDataDisplayHub', 'ReadOnlyTextAreaExample', 'Read-only output'),
     }
   },
   {
@@ -144,6 +163,7 @@ const routes = [
     meta: {
       title: 'Status & notifications',
       icon: StatusIcon,
+      breadcrumbs: hubChildBreadcrumbs('NavFeedbackStatusHub', 'StatusExample', 'Status & notifications'),
     }
   },
   {
@@ -153,6 +173,7 @@ const routes = [
     meta: {
       title: 'Dialog',
       icon: InformationCircleIcon,
+      breadcrumbs: hubChildBreadcrumbs('NavFeedbackStatusHub', 'DialogExample', 'Dialog'),
     }
   },
   {
@@ -162,6 +183,7 @@ const routes = [
     meta: {
       title: 'Tabs',
       icon: Menu01Icon,
+      breadcrumbs: hubChildBreadcrumbs('NavLayoutsHub', 'TabsExample', 'Tabs'),
     }
   },
   {
@@ -171,6 +193,57 @@ const routes = [
     meta: {
       title: 'Navigation Grid',
       icon: Navigation01Icon,
+      breadcrumbs: hubChildBreadcrumbs('NavLayoutsHub', 'NavigationGridExample', 'Navigation Grid'),
+    }
+  },
+  {
+    name: 'NavLayoutsHub',
+    path: '/nav/layouts',
+    component: () => import('./vue/examples/NavSectionHub.vue'),
+    meta: {
+      title: 'Layouts',
+      icon: LayoutGridIcon,
+      breadcrumbs: hubSectionBreadcrumbs('NavLayoutsHub'),
+    }
+  },
+  {
+    name: 'NavDataDisplayHub',
+    path: '/nav/data-display',
+    component: () => import('./vue/examples/NavSectionHub.vue'),
+    meta: {
+      title: 'Data display',
+      icon: TableIcon,
+      breadcrumbs: hubSectionBreadcrumbs('NavDataDisplayHub'),
+    }
+  },
+  {
+    name: 'NavFormsInputHub',
+    path: '/nav/forms-input',
+    component: () => import('./vue/examples/NavSectionHub.vue'),
+    meta: {
+      title: 'Forms & input',
+      icon: EditIcon,
+      breadcrumbs: hubSectionBreadcrumbs('NavFormsInputHub'),
+    }
+  },
+  {
+    name: 'NavFeedbackStatusHub',
+    path: '/nav/feedback-status',
+    component: () => import('./vue/examples/NavSectionHub.vue'),
+    meta: {
+      title: 'Feedback & status',
+      icon: StatusIcon,
+      breadcrumbs: hubSectionBreadcrumbs('NavFeedbackStatusHub'),
+    }
+  },
+  {
+    name: 'NavPatternsHub',
+    path: '/nav/patterns',
+    component: () => import('./vue/examples/NavSectionHub.vue'),
+    meta: {
+      title: 'Patterns',
+      icon: CursorPointer01Icon,
+      breadcrumbs: hubSectionBreadcrumbs('NavPatternsHub'),
     }
   },
   {
@@ -180,6 +253,7 @@ const routes = [
     meta: {
       title: 'Login',
       icon: SecurityValidationIcon,
+      breadcrumbs: hubChildBreadcrumbs('NavFormsInputHub', 'LoginExample', 'Login'),
     }
   }
 ];

@@ -10,28 +10,28 @@
 				<p>Welcome to the administrative panel. This is a placeholder for administrative functionality.</p>
 				
 				<div class="grid-boxed">
-					<div class="stat-display">
+					<div class="stat-display good">
 						<h4>Total Users</h4>
-						<div class="stat fg-good">1,247</div>
-						<div class="subtle">+12% from last month</div>
+						<span class="stat">1,247</span>
+						<span class="subtle">+12% from last month</span>
 					</div>
 					
-					<div class="stat-display">
+					<div class="stat-display bad">
 						<h4>Active Sessions</h4>
-						<div class="stat fg-bad">89</div>
-						<div class="subtle">-3% from last hour</div>
+						<span class="stat">89</span>
+						<span class="subtle">-3% from last hour</span>
 					</div>
 					
-					<div class="stat-display">
+					<div class="stat-display warning">
 						<h4>System Load</h4>
-						<div class="stat fg-warning">67%</div>
-						<div class="subtle">Moderate</div>
+						<span class="stat">67%</span>
+						<span class="subtle">Moderate</span>
 					</div>
 					
-					<div class="stat-display">
+					<div class="stat-display good">
 						<h4>Storage Used</h4>
-						<div class="stat fg-good">2.4 GB</div>
-						<div class="subtle">45% of total</div>
+						<span class="stat">2.4 GB</span>
+						<span class="subtle">45% of total</span>
 					</div>
 				</div>
 			</div>

@@ -264,6 +264,10 @@ const props = defineProps({
 		type: Object,
 		default: () => ({}),
 	},
+	defaultColumnPriorities: {
+		type: Object,
+		default: () => ({}),
+	},
 	anchorEl: {
 		type: Object,
 		default: null,
@@ -389,6 +393,11 @@ function isValidColPriority(priority) {
 }
 
 function defaultColumnPriority(key) {
+	if (Object.prototype.hasOwnProperty.call(props.defaultColumnPriorities, key)) {
+		const value = props.defaultColumnPriorities[key]
+		return isValidColPriority(value) ? value : null
+	}
+
 	const header = headerByKey.value.get(key)
 	return isValidColPriority(header?.colPriority) ? header.colPriority : null
 }

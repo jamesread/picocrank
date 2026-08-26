@@ -24,9 +24,9 @@
 			</button>
 		</div>
 
-		<TopBar v-if="showTopBar" :navigation="navigation" />
+		<Breadcrumbs v-if="showBreadcrumbsBar" />
 
-		<Breadcrumbs v-if="breadcrumbs" />
+		<TopBar v-if="showTopBar" :navigation="topBarNavigation" />
 
 		<div class = "fg1"></div>
 
@@ -138,13 +138,21 @@
 			type: Object,
 			default: null,
 		},
+		topBarNavigation: {
+			type: Object,
+			default: null,
+		},
 	});
 
 	const fallbackSidebar = ref(null);
 
-	const { showTopBar, showSidebarChrome, needsFallbackSidebar } = useResponsiveNav(
+	const { showTopBar, showSidebarChrome, needsFallbackSidebar, isMobile } = useResponsiveNav(
 		() => props.sidebarEnabled,
 		() => props.topBarEnabled,
+	);
+
+	const showBreadcrumbsBar = computed(
+		() => props.breadcrumbs && !isMobile.value,
 	);
 
 	function toggleNavSidebar() {
@@ -165,8 +173,15 @@
 </script>
 
 <style scoped>
+#sidebar-button {
+	flex-shrink: 0;
+	width: 14em;
+	min-width: 14em;
+}
+
 #sidebar-button.disabled-branding {
 	width: auto;
+	min-width: 0;
 }
 
 .logo-home-link {
@@ -194,6 +209,7 @@
 .header-actions {
 	align-self: stretch;
 	gap: 0.25rem;
+	flex-shrink: 0;
 }
 
 .theme-toggle {
@@ -205,7 +221,7 @@
 .header-actions :deep(button) {
 	border: 0;
 	border-radius: 0;
-	color: var(--header-fg-color, var(--header-text-color, #fff));
+	color: var(--header-fg-color);
 	background-color: transparent;
 	align-self: stretch;
 	display: inline-flex;
@@ -227,7 +243,7 @@
 #sidebar-toggler-button {
 	border: 0;
 	border-radius: 0;
-	color: var(--header-fg-color, var(--header-text-color, #fff));
+	color: var(--header-fg-color);
 	background-color: transparent;
 	align-self: stretch;
 	display: inline-flex;
@@ -260,7 +276,7 @@ header .search-trigger,
 header .search-trigger.neutral {
 	border: 0;
 	border-radius: 0;
-	color: var(--header-fg-color, var(--header-text-color, #fff));
+	color: var(--header-fg-color);
 	background-color: transparent;
 	align-self: stretch;
 	height: 100%;

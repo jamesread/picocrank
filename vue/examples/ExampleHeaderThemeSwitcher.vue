@@ -56,7 +56,7 @@ header .header-actions .theme-switcher--compact select {
 	border: 0;
 	border-radius: 0;
 	background-color: transparent;
-	color: var(--header-fg-color, var(--header-text-color, #fff));
+	color: var(--header-fg-color);
 	padding-top: 0;
 	padding-bottom: 0;
 	padding-left: 0.6em;

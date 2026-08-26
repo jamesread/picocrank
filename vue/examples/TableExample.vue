@@ -1,6 +1,6 @@
 <template>
 	<Section
-		title="Table Example"
+		:title="tableSectionTitle"
 		:icon="TableIcon"
 		subtitle="Sortable columns, pagination, and column filters. Right-click or long-press a column header to filter."
 		:padding="false"
@@ -15,8 +15,10 @@
 			:column-options="enabledFeatures.includes('columnOptions')"
 			:loading="enabledFeatures.includes('loading')"
 			:horizontal-scroll="layout === 'scroll'"
+			:responsive-columns="layout === 'priorities'"
 			:sticky-cols="stickyCols"
 			v-model:column-visibility="columnVisibility"
+			v-model:layout-label="tableLayoutLabel"
 			:default-column-visibility="defaultColumnVisibility"
 			v-bind="tableListeners"
 		>
@@ -26,14 +28,14 @@
 				</router-link>
 			</template>
 
-			<template #cell-city="{ row, value }">
+			<template #cell-city="{ value }">
 				<span class="subtle">
 					{{ value }}
 				</span>
 			</template>
 
 			<template #cell-status="{ value }">
-				<span class="tag fg-good">{{ value }}</span>
+				<span class="tag" :class="statusTagClass(value)">{{ value }}</span>
 			</template>
 		</Table>
 	</Section>
@@ -49,14 +51,23 @@
 
 		<FormLayout>
 			<FormField label="Data" fake description="Connect or disconnect row data for the table above. Saved column layouts persist in localStorage for this table.">
-				<div class="table-data-actions">
-					<button type="button" :disabled="dataConnected" @click="dataConnected = true">
-						Connect data
-					</button>
-					<button type="button" class="neutral" :disabled="!dataConnected" @click="dataConnected = false">
-						Disconnect data
-					</button>
-				</div>
+				<RadioGroup
+					v-model="dataConnected"
+					name="table-data-connection"
+					variant="boolean"
+					:options="dataConnectionOptions"
+				/>
+			</FormField>
+
+			<FormField
+				label="Wide table"
+				fake
+				description="Adds extra columns (email, department, role, status) to the table."
+			>
+				<label>
+					<input v-model="wideTable" type="checkbox" />
+					Show extended columns
+				</label>
 			</FormField>
 
 			<FormField label="Features" fake description="Toggle core table behaviour.">
@@ -70,7 +81,7 @@
 			<FormField
 				label="Responsive layout"
 				fake
-				description="Column priorities hide lower-priority columns as the table narrows. Horizontal scroll keeps every column visible with optional sticky leading columns."
+				description="Column priorities hide lower-priority columns as the table narrows. Horizontal scroll keeps every column visible with optional sticky leading columns. Browser layout leaves column sizing to the viewport."
 			>
 				<RadioGroup
 					v-model="layout"
@@ -91,18 +102,6 @@
 					:options="stickyColOptions"
 				/>
 			</FormField>
-
-			<FormField
-				v-if="layout === 'scroll'"
-				label="Wide table"
-				fake
-				description="Adds extra columns so horizontal scroll is easier to see."
-			>
-				<label>
-					<input v-model="wideTable" type="checkbox" />
-					Show extended columns
-				</label>
-			</FormField>
 		</FormLayout>
 
 		<div class="table-events">
@@ -120,6 +119,14 @@
 				{{ activeFilterCount }} active filter(s)
 			</p>
 			<p v-else class="event-line subtle">Query: waiting for the first table update…</p>
+
+			<p v-if="tableLayoutLabel" class="event-line">
+				<strong>Layout:</strong>
+				{{ tableLayoutLabel }}
+			</p>
+			<p v-else-if="enabledFeatures.includes('columnOptions')" class="event-line subtle">
+				Layout: using developer defaults (change columns, order, or filters to see a preset or “Custom” label).
+			</p>
 		</div>
 	</Section>
 
@@ -139,7 +146,7 @@
 				<template v-for="header in headers" :key="header.key">
 					<dt>{{ header.label || header.key }}</dt>
 					<dd>
-						<span v-if="header.key === 'status'" class="tag fg-good">
+						<span v-if="header.key === 'status'" class="tag" :class="statusTagClass(lastRowClick.row[header.key])">
 							{{ lastRowClick.row[header.key] }}
 						</span>
 						<template v-else>
@@ -170,14 +177,27 @@ const defaultColumnVisibility = {
 
 const enabledFeatures = ref([...defaultFeatures])
 const columnVisibility = ref({ ...defaultColumnVisibility })
-const layout = ref('default')
+const layout = ref('priorities')
 const stickyColsOption = ref('2')
 const wideTable = ref(true)
 const dataConnected = ref(true)
 const data = ref([])
 const lastRowClick = ref(null)
 const lastQuery = ref(null)
+const tableLayoutLabel = ref('')
 const rowDialogRef = ref(null)
+
+const tableSectionTitle = computed(() => {
+	if (tableLayoutLabel.value) {
+		return `Table Example (${tableLayoutLabel.value})`
+	}
+	return 'Table Example'
+})
+
+const dataConnectionOptions = [
+	{ label: 'Connect data', value: true },
+	{ label: 'Disconnect data', value: false },
+]
 
 const featureOptions = [
 	{ value: 'pagination', label: 'Pagination' },
@@ -188,9 +208,9 @@ const featureOptions = [
 ]
 
 const layoutOptions = [
-	{ value: 'default', label: 'Default' },
 	{ value: 'priorities', label: 'Column priorities' },
 	{ value: 'scroll', label: 'Horizontal scroll' },
+	{ value: 'browser', label: 'Browser' },
 ]
 
 const stickyColOptions = [
@@ -202,26 +222,17 @@ const stickyColOptions = [
 
 const baseHeaders = [
 	{ key: 'name', label: 'Name', sortable: true, filterable: true, filterType: 'text', width: '20%' },
-	{ key: 'age', label: 'Age', sortable: true, filterable: true, filterType: 'number' },
-	{ key: 'birthYear', label: 'Birth year', sortable: true, filterable: true, filterType: 'number' },
-	{ key: 'city', label: 'City', sortable: true, filterable: true, filterType: 'select', width: '200px' },
+	{ key: 'age', label: 'Age', sortable: true, filterable: true, filterType: 'number', colPriority: 2 },
+	{ key: 'birthYear', label: 'Birth year', sortable: true, filterable: true, filterType: 'number', colPriority: 3 },
+	{ key: 'city', label: 'City', sortable: true, filterable: true, filterType: 'select', width: '200px', colPriority: 1 },
 ]
 
 const extendedHeaders = [
 	{ key: 'email', label: 'Email', sortable: true, filterable: true, filterType: 'text' },
-	{ key: 'department', label: 'Department', sortable: true, filterable: true, filterType: 'select' },
-	{ key: 'role', label: 'Role', sortable: true, filterable: true, filterType: 'text' },
-	{ key: 'status', label: 'Status', sortable: true, filterable: true, filterType: 'select' },
+	{ key: 'department', label: 'Department', sortable: true, filterable: true, filterType: 'select', colPriority: 2 },
+	{ key: 'role', label: 'Role', sortable: true, filterable: true, filterType: 'text', colPriority: 1 },
+	{ key: 'status', label: 'Status', sortable: true, filterable: true, filterType: 'select', colPriority: 1 },
 ]
-
-const priorityByKey = {
-	age: 2,
-	birthYear: 3,
-	city: 1,
-	department: 2,
-	role: 1,
-	status: 1,
-}
 
 const stickyCols = computed(() => {
 	if (layout.value !== 'scroll' || stickyColsOption.value === 'none') {
@@ -230,25 +241,11 @@ const stickyCols = computed(() => {
 	return Number(stickyColsOption.value)
 })
 
-const useExtendedColumns = computed(() => layout.value === 'scroll' && wideTable.value)
+const useExtendedColumns = computed(() => wideTable.value)
 
-const headers = computed(() => {
-	const columns = useExtendedColumns.value
-		? [...baseHeaders, ...extendedHeaders]
-		: [...baseHeaders]
-
-	if (layout.value !== 'priorities') {
-		return columns
-	}
-
-	return columns.map((header) => {
-		const colPriority = priorityByKey[header.key]
-		if (!colPriority) {
-			return { ...header }
-		}
-		return { ...header, colPriority }
-	})
-})
+const headers = computed(() => (
+	useExtendedColumns.value ? [...baseHeaders, ...extendedHeaders] : [...baseHeaders]
+))
 
 const tableData = computed(() => {
 	if (!dataConnected.value) {
@@ -309,10 +306,20 @@ function handleQueryChange(query) {
 	lastQuery.value = query
 }
 
+function statusTagClass(value) {
+	if (value === 'Active') {
+		return 'good'
+	}
+	if (value === 'Pending') {
+		return 'warning'
+	}
+	return null
+}
+
 function resetControls() {
 	enabledFeatures.value = [...defaultFeatures]
 	columnVisibility.value = { ...defaultColumnVisibility }
-	layout.value = 'default'
+	layout.value = 'priorities'
 	stickyColsOption.value = '2'
 	wideTable.value = true
 	dataConnected.value = true
@@ -330,12 +337,6 @@ onMounted(() => {
 <style scoped>
 .table-events {
 	margin-top: 1.5rem;
-}
-
-.table-data-actions {
-	display: flex;
-	flex-wrap: wrap;
-	gap: 0.5rem;
 }
 
 .table-events h4 {
