@@ -50,7 +50,7 @@
 		</template>
 
 		<FormLayout>
-			<FormField label="Data" fake description="Connect or disconnect row data for the table above. Saved column layouts persist in localStorage for this table.">
+			<FormField label="Data" component-has-label description="Connect or disconnect row data for the table above. Saved column layouts persist in localStorage for this table.">
 				<RadioGroup
 					v-model="dataConnected"
 					name="table-data-connection"
@@ -61,7 +61,7 @@
 
 			<FormField
 				label="Wide table"
-				fake
+				component-has-label
 				description="Adds extra columns (email, department, role, status) to the table."
 			>
 				<label>
@@ -70,7 +70,7 @@
 				</label>
 			</FormField>
 
-			<FormField label="Features" fake description="Toggle core table behaviour.">
+			<FormField label="Features" component-has-label description="Toggle core table behaviour.">
 				<CheckGroup
 					v-model="enabledFeatures"
 					name="table-features"
@@ -80,7 +80,7 @@
 
 			<FormField
 				label="Responsive layout"
-				fake
+				component-has-label
 				description="Column priorities hide lower-priority columns as the table narrows. Horizontal scroll keeps every column visible with optional sticky leading columns. Browser layout leaves column sizing to the viewport."
 			>
 				<RadioGroup
@@ -93,7 +93,7 @@
 			<FormField
 				v-if="layout === 'scroll'"
 				label="Sticky columns"
-				fake
+				component-has-label
 				description="Pin the first columns while scrolling horizontally."
 			>
 				<RadioGroup

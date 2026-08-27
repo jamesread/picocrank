@@ -22,7 +22,7 @@
 				/>
 			</FormField>
 
-			<FormField label="Role" fake>
+			<FormField label="Role" component-has-label>
 				<RadioGroup
 					v-model="formData.role"
 					name="role"
@@ -30,7 +30,7 @@
 				/>
 			</FormField>
 
-			<FormField label="Term" fake>
+			<FormField label="Term" component-has-label>
 				<RadioGroup
 					v-model="formData.term"
 					name="term"
@@ -52,7 +52,8 @@
 
 			<FormField
 				label="Compensation"
-				fake
+				component-has-label
+				label-required
 				description-above
 				description="Select the incentive plan that applies to this role."
 				docs-url="https://github.com/jamesread/femtocrank"
@@ -68,11 +69,13 @@
 
 			<FormField
 				label="Accessibility requirements"
-				fake
+				component-has-label
 				description-above
 				description="Choose any accommodations needed for this role."
 				docs-url="https://www.w3.org/WAI/fundamentals/accessibility-intro/"
 				docs-url-title="Web accessibility introduction"
+				:validate="validateAccessibilityRequirements"
+				:validate-deps="[formData.accessibility]"
 			>
 				<CheckGroup
 					v-model="formData.accessibility"
@@ -84,6 +87,7 @@
 			<FormField
 				label="Email"
 				for="email"
+				:error="emailError"
 				description="We'll use this address for account notifications only."
 				docs-url="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/email"
 				docs-url-title="HTML email input reference"
@@ -149,7 +153,7 @@
 				/>
 			</FormField>
 
-			<FormField label="Newsletters" fake>
+			<FormField label="Newsletters" component-has-label>
 				<div>
 					<label>
 						<input 
@@ -174,7 +178,8 @@
 			<FormField
 				label="Comments"
 				for="comments"
-				description="Optional feedback or notes about this submission."
+				:error="commentsError"
+				description="Optional feedback or notes about this submission (minimum 50 characters when provided)."
 			>
 				<textarea
 					id="comments"
@@ -222,12 +227,38 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import Section from '../components/Section.vue'
 import FormLayout from '../components/FormLayout.vue'
 import FormField from '../components/FormField.vue'
 import RadioGroup from '../components/RadioGroup.vue'
 import CheckGroup from '../components/CheckGroup.vue'
+
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+const MIN_COMMENTS_LENGTH = 50
+
+function createDefaultFormData() {
+	return {
+		name: '',
+		role: '',
+		term: '',
+		salary: '0',
+		compensation: 'sales-target-incentive',
+		accessibility: ['screen-reader', 'high-contrast'],
+		email: 'not-an-email',
+		isAdmin: false,
+		website: '',
+		favouriteFood: '',
+		favouriteColour: '#dee3e7',
+		favouriteNumber: 50,
+		newsletter1: false,
+		newsletter2: false,
+		comments: 'Too short.',
+		readonlyText: 'This is a readonly textarea.',
+		disabledText: 'This is a disabled textarea.',
+		datetime: '',
+	}
+}
 
 // From femtocrank/tests/simple.html — Role (default), Term (boolean), Compensation (list)
 const roleOptions = [
@@ -251,36 +282,52 @@ const accessibilityOptions = [
 	{ label: 'Screen reader support', value: 'screen-reader' },
 	{ label: 'Keyboard navigation', value: 'keyboard-navigation' },
 	{ label: 'High contrast', value: 'high-contrast' },
+	{ label: 'Low contrast UI', value: 'low-contrast' },
 	{ label: 'Captions / transcripts', value: 'captions' },
 ]
 
-const formData = ref({
-	name: '',
-	role: '',
-	term: '',
-	salary: '0',
-	compensation: '',
-	accessibility: [],
-	email: '',
-	isAdmin: false,
-	website: '',
-	favouriteFood: '',
-	favouriteColour: '#dee3e7',
-	favouriteNumber: 50,
-	newsletter1: false,
-	newsletter2: false,
-	comments: '',
-	readonlyText: 'This is a readonly textarea.',
-	disabledText: 'This is a disabled textarea.',
-	datetime: ''
+function validateAccessibilityRequirements() {
+	const selected = formData.value.accessibility
+	if (selected.includes('high-contrast') && selected.includes('low-contrast')) {
+		return 'High contrast and low contrast UI cannot both be selected.'
+	}
+	return ''
+}
+
+const formData = ref(createDefaultFormData())
+
+const emailError = computed(() => {
+	const email = formData.value.email.trim()
+	if (!email) {
+		return 'Email is required.'
+	}
+	if (!EMAIL_PATTERN.test(email)) {
+		return 'Enter a valid email address.'
+	}
+	return ''
+})
+
+const commentsError = computed(() => {
+	const comments = formData.value.comments.trim()
+	if (comments.length > 0 && comments.length < MIN_COMMENTS_LENGTH) {
+		return `Comments must be at least ${MIN_COMMENTS_LENGTH} characters.`
+	}
+	return ''
 })
 
 const submitted = ref(false)
 
-function handleSubmit() {
+function handleSubmit(event) {
+	if (!event.target.reportValidity()) {
+		return
+	}
+
+	if (validateAccessibilityRequirements()) {
+		return
+	}
+
 	submitted.value = true
 	console.log('Form submitted:', formData.value)
-	// In a real application, you would send this data to a server
 	alert('Form submitted! Check the console and the form result below.')
 }
 
@@ -290,26 +337,7 @@ function handleCancel() {
 }
 
 function resetForm() {
-	formData.value = {
-		name: '',
-		role: '',
-		term: '',
-		salary: '0',
-		compensation: '',
-		accessibility: [],
-		email: '',
-		isAdmin: false,
-		website: '',
-		favouriteFood: '',
-		favouriteColour: '#dee3e7',
-		favouriteNumber: 50,
-		newsletter1: false,
-		newsletter2: false,
-		comments: '',
-		readonlyText: 'This is a readonly textarea.',
-		disabledText: 'This is a disabled textarea.',
-		datetime: ''
-	}
+	formData.value = createDefaultFormData()
 	submitted.value = false
 }
 </script>

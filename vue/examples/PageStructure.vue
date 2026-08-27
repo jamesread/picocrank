@@ -11,7 +11,7 @@
 
 	<Section title="Header" subtitle="Branding, search, and top navigation">
 		<FormLayout @submit.prevent>
-			<FormField label="Logo and title" fake>
+			<FormField label="Logo and title" component-has-label>
 				<RadioGroup
 					name="ps-branding"
 					variant="boolean"
@@ -22,7 +22,7 @@
 				/>
 			</FormField>
 
-			<FormField label="QuickSearch" fake>
+			<FormField label="QuickSearch" component-has-label>
 				<RadioGroup
 					name="ps-quicksearch"
 					variant="boolean"
@@ -33,7 +33,7 @@
 				/>
 			</FormField>
 
-			<FormField label="Dummy background search" fake :disabled="!quickSearchEnabled">
+			<FormField label="Dummy background search" component-has-label :disabled="!quickSearchEnabled">
 				<div>
 					<RadioGroup
 						name="ps-dummy-search"
@@ -51,7 +51,7 @@
 				</div>
 			</FormField>
 
-			<FormField label="Dark/Light mode button" fake>
+			<FormField label="Dark/Light mode button" component-has-label>
 				<RadioGroup
 					name="ps-theme-toggle"
 					variant="boolean"
@@ -62,7 +62,7 @@
 				/>
 			</FormField>
 
-			<FormField label="Theme switcher" fake>
+			<FormField label="Theme switcher" component-has-label>
 				<RadioGroup
 					name="ps-theme-switcher"
 					variant="boolean"
@@ -73,7 +73,7 @@
 				/>
 			</FormField>
 
-			<FormField label="Top bar" fake>
+			<FormField label="Top bar" component-has-label>
 				<div>
 					<RadioGroup
 						name="ps-topbar"
@@ -92,7 +92,7 @@
 				</div>
 			</FormField>
 
-			<FormField label="Breadcrumbs" fake>
+			<FormField label="Breadcrumbs" component-has-label>
 				<RadioGroup
 					name="ps-breadcrumbs"
 					variant="boolean"
@@ -107,7 +107,7 @@
 
 	<Section title="Sidebar" subtitle="Primary navigation panel">
 		<FormLayout @submit.prevent>
-			<FormField label="Sidebar navigation" fake>
+			<FormField label="Sidebar navigation" component-has-label>
 				<div>
 					<RadioGroup
 						name="ps-sidebar"
@@ -124,7 +124,7 @@
 				</div>
 			</FormField>
 
-			<FormField label="Example link states" fake>
+			<FormField label="Example link states" component-has-label>
 				<div>
 					<RadioGroup
 						name="ps-example-links"

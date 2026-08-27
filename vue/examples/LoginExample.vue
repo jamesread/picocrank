@@ -1,6 +1,33 @@
 <template>
-	<Section title="Login Example" subtitle="A reusable login form component with local and OAuth2 authentication">
-		<Login 
+	<Section title="Simple login" subtitle="Username and password only" classes="narrow">
+		<Login ref="simpleLoginRef" local-only @local-login="handleSimpleLocalLogin" />
+	</Section>
+
+	<Section
+		title="Simulated server response"
+		subtitle="Choose what the server returns when you submit the simple login form above"
+		classes="narrow"
+	>
+		<FormField label="Response" component-has-label description="Field errors appear on username or password; server and network errors appear below the form.">
+			<RadioGroup
+				v-model="simulatedResponse"
+				name="login-sim-response"
+				variant="list"
+				:options="simulatedResponseOptions"
+			/>
+		</FormField>
+
+		<FormField label="Timing" component-has-label>
+			<label class="simulate-delay-label">
+				<input v-model="simulateDelay" type="checkbox" />
+				<span>Simulate slow response (1.5s)</span>
+			</label>
+		</FormField>
+	</Section>
+
+	<Section title="Login example" subtitle="Local, OAuth2, and custom authentication tabs" classes="narrow">
+		<Login
+			ref="fullLoginRef"
 			:oauth-providers="oauthProviders"
 			:custom-tabs="customTabs"
 			@local-login="handleLocalLogin"
@@ -56,6 +83,67 @@
 import { ref } from 'vue';
 import Section from '../components/Section.vue';
 import Login from '../components/Login.vue';
+import FormField from '../components/FormField.vue';
+import RadioGroup from '../components/RadioGroup.vue';
+
+const simpleLoginRef = ref(null);
+const fullLoginRef = ref(null);
+const simulatedResponse = ref('success');
+const simulateDelay = ref(false);
+
+const simulatedResponseOptions = [
+	{ value: 'success', label: 'Success' },
+	{ value: 'wrong-password', label: 'Wrong password' },
+	{ value: 'username-not-found', label: 'Username not found' },
+	{ value: 'account-locked', label: 'Account locked' },
+	{ value: 'server-error', label: 'Server error (500)' },
+	{ value: 'network-error', label: 'Network unavailable' },
+];
+
+const simulatedResponseMessages = {
+	'wrong-password': 'Incorrect password.',
+	'username-not-found': 'No account found for that username.',
+	'account-locked': 'This account is locked. Contact support.',
+	'server-error': 'Sign-in failed. Please try again later.',
+	'network-error': 'Could not reach the server. Check your connection.',
+};
+
+const SIMULATED_DELAY_MS = 1500;
+
+function resolveSimulatedLoginErrors(responseKey) {
+	const message = simulatedResponseMessages[responseKey];
+	if (!message) {
+		return null;
+	}
+	if (responseKey === 'wrong-password') {
+		return { password: message };
+	}
+	if (responseKey === 'username-not-found') {
+		return { username: message };
+	}
+	return { form: message };
+}
+
+async function handleSimpleLocalLogin(credentials) {
+	try {
+		if (simulateDelay.value) {
+			await new Promise((resolve) => setTimeout(resolve, SIMULATED_DELAY_MS));
+		}
+
+		const errors = resolveSimulatedLoginErrors(simulatedResponse.value);
+		if (errors) {
+			simpleLoginRef.value?.setLocalLoginErrors(errors);
+			return;
+		}
+
+		simpleLoginRef.value?.resetLocalForm();
+		alert(`Signed in as ${credentials.username}`);
+	} catch {
+		simpleLoginRef.value?.setLocalLoginErrors({
+			form: 'Sign-in failed. Please try again later.',
+		});
+	}
+}
 
 // Custom tabs configuration
 const customTabs = ref([
@@ -151,6 +239,7 @@ function handleLocalLogin(credentials) {
 
 	// Placeholder success
 	alert(`Local login would authenticate: ${credentials.username}`);
+	fullLoginRef.value?.setLocalLoginLoading(false);
 }
 
 // Handle OAuth login
@@ -220,6 +309,13 @@ function handleSSOLogin(provider) {
 </script>
 
 <style scoped>
+.simulate-delay-label {
+	display: flex;
+	align-items: center;
+	gap: 0.5em;
+	cursor: pointer;
+}
+
 .magic-link-form,
 .sso-providers {
 	display: flex;

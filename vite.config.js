@@ -192,4 +192,9 @@ export default defineConfig({
     }),
     vue(),
   ],
+  test: {
+    environment: 'happy-dom',
+    include: ['vue/**/*.spec.js'],
+    setupFiles: ['./vue/test/setup.js'],
+  },
 })

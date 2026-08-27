@@ -35,7 +35,14 @@
 	--login-error-fg: var(--karma-on-bg-fg);
 	--login-muted-fg: var(--muted-text-color);
 
+	--login-spinner-fg: var(--link-color);
+	--login-spinner-track: var(--border-color);
+
+	--form-field-required-fg: var(--karma-bad);
+
 	--table-muted-fg: var(--muted-text-color);
+
+	--button-transparent-disabled-fg: color-mix(in srgb, var(--text-color) 45%, var(--section-bg-color));
 
 	--table-popover-bg: var(--section-bg-color);
 	--table-popover-border: var(--border-color);
@@ -105,6 +112,45 @@ section .section-header [role="toolbar"] .button {
 	padding-right: 1em;
 	min-width: 0;
 	line-height: normal;
+}
+
+section.narrow {
+	max-width: 480px;
+	margin-left: auto;
+	margin-right: auto;
+	border-radius: .8em;
+}
+
+section.narrow form {
+	grid-template-columns: 1fr;
+}
+
+section.narrow fieldset {
+	grid-column: span 1;
+}
+
+form > .form-field-label-skip {
+	grid-column: 1 / -1;
+}
+
+/*
+ * FormField applies .field-invalid when an error is set programmatically.
+ * Mirrors femtocrank :user-invalid (which only applies after user interaction).
+ */
+input.field-invalid,
+textarea.field-invalid,
+select.field-invalid {
+	border-color: var(--karma-bad-border);
+	background-color: var(--karma-bad-wash);
+	color: var(--text-color);
+	box-shadow: 0 0 0 3px color-mix(in srgb, var(--karma-bad) 35%, transparent);
+}
+
+input.field-invalid:focus-visible,
+textarea.field-invalid:focus-visible,
+select.field-invalid:focus-visible {
+	outline: 2px solid var(--karma-bad-border);
+	outline-offset: 2px;
 }
 }
 

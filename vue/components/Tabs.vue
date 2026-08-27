@@ -18,11 +18,14 @@
 					v-for="(tab, index) in tabs"
 					:key="getTabKey(tab, index)"
 					:ref="(el) => setTabRef(getTabKey(tab, index), el)"
-					:class="['tab-button', { active: isTabSelected(tab, index) }]"
+					:class="['tab-button', { active: isTabSelected(tab, index), disabled: isTabDisabled(tab) }]"
+					:disabled="isTabDisabled(tab)"
 					:aria-selected="isTabSelected(tab, index) ? 'true' : 'false'"
+					:aria-disabled="isTabDisabled(tab) ? 'true' : undefined"
 					:aria-controls="`tab-panel-${getTabKey(tab, index)}`"
 					:id="`tab-${getTabKey(tab, index)}`"
-					:tabindex="isTabFocused(tab, index) ? 0 : -1"
+					:tabindex="tabTabIndex(tab, index)"
+					:title="tab.disabledTitle || undefined"
 					role="tab"
 					type="button"
 					@click="onTabClick(getTabKey(tab, index))"
@@ -104,18 +107,66 @@ const emit = defineEmits(['tab-change'])
 
 const tabRefs = new Map()
 
-function getInitialTabId() {
-	if (props.defaultTab !== null) {
-		return props.defaultTab
-	}
-	if (props.tabs.length > 0) {
-		return getTabKey(props.tabs[0], 0)
-	}
-	return null
+const activeTabId = ref(null)
+const focusedTabId = ref(null)
+
+function isTabDisabled(tab) {
+	return tab.disabled === true
 }
 
-const activeTabId = ref(getInitialTabId())
-const focusedTabId = ref(getInitialTabId())
+function getFirstEnabledIndex() {
+	return props.tabs.findIndex((tab) => !isTabDisabled(tab))
+}
+
+function getLastEnabledIndex() {
+	for (let index = props.tabs.length - 1; index >= 0; index -= 1) {
+		if (!isTabDisabled(props.tabs[index])) {
+			return index
+		}
+	}
+	return -1
+}
+
+function getFirstEnabledTabKey() {
+	const index = getFirstEnabledIndex()
+	if (index < 0) {
+		return null
+	}
+	return getTabKey(props.tabs[index], index)
+}
+
+function resolveSelectableTabId(tabKey) {
+	if (tabKey !== null && tabKey !== undefined) {
+		const index = props.tabs.findIndex((tab, i) => getTabKey(tab, i) === tabKey)
+		if (index >= 0 && !isTabDisabled(props.tabs[index])) {
+			return tabKey
+		}
+	}
+	return getFirstEnabledTabKey()
+}
+
+function tabTabIndex(tab, index) {
+	if (isTabDisabled(tab)) {
+		return -1
+	}
+	return isTabFocused(tab, index) ? 0 : -1
+}
+
+function findNextEnabledIndex(fromIndex, step) {
+	const length = props.tabs.length
+	if (length === 0) {
+		return fromIndex
+	}
+
+	for (let offset = 1; offset <= length; offset += 1) {
+		const index = (fromIndex + step * offset + length * 100) % length
+		if (!isTabDisabled(props.tabs[index])) {
+			return index
+		}
+	}
+
+	return fromIndex
+}
 
 function getTabKey(tab, index) {
 	return tab.id ?? index
@@ -146,10 +197,14 @@ function focusTab(tabKey) {
 }
 
 function selectTab(tabKey, { emitChange = true } = {}) {
+	const index = tabIndexForKey(tabKey)
+	if (index >= 0 && isTabDisabled(props.tabs[index])) {
+		return
+	}
+
 	if (activeTabId.value !== tabKey) {
 		activeTabId.value = tabKey
 		if (emitChange) {
-			const index = tabIndexForKey(tabKey)
 			const activeTab = index >= 0 ? props.tabs[index] : null
 			emit('tab-change', activeTab, tabKey)
 		}
@@ -166,8 +221,11 @@ function moveFocusToIndex(index, { activate = props.activation === 'auto' } = {}
 		return
 	}
 
-	const normalized = (index + props.tabs.length) % props.tabs.length
-	const tabKey = getTabKey(props.tabs[normalized], normalized)
+	if (index < 0 || index >= props.tabs.length || isTabDisabled(props.tabs[index])) {
+		return
+	}
+
+	const tabKey = getTabKey(props.tabs[index], index)
 	focusedTabId.value = tabKey
 
 	if (activate) {
@@ -175,6 +233,14 @@ function moveFocusToIndex(index, { activate = props.activation === 'auto' } = {}
 	}
 
 	nextTick(() => focusTab(tabKey))
+}
+
+function moveFocusByStep(fromIndex, step, { activate = props.activation === 'auto' } = {}) {
+	const nextIndex = findNextEnabledIndex(fromIndex, step)
+	if (nextIndex === fromIndex && isTabDisabled(props.tabs[fromIndex])) {
+		return
+	}
+	moveFocusToIndex(nextIndex, { activate })
 }
 
 function tabKeyFromElement(tabEl) {
@@ -204,34 +270,34 @@ function onTabListKeydown(event) {
 		case 'ArrowRight':
 			if (!isVertical) {
 				event.preventDefault()
-				moveFocusToIndex(index + 1)
+				moveFocusByStep(index, 1)
 			}
 			break
 		case 'ArrowLeft':
 			if (!isVertical) {
 				event.preventDefault()
-				moveFocusToIndex(index - 1)
+				moveFocusByStep(index, -1)
 			}
 			break
 		case 'ArrowDown':
 			if (isVertical) {
 				event.preventDefault()
-				moveFocusToIndex(index + 1)
+				moveFocusByStep(index, 1)
 			}
 			break
 		case 'ArrowUp':
 			if (isVertical) {
 				event.preventDefault()
-				moveFocusToIndex(index - 1)
+				moveFocusByStep(index, -1)
 			}
 			break
 		case 'Home':
 			event.preventDefault()
-			moveFocusToIndex(0)
+			moveFocusToIndex(getFirstEnabledIndex())
 			break
 		case 'End':
 			event.preventDefault()
-			moveFocusToIndex(props.tabs.length - 1)
+			moveFocusToIndex(getLastEnabledIndex())
 			break
 		case ' ':
 		case 'Enter':
@@ -260,20 +326,25 @@ function syncTabIdsAfterListChange() {
 		return
 	}
 
-	const activeStillExists = tabIndexForKey(activeTabId.value) >= 0
-	if (!activeStillExists) {
-		const firstKey = getTabKey(props.tabs[0], 0)
+	const activeIndex = tabIndexForKey(activeTabId.value)
+	const activeIsValid = activeIndex >= 0 && !isTabDisabled(props.tabs[activeIndex])
+	if (!activeIsValid) {
+		const firstKey = getFirstEnabledTabKey()
 		activeTabId.value = firstKey
 		focusedTabId.value = firstKey
 		return
 	}
 
-	if (tabIndexForKey(focusedTabId.value) < 0) {
+	const focusedIndex = tabIndexForKey(focusedTabId.value)
+	const focusedIsValid = focusedIndex >= 0 && !isTabDisabled(props.tabs[focusedIndex])
+	if (!focusedIsValid) {
 		focusedTabId.value = activeTabId.value
 	}
 }
 
 onMounted(() => {
+	activeTabId.value = resolveSelectableTabId(props.defaultTab)
+	focusedTabId.value = activeTabId.value
 	syncTabIdsAfterListChange()
 })
 
@@ -357,7 +428,7 @@ defineExpose({
 	position: relative;
 }
 
-.tab-button:hover:not(.active) {
+.tab-button:hover:not(.active):not(:disabled) {
 	color: var(--tab-hover-fg);
 	background-color: var(--tab-hover-bg);
 }
@@ -366,6 +437,25 @@ defineExpose({
 	background-color: var(--tab-active-bg);
 	color: var(--tab-active-fg);
 	border-bottom-color: transparent;
+}
+
+.tab-button:disabled,
+.tab-button.disabled {
+	cursor: not-allowed;
+	color: var(--disabled-text-color);
+	opacity: 0.72;
+}
+
+.tab-button:disabled:hover,
+.tab-button.disabled:hover {
+	color: var(--disabled-text-color);
+	background-color: transparent;
+}
+
+.tab-button:disabled.active,
+.tab-button.disabled.active {
+	background-color: var(--tab-active-bg);
+	color: var(--disabled-text-color);
 }
 
 .tabs-vertical .tab-button {
@@ -426,7 +516,7 @@ defineExpose({
 	z-index: 1;
 }
 
-.tab-button:hover:not(.active):focus-visible {
+.tab-button:hover:not(.active):not(:disabled):focus-visible {
 	color: var(--tab-hover-fg);
 	background-color: var(--tab-hover-bg);
 }

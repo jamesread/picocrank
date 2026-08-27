@@ -1,6 +1,7 @@
 <template>
 	<Section title="Login" classes="">
-		<Login 
+		<Login
+			ref="loginRef"
 			@local-login="handleLocalLogin"
 			@oauth-login="handleOAuthLogin"
 			@tab-change="onTabChange"
@@ -9,8 +10,11 @@
 </template>
 
 <script setup>
+import { ref } from 'vue';
 import Section from '../components/Section.vue';
 import Login from '../components/Login.vue';
+
+const loginRef = ref(null);
 
 // Handle local login
 function handleLocalLogin(credentials) {
@@ -41,6 +45,7 @@ function handleLocalLogin(credentials) {
 
 	// Placeholder success
 	alert(`Local login would authenticate: ${credentials.username}`);
+	loginRef.value?.setLocalLoginLoading(false);
 }
 
 // Handle OAuth login

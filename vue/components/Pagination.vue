@@ -185,17 +185,18 @@ watch(() => props.pageSize, (newSize) => {
 
 .button:disabled {
   background: transparent;
+  color: var(--button-transparent-disabled-fg);
   cursor: not-allowed;
+}
+
+.button.active:disabled {
+  color: var(--text-color);
 }
 
 #page-size {
   background: transparent;
   margin-left: 0.5rem;
   margin-right: 0.5rem;
-}
-
-option {
-  background: #545f69;
 }
 
 /* Responsive design */

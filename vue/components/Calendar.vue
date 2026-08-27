@@ -1,84 +1,79 @@
-<script setup lang="ts">
+<script setup>
 import { ref, computed, watch, onUnmounted } from 'vue'
 import { HugeiconsIcon } from '@hugeicons/vue'
 
-export interface CalendarEvent {
-  id: string | number
-  title: string
-  startDate?: Date | string | null
-  endDate?: Date | string | null
-  date?: Date | string | null
-  /** Optional Hugeicons icon (from @hugeicons/core-free-icons). */
-  icon?: unknown
-  /** Optional CSS color overriding the default event background. */
-  color?: string
-  /** Optional CSS color for event title/time when using a custom background. */
-  foregroundColor?: string
-  [key: string]: any
-}
-
-/** Payload for `event-move-request`: call `respond(true)` after a successful commit, or `respond(false)` to decline (e.g. failed server update). */
-export interface CalendarEventMoveRequest {
-  event: CalendarEvent
-  /** Calendar cell where the drag started (for multi-day events, the visible segment day). */
-  sourceDate: Date
-  /** Calendar cell where the event was dropped. */
-  targetDate: Date
-  /** Invoke exactly once with the outcome. If omitted until timeout, the move is treated as rejected. */
-  respond: (_accepted: boolean) => void
-}
-
-export interface CalendarProps {
-  events: CalendarEvent[]
-  monthNames?: string[]
-  dayNames?: string[]
-  loading?: boolean
-  error?: string | null
-  /** When true, events can be dragged to another day. */
-  eventDragEnabled?: boolean
-  /**
-   * Max time (ms) to wait for `respond()` on `event-move-request`.
-   * If `respond` is not called in time, the move is rejected and a warning is logged.
-   * Set to `0` to disable the timeout (not recommended if listeners may omit `respond`).
-   */
-  eventMoveResponseTimeoutMs?: number
-  // Formatter functions
-  getEventDate?: (_event: CalendarEvent) => Date | null
-  getEventDateRange?: (_event: CalendarEvent) => { start: Date | null; end: Date | null }
-  formatEventTime?: (_event: CalendarEvent, _date: Date) => string
-  // Customization
-  showNavigation?: boolean
-  /** When true, day titles show ordinal + full month name (e.g. "21st July") instead of the day number alone. */
-  shortMonthSuffix?: boolean
-  currentMonth?: number
-  currentYear?: number
-}
-
-const props = withDefaults(defineProps<CalendarProps>(), {
-  section: false,
-  monthNames: () => [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'
-  ],
-  dayNames: () => ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-  loading: false,
-  error: null,
-  eventDragEnabled: true,
-  eventMoveResponseTimeoutMs: 15000,
-  showNavigation: true,
-  shortMonthSuffix: false,
+const props = defineProps({
+	events: {
+		type: Array,
+		required: true,
+	},
+	monthNames: {
+		type: Array,
+		default: () => [
+			'January', 'February', 'March', 'April', 'May', 'June',
+			'July', 'August', 'September', 'October', 'November', 'December',
+		],
+	},
+	dayNames: {
+		type: Array,
+		default: () => ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+	},
+	loading: {
+		type: Boolean,
+		default: false,
+	},
+	error: {
+		type: String,
+		default: null,
+	},
+	eventDragEnabled: {
+		type: Boolean,
+		default: true,
+	},
+	eventMoveResponseTimeoutMs: {
+		type: Number,
+		default: 15000,
+	},
+	getEventDate: {
+		type: Function,
+		default: null,
+	},
+	getEventDateRange: {
+		type: Function,
+		default: null,
+	},
+	formatEventTime: {
+		type: Function,
+		default: null,
+	},
+	showNavigation: {
+		type: Boolean,
+		default: true,
+	},
+	shortMonthSuffix: {
+		type: Boolean,
+		default: false,
+	},
+	currentMonth: {
+		type: Number,
+		default: undefined,
+	},
+	currentYear: {
+		type: Number,
+		default: undefined,
+	},
 })
 
-const emit = defineEmits<{
-  'event-click': [event: CalendarEvent]
-  'date-click': [date: Date]
-  'date-range-select': [start: Date, end: Date]
-  'month-change': [month: number, year: number]
-  'event-context-menu': [event: CalendarEvent, mouseEvent: MouseEvent]
-  'event-move-request': [payload: CalendarEventMoveRequest]
-  'event-moved': [payload: { event: CalendarEvent; sourceDate: Date; targetDate: Date }]
-  'event-move-rejected': [payload: { event: CalendarEvent; sourceDate: Date; targetDate: Date }]
-}>()
+const emit = defineEmits([
+	'event-click',
+	'date-click',
+	'date-range-select',
+	'month-change',
+	'event-context-menu',
+	'event-move-request',
+	'event-moved',
+	'event-move-rejected',
+])
 
 // Internal calendar state
 const internalCurrentDate = ref(new Date())
@@ -93,7 +88,7 @@ const viewMonth = computed(() => currentDate.value.getMonth())
 const viewYear = computed(() => currentDate.value.getFullYear())
 
 // Compute the first visible day (Monday) for the current month view
-function getStartOfGrid(date: Date): Date {
+function getStartOfGrid(date) {
   const firstOfMonth = new Date(date.getFullYear(), date.getMonth(), 1)
   const dayOfWeek = (firstOfMonth.getDay() + 6) % 7 // Monday=0
   const start = new Date(firstOfMonth)
@@ -103,19 +98,19 @@ function getStartOfGrid(date: Date): Date {
 }
 
 // Anchor date for the 6x7 grid; we will shift this by weeks without re-rendering the grid structure
-const gridStartDate = ref<Date>(getStartOfGrid(currentDate.value))
+const gridStartDate = ref(getStartOfGrid(currentDate.value))
 // Track if we're actively scrolling to prevent watcher from resetting grid anchor
 const isScrolling = ref(false)
 
 // Helper function to check if a time is midnight (00:00)
-function isMidnight(dateValue: any): boolean {
+function isMidnight(dateValue) {
   if (!dateValue) return false
   const date = new Date(dateValue)
   return date.getHours() === 0 && date.getMinutes() === 0
 }
 
 // Helper function to format time, returning "No time" if midnight
-function formatTimeOrNoTime(dateValue: any): string {
+function formatTimeOrNoTime(dateValue) {
   if (!dateValue) return 'No time'
   if (isMidnight(dateValue)) return 'No time'
   const date = new Date(dateValue)
@@ -123,7 +118,7 @@ function formatTimeOrNoTime(dateValue: any): string {
 }
 
 // Determine if a date is in the past (before today)
-function isPastDay(date: Date): boolean {
+function isPastDay(date) {
   const day = new Date(date)
   day.setHours(0, 0, 0, 0)
   const today = new Date()
@@ -132,14 +127,14 @@ function isPastDay(date: Date): boolean {
 }
 
 // Get event date range
-function resolveEventDateRange(event: CalendarEvent): { start: Date | null; end: Date | null } {
+function resolveEventDateRange(event) {
   if (props.getEventDateRange) {
     return props.getEventDateRange(event)
   }
   
   // Default implementation
-  let start: Date | null = null
-  let end: Date | null = null
+  let start = null
+  let end = null
   
   if (event.startDate) {
     start = new Date(event.startDate)
@@ -155,7 +150,7 @@ function resolveEventDateRange(event: CalendarEvent): { start: Date | null; end:
 }
 
 // Get events for a specific date
-function getEventsForDate(date: Date): CalendarEvent[] {
+function getEventsForDate(date) {
   const targetDate = new Date(date)
   targetDate.setHours(0, 0, 0, 0)
 
@@ -178,7 +173,7 @@ function getEventsForDate(date: Date): CalendarEvent[] {
 }
 
 // Check if an event is a multi-day event
-function isMultiDayEvent(event: CalendarEvent): boolean {
+function isMultiDayEvent(event) {
   const { start, end } = resolveEventDateRange(event)
   
   if (!start || !end) return false
@@ -193,7 +188,7 @@ function isMultiDayEvent(event: CalendarEvent): boolean {
 }
 
 // Get the position of an event within a multi-day range for a specific date
-function getMultiDayPosition(event: CalendarEvent, date: Date): 'start' | 'middle' | 'end' | 'single' {
+function getMultiDayPosition(event, date) {
   const { start, end } = resolveEventDateRange(event)
   
   if (!start || !end) return 'single'
@@ -215,7 +210,7 @@ function getMultiDayPosition(event: CalendarEvent, date: Date): 'start' | 'middl
 }
 
 // Format event time based on position in multi-day event
-function formatEventTimeDefault(event: CalendarEvent, date: Date): string {
+function formatEventTimeDefault(event, date) {
   if (props.formatEventTime) {
     return props.formatEventTime(event, date)
   }
@@ -238,8 +233,8 @@ function formatEventTimeDefault(event: CalendarEvent, date: Date): string {
   return 'All day'
 }
 
-function getEventStyle(event: CalendarEvent): Record<string, string> | undefined {
-  const style: Record<string, string> = {}
+function getEventStyle(event) {
+  const style = {}
   if (event.color) {
     style['--event-color'] = event.color
   }
@@ -250,7 +245,7 @@ function getEventStyle(event: CalendarEvent): Record<string, string> | undefined
 }
 
 // Get ordinal suffix for a number (1st, 2nd, 3rd, 4th, etc.)
-function getOrdinalSuffix(day: number): string {
+function getOrdinalSuffix(day) {
   const j = day % 10
   const k = day % 100
   if (j === 1 && k !== 11) {
@@ -267,7 +262,7 @@ function getOrdinalSuffix(day: number): string {
 
 // Calendar generation from persistent grid start
 const calendarDays = computed(() => {
-  const days = [] as { date: Date; events: CalendarEvent[] }[]
+  const days = []
   const start = gridStartDate.value
   for (let i = 0; i < 42; i++) {
     const date = new Date(start)
@@ -320,13 +315,13 @@ function goToToday() {
 // Week navigation (mouse wheel)
 const lastWheelAt = ref(0)
 const wheelThrottleMs = 180
-function getVisibleMonthYear(start: Date): { month: number; year: number } {
+function getVisibleMonthYear(start) {
   const mid = new Date(start)
   mid.setDate(start.getDate() + 21) // middle of 6x7 grid
   return { month: mid.getMonth(), year: mid.getFullYear() }
 }
 
-function adjustByWeeks(weeks: number): void {
+function adjustByWeeks(weeks) {
   const newStart = new Date(gridStartDate.value)
   newStart.setDate(newStart.getDate() + weeks * 7)
   gridStartDate.value = newStart
@@ -347,7 +342,7 @@ function adjustByWeeks(weeks: number): void {
   }
 }
 
-function handleWheel(event: WheelEvent): void {
+function handleWheel(event) {
   // Prevent page scrolling while using calendar scroll
   event.preventDefault()
   const now = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now()
@@ -358,11 +353,11 @@ function handleWheel(event: WheelEvent): void {
 }
 
 // Event handlers
-function handleEventClick(event: CalendarEvent) {
+function handleEventClick(event) {
   emit('event-click', event)
 }
 
-function handleContextMenu(event: CalendarEvent, mouseEvent: MouseEvent) {
+function handleContextMenu(event, mouseEvent) {
   mouseEvent.preventDefault()
   mouseEvent.stopPropagation()
   emit('event-context-menu', event, mouseEvent)
@@ -370,34 +365,34 @@ function handleContextMenu(event: CalendarEvent, mouseEvent: MouseEvent) {
 
 // --- Date range selection (click / drag) ---
 
-function startOfDay(d: Date): Date {
+function startOfDay(d) {
   const x = new Date(d)
   x.setHours(0, 0, 0, 0)
   return x
 }
 
-function toDateKey(d: Date): string {
+function toDateKey(d) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
 
-function dateFromKey(key: string): Date {
+function dateFromKey(key) {
   const [y, m, day] = key.split('-').map(Number)
   return startOfDay(new Date(y, m - 1, day))
 }
 
 const isDraggingRange = ref(false)
-const rangeDragAnchor = ref<Date | null>(null)
-const rangeDragEnd = ref<Date | null>(null)
-const selectedRangeStart = ref<Date | null>(null)
-const selectedRangeEnd = ref<Date | null>(null)
+const rangeDragAnchor = ref(null)
+const rangeDragEnd = ref(null)
+const selectedRangeStart = ref(null)
+const selectedRangeEnd = ref(null)
 
-function isEventTarget(ev: Event): boolean {
+function isEventTarget(ev) {
   const t = ev.target
   if (!(t instanceof Node)) return false
-  return Boolean((t as HTMLElement).closest?.('.calendar-event'))
+  return Boolean(t.closest?.('.calendar-event'))
 }
 
-function getRangeBounds(): { lo: Date; hi: Date } | null {
+function getRangeBounds() {
   const a = rangeDragAnchor.value
   const b = rangeDragEnd.value
   if (!a || !b) return null
@@ -407,15 +402,17 @@ function getRangeBounds(): { lo: Date; hi: Date } | null {
   return { lo: startOfDay(b), hi: startOfDay(a) }
 }
 
-function rangeHighlightForDate(date: Date): 'none' | 'single' | 'start' | 'end' | 'middle' {
+function rangeHighlightForDate(date) {
   const bounds = isDraggingRange.value
     ? getRangeBounds()
     : selectedRangeStart.value && selectedRangeEnd.value
       ? (() => {
-          const sa = startOfDay(selectedRangeStart.value!).getTime()
-          const sb = startOfDay(selectedRangeEnd.value!).getTime()
-          const lo = sa <= sb ? startOfDay(selectedRangeStart.value!) : startOfDay(selectedRangeEnd.value!)
-          const hi = sa <= sb ? startOfDay(selectedRangeEnd.value!) : startOfDay(selectedRangeStart.value!)
+          const rangeStart = selectedRangeStart.value
+          const rangeEnd = selectedRangeEnd.value
+          const sa = startOfDay(rangeStart).getTime()
+          const sb = startOfDay(rangeEnd).getTime()
+          const lo = sa <= sb ? startOfDay(rangeStart) : startOfDay(rangeEnd)
+          const hi = sa <= sb ? startOfDay(rangeEnd) : startOfDay(rangeStart)
           return { lo, hi }
         })()
       : null
@@ -428,18 +425,18 @@ function rangeHighlightForDate(date: Date): 'none' | 'single' | 'start' | 'end' 
   return 'middle'
 }
 
-function onWindowTouchMove(ev: TouchEvent): void {
+function onWindowTouchMove(ev) {
   if (!isDraggingRange.value || ev.touches.length === 0) return
   const { clientX, clientY } = ev.touches[0]
   const el = document.elementFromPoint(clientX, clientY)
   if (!el) return
-  const cell = (el as HTMLElement).closest?.('[data-calendar-date]')
+  const cell = el.closest?.('[data-calendar-date]')
   const key = cell?.dataset?.calendarDate
   if (!key) return
   rangeDragEnd.value = dateFromKey(key)
 }
 
-function detachRangePointerListeners(): void {
+function detachRangePointerListeners() {
   window.removeEventListener('mouseup', endRangeSelectionFromPointer)
   window.removeEventListener('blur', endRangeSelectionFromPointer)
   window.removeEventListener('touchmove', onWindowTouchMove)
@@ -447,7 +444,7 @@ function detachRangePointerListeners(): void {
   window.removeEventListener('touchcancel', endRangeSelectionFromPointer)
 }
 
-function endRangeSelectionFromPointer(): void {
+function endRangeSelectionFromPointer() {
   if (!isDraggingRange.value) return
   const bounds = getRangeBounds()
   isDraggingRange.value = false
@@ -466,7 +463,7 @@ function endRangeSelectionFromPointer(): void {
   }
 }
 
-function onDayPointerDown(date: Date, ev: MouseEvent | TouchEvent): void {
+function onDayPointerDown(date, ev) {
   if (isEventTarget(ev)) return
   if (ev instanceof MouseEvent && ev.button !== 0) return
 
@@ -484,7 +481,7 @@ function onDayPointerDown(date: Date, ev: MouseEvent | TouchEvent): void {
   }
 }
 
-function onDayPointerEnter(date: Date): void {
+function onDayPointerEnter(date) {
   if (!isDraggingRange.value) return
   rangeDragEnd.value = startOfDay(date)
 }
@@ -497,17 +494,17 @@ onUnmounted(() => {
 
 const CALENDAR_EVENT_DRAG_MIME = 'application/x-picocrank-calendar-event-id'
 
-const draggingEventId = ref<string | number | null>(null)
-const draggingSourceDate = ref<Date | null>(null)
-const dragOverTargetDate = ref<Date | null>(null)
+const draggingEventId = ref(null)
+const draggingSourceDate = ref(null)
+const dragOverTargetDate = ref(null)
 const eventMoveLocked = ref(false)
 
-function sameCalendarDay(a: Date | null, b: Date | null): boolean {
+function sameCalendarDay(a, b) {
   if (!a || !b) return false
   return startOfDay(a).getTime() === startOfDay(b).getTime()
 }
 
-function onEventDragStart(event: CalendarEvent, sourceCellDate: Date, dragEvent: DragEvent): void {
+function onEventDragStart(event, sourceCellDate, dragEvent) {
   if (!props.eventDragEnabled) {
     dragEvent.preventDefault()
     return
@@ -521,13 +518,13 @@ function onEventDragStart(event: CalendarEvent, sourceCellDate: Date, dragEvent:
   }
 }
 
-function onEventDragEnd(): void {
+function onEventDragEnd() {
   draggingEventId.value = null
   draggingSourceDate.value = null
   dragOverTargetDate.value = null
 }
 
-function onDayDragOver(dayDate: Date, ev: DragEvent): void {
+function onDayDragOver(dayDate, ev) {
   if (!props.eventDragEnabled || draggingEventId.value === null) return
   ev.preventDefault()
   if (ev.dataTransfer) {
@@ -536,7 +533,7 @@ function onDayDragOver(dayDate: Date, ev: DragEvent): void {
   dragOverTargetDate.value = startOfDay(dayDate)
 }
 
-function onDayDrop(dayDate: Date, ev: DragEvent): void {
+function onDayDrop(dayDate, ev) {
   ev.preventDefault()
   dragOverTargetDate.value = null
   if (!props.eventDragEnabled) return
@@ -560,9 +557,9 @@ function onDayDrop(dayDate: Date, ev: DragEvent): void {
   const targetClone = new Date(targetDate)
 
   let settled = false
-  let watchdog: ReturnType<typeof setTimeout> | undefined
+  let watchdog
 
-  function respond(accepted: boolean): void {
+  function respond(accepted) {
     if (settled) return
     settled = true
     if (watchdog !== undefined) {

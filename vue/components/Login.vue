@@ -1,30 +1,50 @@
 <template>
-	<div class="login-container">
+	<div class="login-container" :class="{ 'local-only': localOnly }">
 		<Tabs :tabs="loginTabs" @tab-change="onTabChange">
 			<!-- Local Login Tab -->
 			<template #tab-local>
 				<div class="login-section">
-					<form @submit.prevent="handleLocalLogin" class="local-login-form">
-						<input
-							id="username"
-							type="text"
-							v-model="localLogin.username"
-							required
-							autocomplete="username"
-							placeholder="Username"
-						/>
-						<input
-							id="password"
-							type="password"
-							v-model="localLogin.password"
-							required
-							autocomplete="current-password"
-							placeholder="Password"
-						/>
+					<div
+						v-if="localLoginLoading"
+						class="local-login-loading"
+						role="status"
+						aria-live="polite"
+					>
+						<span class="local-login-spinner" aria-hidden="true" />
+						<p>{{ localLoginLoadingMessage }}</p>
+					</div>
+					<form v-else @submit.prevent="handleLocalLogin" class="local-login-form">
+						<FormField label="Username" for="username" label-skip v-model:error="usernameError">
+							<input
+								id="username"
+								type="text"
+								v-model="localLogin.username"
+								required
+								autocomplete="username"
+								placeholder="Username"
+								aria-label="Username"
+							/>
+						</FormField>
+						<FormField label="Password" for="password" label-skip v-model:error="passwordError">
+							<input
+								id="password"
+								type="password"
+								v-model="localLogin.password"
+								required
+								autocomplete="current-password"
+								placeholder="Password"
+								aria-label="Password"
+							/>
+						</FormField>
 						<button type="submit" class="good">Login</button>
-						<div v-if="localLoginError" class="error-message">
-							{{ localLoginError }}
-						</div>
+						<NotificationBlock
+							v-if="formError"
+							class="login-form-error"
+							type="bad"
+							label="Error"
+							:message="formError"
+							role="alert"
+						/>
 					</form>
 				</div>
 			</template>
@@ -70,6 +90,8 @@
 <script setup>
 import { ref, reactive, watch, computed, useSlots } from 'vue';
 import Tabs from './Tabs.vue';
+import FormField from './FormField.vue';
+import NotificationBlock from './NotificationBlock.vue';
 import { HugeiconsIcon } from '@hugeicons/vue';
 
 const props = defineProps({
@@ -95,6 +117,15 @@ const props = defineProps({
 	showDefaultTabs: {
 		type: Boolean,
 		default: true
+	},
+	// Username & password only — no OAuth or custom tabs; hides the tab bar
+	localOnly: {
+		type: Boolean,
+		default: false
+	},
+	loadingMessage: {
+		type: String,
+		default: 'Signing in…'
 	}
 });
 
@@ -119,8 +150,9 @@ const loginTabs = ref([]);
 function initializeTabs() {
 	const tabs = [];
 	
-	// Add default tabs if enabled
-	if (props.showDefaultTabs) {
+	if (props.localOnly) {
+		tabs.push({ id: 'local', label: props.tabLabels.local || 'Username & Password' });
+	} else if (props.showDefaultTabs) {
 		tabs.push(
 			{ id: 'local', label: props.tabLabels.local || 'Username & Password' },
 			{ id: 'oauth', label: props.tabLabels.oauth || 'OAuth2' }
@@ -128,7 +160,7 @@ function initializeTabs() {
 	}
 	
 	// Add custom tabs
-	if (props.customTabs && props.customTabs.length > 0) {
+	if (!props.localOnly && props.customTabs && props.customTabs.length > 0) {
 		tabs.push(...props.customTabs);
 	}
 	
@@ -139,7 +171,7 @@ function initializeTabs() {
 initializeTabs();
 
 // Watch for changes to customTabs or showDefaultTabs
-watch(() => [props.customTabs, props.showDefaultTabs], () => {
+watch(() => [props.customTabs, props.showDefaultTabs, props.localOnly], () => {
 	initializeTabs();
 }, { deep: true });
 
@@ -149,7 +181,26 @@ const localLogin = reactive({
 	password: ''
 });
 
-const localLoginError = ref('');
+const usernameError = ref('');
+const passwordError = ref('');
+const formError = ref('');
+const localLoginLoading = ref(false);
+const localLoginLoadingMessage = ref('');
+
+function clearLocalLoginErrors() {
+	usernameError.value = '';
+	passwordError.value = '';
+	formError.value = '';
+}
+
+watch(
+	() => [localLogin.username, localLogin.password],
+	() => {
+		if (formError.value) {
+			formError.value = '';
+		}
+	},
+);
 
 // OAuth providers - provided by parent component
 const oauthProviders = ref(props.oauthProviders);
@@ -163,9 +214,10 @@ watch(() => props.oauthProviders, (newProviders) => {
 
 // Handle local login
 function handleLocalLogin() {
-	localLoginError.value = '';
-	
-	// Emit event for parent component to handle
+	clearLocalLoginErrors();
+	localLoginLoading.value = true;
+	localLoginLoadingMessage.value = props.loadingMessage;
+
 	emit('local-login', {
 		username: localLogin.username,
 		password: localLogin.password
@@ -176,7 +228,8 @@ function handleLocalLogin() {
 function resetLocalForm() {
 	localLogin.username = '';
 	localLogin.password = '';
-	localLoginError.value = '';
+	clearLocalLoginErrors();
+	localLoginLoading.value = false;
 }
 
 // Handle OAuth login
@@ -189,15 +242,28 @@ function handleOAuthLogin(provider) {
 
 // Handle tab change
 function onTabChange(tab, tabId) {
-	// Clear errors when switching tabs
-	localLoginError.value = '';
+	clearLocalLoginErrors();
 	oauthError.value = '';
+	localLoginLoading.value = false;
 	emit('tab-change', tab, tabId);
 }
 
-// Method to set error messages
+function setLocalLoginErrors(errors = {}) {
+	localLoginLoading.value = false;
+	usernameError.value = errors.username || '';
+	passwordError.value = errors.password || '';
+	formError.value = errors.form || '';
+}
+
 function setLocalLoginError(message) {
-	localLoginError.value = message;
+	setLocalLoginErrors({ form: message });
+}
+
+function setLocalLoginLoading(loading, message) {
+	localLoginLoading.value = loading;
+	if (loading) {
+		localLoginLoadingMessage.value = message ?? props.loadingMessage;
+	}
 }
 
 function setOAuthError(message) {
@@ -214,6 +280,8 @@ defineExpose({
 	addOAuthProvider,
 	resetLocalForm,
 	setLocalLoginError,
+	setLocalLoginErrors,
+	setLocalLoginLoading,
 	setOAuthError,
 	localLogin
 });
@@ -223,6 +291,15 @@ defineExpose({
 .login-container {
 	max-width: 500px;
 	margin: 2rem auto;
+}
+
+.login-container.local-only {
+	margin-top: 0;
+	margin-bottom: 0;
+}
+
+.login-container.local-only :deep(.tabs-header) {
+	display: none;
 }
 
 .login-section {
@@ -239,17 +316,46 @@ defineExpose({
 	width: 100%;
 }
 
-.local-login-form input {
-	padding: 0.75rem;
-	border-radius: 4px;
-	font-size: 1em;
+.local-login-form :deep(.form-field-control) {
+	width: 100%;
+}
+
+.local-login-form :deep(input) {
 	width: 100%;
 	box-sizing: border-box;
 }
 
-.local-login-form input:focus-visible {
-	outline: 2px solid var(--login-input-focus-outline);
-	outline-offset: 2px;
+.local-login-loading {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 1rem;
+	width: 100%;
+	min-height: 9rem;
+	padding: 1rem 0;
+	color: var(--login-muted-fg);
+	text-align: center;
+}
+
+.local-login-loading p {
+	margin: 0;
+	font-size: 0.95em;
+}
+
+.local-login-spinner {
+	width: 2rem;
+	height: 2rem;
+	border: 3px solid var(--login-spinner-track);
+	border-top-color: var(--login-spinner-fg);
+	border-radius: 50%;
+	animation: local-login-spin 0.75s linear infinite;
+}
+
+@keyframes local-login-spin {
+	to {
+		transform: rotate(360deg);
+	}
 }
 
 .local-login-form button {
@@ -264,6 +370,11 @@ defineExpose({
 
 .local-login-form button:hover {
 	opacity: 0.9;
+}
+
+.local-login-form :deep(.login-form-error) {
+	width: 100%;
+	font-size: 0.9em;
 }
 
 .oauth-providers {

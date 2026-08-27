@@ -1,7 +1,6 @@
 import js from '@eslint/js'
 import pluginVue from 'eslint-plugin-vue'
 import globals from 'globals'
-import tseslint from 'typescript-eslint'
 import vueParser from 'vue-eslint-parser'
 
 export default [
@@ -50,13 +49,21 @@ export default [
 		languageOptions: {
 			parser: vueParser,
 			parserOptions: {
-				parser: {
-					js: 'espree',
-					ts: tseslint.parser,
-				},
 				sourceType: 'module',
 				extraFileExtensions: ['.vue'],
 			},
+		},
+	},
+	{
+		files: ['**/*.spec.js', 'vue/test/**'],
+		languageOptions: {
+			globals: {
+				...globals.browser,
+				...globals.node,
+			},
+		},
+		rules: {
+			'vue/one-component-per-file': 'off',
 		},
 	},
 	{

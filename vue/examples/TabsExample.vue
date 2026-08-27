@@ -1,7 +1,7 @@
 <template>
 	<Section
 		title="Horizontal Tabs"
-		subtitle="A flexible tabbed control component with support for multiple tab panes"
+		subtitle="A flexible tabbed control component with support for multiple tab panes and disabled tabs"
 		:padding="horizontalTabsSectionPadding"
 	>
 		<template #toolbar>
@@ -12,6 +12,10 @@
 			<label class="tabs-padding-toggle">
 				<input v-model="horizontalTabsPadding" type="checkbox" />
 				Tab padding
+			</label>
+			<label class="tabs-padding-toggle">
+				<input v-model="detailsTabEnabled" type="checkbox" />
+				Enable Details tab
 			</label>
 		</template>
 
@@ -26,6 +30,8 @@
 					<p>
 						This is the Overview tab. It contains general information about the current topic.
 						You can place any content here, including forms, tables, images, or other components.
+						The <strong>Details</strong> tab starts disabled — use the toolbar checkbox to
+						enable it when elevated permissions are granted.
 					</p>
 					<ul>
 						<li>First item in the overview</li>
@@ -97,7 +103,7 @@
 
 	<Section
 		title="Vertical Tabs"
-		subtitle="Side tab strip with arrow-key navigation up and down"
+		subtitle="Side tab strip with arrow-key navigation up and down; disabled tabs are skipped"
 		:padding="verticalTabsSectionPadding"
 	>
 		<template #toolbar>
@@ -108,6 +114,10 @@
 			<label class="tabs-padding-toggle">
 				<input v-model="verticalTabsPadding" type="checkbox" />
 				Tab padding
+			</label>
+			<label class="tabs-padding-toggle">
+				<input v-model="advancedTabEnabled" type="checkbox" />
+				Enable Advanced tab
 			</label>
 		</template>
 
@@ -123,6 +133,7 @@
 					<p>
 						Vertical tabs place the tab list beside the panel. Use them when labels are
 						longer or when the layout mirrors a settings sidebar.
+						<strong>Advanced</strong> starts disabled — use the toolbar checkbox to enable it.
 					</p>
 				</div>
 			</template>
@@ -186,24 +197,47 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue';
+import { computed, ref, reactive } from 'vue';
 import { HomeIcon, Settings01Icon, UserIcon, ViewIcon } from '@hugeicons/core-free-icons';
 import Section from '../components/Section.vue';
 import Tabs from '../components/Tabs.vue';
 import FormLayout from '../components/FormLayout.vue';
 import FormField from '../components/FormField.vue';
 
-const basicTabs = ref([
+const detailsTabEnabled = ref(false);
+const advancedTabEnabled = ref(false);
+
+const basicTabs = computed(() => [
 	{ id: 0, label: 'Overview', icon: HomeIcon },
-	{ id: 1, label: 'Details', icon: ViewIcon },
+	{
+		id: 1,
+		label: 'Details',
+		icon: ViewIcon,
+		...(detailsTabEnabled.value
+			? {}
+			: {
+				disabled: true,
+				disabledTitle: 'Details requires elevated permissions',
+			}),
+	},
 	{ id: 2, label: 'Settings', icon: Settings01Icon },
 ]);
 
-const verticalTabs = ref([
+const verticalTabs = computed(() => [
 	{ id: 'general', label: 'General', icon: HomeIcon },
 	{ id: 'appearance', label: 'Appearance', icon: Settings01Icon },
 	{ id: 'notifications', label: 'Notifications', icon: UserIcon },
-	{ id: 'advanced', label: 'Advanced', icon: Settings01Icon },
+	{
+		id: 'advanced',
+		label: 'Advanced',
+		icon: Settings01Icon,
+		...(advancedTabEnabled.value
+			? {}
+			: {
+				disabled: true,
+				disabledTitle: 'Advanced settings are not available for this account',
+			}),
+	},
 ]);
 
 const horizontalTabsSectionPadding = ref(true);
