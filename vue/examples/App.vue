@@ -2,7 +2,8 @@
 	<Navigation ref="navigation">
 		<Navigation ref="topBarNavigation">
 			<Header
-				username="Guest"
+				:username="headerUsername"
+				:login-route="headerLoginRoute"
 				@toggleSidebar="toggleSidebar"
 				@logoClick="goToIndex"
 				@userClick="goToUserDetails"
@@ -85,6 +86,8 @@
 	const includeSupplementalThemes = ref(true);
 	const topBarEnabled = ref(false);
 	const breadcrumbsEnabled = ref(true);
+	const headerUsername = ref('tester');
+	const headerLoginRoute = { name: 'Login' };
 
 	const { discoverThemes } = initCustomTheme({ includeSupplementalThemes: true });
 
@@ -132,6 +135,10 @@
 
 	function toggleBreadcrumbsEnabled() {
 		breadcrumbsEnabled.value = !breadcrumbsEnabled.value;
+	}
+
+	function setHeaderUsername(username) {
+		headerUsername.value = username;
 	}
 
 	async function dummyFetchResults(_query, { signal } = {}) {
@@ -200,6 +207,8 @@
 	provide('toggleTopBarEnabled', toggleTopBarEnabled);
 	provide('breadcrumbsEnabled', breadcrumbsEnabled);
 	provide('toggleBreadcrumbsEnabled', toggleBreadcrumbsEnabled);
+	provide('headerUsername', headerUsername);
+	provide('setHeaderUsername', setHeaderUsername);
 
 	watch(quickSearchRef, (quickSearch) => {
 		if (quickSearch) {

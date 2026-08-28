@@ -102,6 +102,23 @@
 					@update:model-value="setBreadcrumbsEnabled"
 				/>
 			</FormField>
+
+			<FormField label="Header username" component-has-label>
+				<div>
+					<RadioGroup
+						name="ps-header-username"
+						variant="list"
+						aria-label="Header username"
+						:model-value="headerUsername"
+						:options="headerUsernameOptions"
+						@update:model-value="setHeaderUsernameValue"
+					/>
+					<p class="subtle">
+						When no username is set, the header shows a Login link if
+						<code>loginRoute</code> is configured.
+					</p>
+				</div>
+			</FormField>
 		</FormLayout>
 	</Section>
 
@@ -174,6 +191,11 @@ const onOffOptions = [
 	{ label: 'Off', value: false },
 ]
 
+const headerUsernameOptions = [
+	{ label: 'No username', value: '' },
+	{ label: 'tester', value: 'tester' },
+]
+
 const sidebarEnabled = inject('sidebarEnabled')
 const toggleSidebarEnabled = inject('toggleSidebarEnabled')
 const brandingEnabled = inject('brandingEnabled')
@@ -190,6 +212,8 @@ const topBarEnabled = inject('topBarEnabled')
 const toggleTopBarEnabled = inject('toggleTopBarEnabled')
 const breadcrumbsEnabled = inject('breadcrumbsEnabled')
 const toggleBreadcrumbsEnabled = inject('toggleBreadcrumbsEnabled')
+const headerUsername = inject('headerUsername')
+const setHeaderUsername = inject('setHeaderUsername')
 const navigation = inject('navigation', null)
 
 const exampleLinksEnabled = ref(false)
@@ -226,6 +250,10 @@ function setTopBarEnabled(want) {
 
 function setBreadcrumbsEnabled(want) {
 	setFlag(breadcrumbsEnabled, toggleBreadcrumbsEnabled, want)
+}
+
+function setHeaderUsernameValue(username) {
+	setHeaderUsername(username)
 }
 
 function setSidebarEnabled(want) {

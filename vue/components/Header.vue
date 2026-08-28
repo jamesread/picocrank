@@ -55,6 +55,13 @@
 					<HugeiconsIcon :icon="UserIcon" width="1em" height="1em" aria-hidden="true" />
 					<span>{{ username }}</span>
 				</button>
+				<RouterLink
+					v-else-if="showLoginLink"
+					:to="loginRoute"
+					class="user-info flex-row neutral login-link"
+				>
+					<span>Login</span>
+				</RouterLink>
 			</slot>
 		</div>
 	</header>
@@ -65,6 +72,7 @@
 
 <script setup>
 	import { computed, ref } from "vue";
+	import { RouterLink } from "vue-router";
 	import { HugeiconsIcon } from "@hugeicons/vue";
 	import { BulbIcon, Menu01Icon, Moon02Icon, Sun01Icon, UserIcon } from "@hugeicons/core-free-icons";
 
@@ -110,6 +118,10 @@
 			type: String,
 			default: "",
 		},
+		loginRoute: {
+			type: [String, Object],
+			default: null,
+		},
 		title: {
 			type: String,
 			default: "Untitled",
@@ -153,6 +165,10 @@
 
 	const showBreadcrumbsBar = computed(
 		() => props.breadcrumbs && !isMobile.value,
+	);
+
+	const showLoginLink = computed(
+		() => !props.username.trim() && props.loginRoute != null && props.loginRoute !== '',
 	);
 
 	function toggleNavSidebar() {
@@ -201,6 +217,11 @@
 	font-weight: normal;
 }
 
+.login-link {
+	text-decoration: none;
+	color: inherit;
+}
+
 .user-info span {
 	padding-right: 0;
 	font-weight: normal;
@@ -218,6 +239,7 @@
 
 /* Match Femtocrank header chrome (same idea as #sidebar-button:hover) */
 .header-actions > button,
+.header-actions > a.login-link,
 .header-actions :deep(button) {
 	border: 0;
 	border-radius: 0;
@@ -233,6 +255,7 @@
 }
 
 .header-actions > button:hover,
+.header-actions > a.login-link:hover,
 .header-actions :deep(button:hover),
 .user-info:hover {
 	background-color: var(--header-hover-background-color);
@@ -296,6 +319,10 @@ header .search-trigger:hover {
 }
 
 header .user-info {
+	font-weight: normal;
+}
+
+header .login-link {
 	font-weight: normal;
 }
 </style>
