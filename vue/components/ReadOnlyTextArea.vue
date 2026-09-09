@@ -1,19 +1,28 @@
 <template>
 	<div class="readonly-textarea">
-		<div v-if="label || showCopyButton" class="readonly-textarea-header">
+		<div v-if="showHeader" class="readonly-textarea-header">
 			<label v-if="label" :for="textareaId">{{ label }}</label>
-			<div v-else class="fg1" />
-			<button
-				v-if="showCopyButton"
-				type="button"
-				class="readonly-textarea-copy"
-				:title="copied ? 'Copied' : 'Copy to clipboard'"
-				:disabled="!modelValue"
-				@click="copy"
+			<div v-if="pushActionsEnd" class="fg1" />
+			<div
+				v-if="showActions"
+				class="readonly-textarea-actions"
+				:class="{ 'readonly-textarea-actions--leading': hasActions }"
 			>
-				<HugeiconsIcon :icon="copied ? CopyCheckIcon : Copy01Icon" width="1em" height="1em" />
-				<span>{{ copied ? copiedLabel : copyLabel }}</span>
-			</button>
+				<div v-if="hasActions" class="readonly-textarea-actions-slot">
+					<slot name="actions" />
+				</div>
+				<button
+					v-if="showCopyButton"
+					type="button"
+					class="readonly-textarea-copy"
+					:title="copied ? 'Copied' : 'Copy to clipboard'"
+					:disabled="!modelValue"
+					@click="copy"
+				>
+					<HugeiconsIcon :icon="copied ? CopyCheckIcon : Copy01Icon" width="1em" height="1em" />
+					<span>{{ copied ? copiedLabel : copyLabel }}</span>
+				</button>
+			</div>
 		</div>
 		<textarea
 			:id="textareaId"
@@ -28,7 +37,7 @@
 </template>
 
 <script setup>
-import { ref, computed, useId, watch } from 'vue'
+import { ref, computed, useId, useSlots, watch, Comment } from 'vue'
 import { HugeiconsIcon } from '@hugeicons/vue'
 import { Copy01Icon, CopyCheckIcon } from '@hugeicons/core-free-icons'
 
@@ -84,6 +93,26 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['copy', 'copy-error', 'update:modelValue'])
+
+const slots = useSlots()
+
+const hasActions = computed(() => {
+	const render = slots.actions
+	if (!render) {
+		return false
+	}
+	return render().some((vnode) => vnode.type !== Comment)
+})
+
+const showActions = computed(() => hasActions.value || props.showCopyButton)
+
+const showHeader = computed(
+	() => Boolean(props.label) || showActions.value,
+)
+
+const pushActionsEnd = computed(
+	() => showActions.value && !hasActions.value,
+)
 
 const generatedId = useId()
 const textareaId = props.id || `readonly-textarea-${generatedId}`
@@ -187,7 +216,6 @@ defineExpose({
 .readonly-textarea-header {
 	display: flex;
 	align-items: center;
-	justify-content: space-between;
 	gap: 0.75rem;
 }
 
@@ -197,12 +225,33 @@ defineExpose({
 
 .fg1 {
 	flex: 1;
+	min-width: 0;
+}
+
+.readonly-textarea-actions {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.75rem;
+	margin-left: auto;
+	flex-shrink: 0;
+}
+
+.readonly-textarea-actions--leading {
+	margin-left: 0;
+}
+
+.readonly-textarea-actions-slot {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.75rem;
+	flex-wrap: wrap;
 }
 
 .readonly-textarea-copy {
 	display: inline-flex;
 	align-items: center;
 	gap: 0.35em;
+	flex-shrink: 0;
 }
 
 .readonly-textarea textarea {

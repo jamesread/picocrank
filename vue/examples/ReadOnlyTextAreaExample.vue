@@ -18,7 +18,11 @@
 				label="Application log"
 				:rows="10"
 				@copy="onCopy"
-			/>
+			>
+				<template #actions>
+					<button type="button" @click="refreshDiagnostics">Refresh log</button>
+				</template>
+			</ReadOnlyTextArea>
 
 			<ReadOnlyTextArea
 				v-model="environmentInfo"
