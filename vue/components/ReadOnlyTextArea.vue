@@ -180,6 +180,8 @@ defineExpose({
 	flex-direction: column;
 	gap: 0.5rem;
 	width: 100%;
+	min-width: 0;
+	max-width: 100%;
 }
 
 .readonly-textarea-header {
@@ -205,12 +207,15 @@ defineExpose({
 
 .readonly-textarea textarea {
 	width: 100%;
+	max-width: 100%;
+	box-sizing: border-box;
 	resize: vertical;
 	margin: 0;
 }
 
 .readonly-textarea textarea.monospace {
 	font-family: monospace;
-	white-space: pre;
+	white-space: pre-wrap;
+	overflow-wrap: anywhere;
 }
 </style>
