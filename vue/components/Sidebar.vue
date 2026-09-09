@@ -107,7 +107,8 @@ import { HugeiconsIcon } from '@hugeicons/vue'
 import { Pin02Icon, PinIcon, ArrowDown01Icon, ArrowRight01Icon } from '@hugeicons/core-free-icons'
 import SidebarNavLink from './SidebarNavLink.vue'
 
-const STORAGE_KEY = 'picocrank-nav-sections-collapsed'
+const COLLAPSED_SECTIONS_STORAGE_KEY = 'picocrank-nav-sections-collapsed'
+const STUCK_STORAGE_KEY = 'picocrank-sidebar-stuck'
 const SIDEBAR_PANEL_ID = 'picocrank-sidebar'
 const TOGGLER_ID = 'sidebar-toggler-button'
 
@@ -118,8 +119,16 @@ const props = defineProps({
 	},
 })
 
+function loadStuckPreference() {
+	try {
+		return localStorage.getItem(STUCK_STORAGE_KEY) === 'true'
+	} catch {
+		return false
+	}
+}
+
 const isOpen = ref(false)
-const isStuck = ref(false)
+const isStuck = ref(loadStuckPreference())
 const sidebarRef = ref(null)
 const route = useRoute()
 const headingId = useId()
@@ -156,7 +165,7 @@ function isActive(link) {
 
 function loadCollapsedSections() {
 	try {
-		const raw = localStorage.getItem(STORAGE_KEY)
+		const raw = localStorage.getItem(COLLAPSED_SECTIONS_STORAGE_KEY)
 		if (!raw) return new Set()
 		const parsed = JSON.parse(raw)
 		return new Set(Array.isArray(parsed) ? parsed : [])
@@ -168,7 +177,7 @@ function loadCollapsedSections() {
 const collapsedSections = ref(loadCollapsedSections())
 
 function saveCollapsedSections() {
-	localStorage.setItem(STORAGE_KEY, JSON.stringify([...collapsedSections.value]))
+	localStorage.setItem(COLLAPSED_SECTIONS_STORAGE_KEY, JSON.stringify([...collapsedSections.value]))
 }
 
 function isSectionCollapsed(sectionId) {
@@ -243,6 +252,14 @@ function expandSectionContainingActiveRoute() {
 watch(() => route.fullPath, () => {
 	expandSectionContainingActiveRoute()
 }, { immediate: true })
+
+watch(isStuck, (stuck) => {
+	try {
+		localStorage.setItem(STUCK_STORAGE_KEY, stuck ? 'true' : 'false')
+	} catch {
+		// ignore storage errors (private mode, quota, etc.)
+	}
+})
 
 function toggleStick() {
 	isStuck.value = !isStuck.value
