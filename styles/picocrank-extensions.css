@@ -103,7 +103,17 @@ section .section-content {
 	min-width: 0;
 }
 
-/* Femtocrank 2.7 compacts section toolbars; keep pre-upgrade default button padding. */
+/*
+ * Femtocrank 2.7 compacts section toolbars; keep pre-upgrade default button padding.
+ * Toolbar is a flex row beside the section title — buttons must not shrink when a
+ * search or filter control shares the row (avoid width: 100% on flex siblings).
+ */
+section .section-header [role="toolbar"] {
+	flex: 1 1 auto;
+	min-width: 0;
+	justify-content: flex-end;
+}
+
 section .section-header [role="toolbar"] button,
 section .section-header [role="toolbar"] .button {
 	padding-top: .4em;
@@ -112,6 +122,12 @@ section .section-header [role="toolbar"] .button {
 	padding-right: 1em;
 	min-width: 0;
 	line-height: normal;
+	flex-shrink: 0;
+}
+
+section .section-header [role="toolbar"] > :not(button):not(.button) {
+	flex: 1 1 auto;
+	min-width: 0;
 }
 
 section.narrow {
