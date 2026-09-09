@@ -90,6 +90,8 @@
 	--danger-zone-summary-hover-bg: var(--karma-bad-tint);
 	--danger-zone-warning-fg: var(--muted-text-color);
 	--danger-zone-focus-outline: var(--karma-bad-border);
+
+	--picocrank-fixed-header-offset: 4em;
 }
 
 table thead th {
@@ -167,6 +169,27 @@ textarea.field-invalid:focus-visible,
 select.field-invalid:focus-visible {
 	outline: 2px solid var(--karma-bad-border);
 	outline-offset: 2px;
+}
+
+/*
+ * Fixed header layout: pin the app header and offset sidebar + main content.
+ * Apply .layout-fixed-header on a wrapper whose direct children are header and #layout.
+ */
+.layout-fixed-header > header {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	z-index: 5;
+}
+
+.layout-fixed-header > #layout aside {
+	z-index: 3;
+	padding-top: var(--picocrank-fixed-header-offset);
+}
+
+.layout-fixed-header > #layout main {
+	padding-top: var(--picocrank-fixed-header-offset);
 }
 }
 

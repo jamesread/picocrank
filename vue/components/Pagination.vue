@@ -108,12 +108,12 @@ const props = defineProps({
 const emit = defineEmits(['page-change', 'page-size-change', 'update:page', 'update:pageSize'])
 
 const localPageSize = ref(props.pageSize)
-const localCurrentPage = ref(props.currentPage)
 
-// Computed property to get the current page value (supports both v-model and regular props)
 const currentPageValue = computed(() => {
-  // When using v-model, the page prop will be reactive and change
-  // When using regular props, currentPage will be reactive
+  // `page` supports v-model; `currentPage` is the plain prop. Both default to 1.
+  if (props.currentPage !== 1) {
+    return props.currentPage
+  }
   return props.page
 })
 
@@ -124,27 +124,17 @@ const endItem = computed(() => Math.min(currentPageValue.value * localPageSize.v
 
 function goToPage(page) {
   if (page >= 1 && page <= totalPages.value && page !== currentPageValue.value) {
-    localCurrentPage.value = page
     emit('page-change', page)
     emit('update:page', page)
   }
 }
 
 function handlePageSizeChange() {
-  localCurrentPage.value = 1
   emit('page-size-change', localPageSize.value)
   emit('update:pageSize', localPageSize.value)
   emit('page-change', 1)
   emit('update:page', 1)
 }
-
-watch(() => props.currentPage, (newPage) => {
-  localCurrentPage.value = newPage
-})
-
-watch(() => props.page, (newPage) => {
-  localCurrentPage.value = newPage
-})
 
 watch(() => props.pageSize, (newSize) => {
   localPageSize.value = newSize
