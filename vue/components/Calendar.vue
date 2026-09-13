@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, watch, onUnmounted } from 'vue'
+import { ref, computed, watch, onUnmounted, nextTick } from 'vue'
 import { HugeiconsIcon } from '@hugeicons/vue'
 
 const props = defineProps({
@@ -62,6 +62,15 @@ const props = defineProps({
 		type: Number,
 		default: undefined,
 	},
+	viewMode: {
+		type: String,
+		default: 'month',
+		validator: (value) => ['month', 'week', 'day'].includes(value),
+	},
+	focusDate: {
+		type: [Date, String, Number],
+		default: null,
+	},
 })
 
 const emit = defineEmits([
@@ -73,6 +82,9 @@ const emit = defineEmits([
 	'event-move-request',
 	'event-moved',
 	'event-move-rejected',
+	'update:viewMode',
+	'update:focusDate',
+	'view-change',
 ])
 
 // Internal calendar state
@@ -87,20 +99,91 @@ const currentDate = computed(() => {
 const viewMonth = computed(() => currentDate.value.getMonth())
 const viewYear = computed(() => currentDate.value.getFullYear())
 
-// Compute the first visible day (Monday) for the current month view
-function getStartOfGrid(date) {
-  const firstOfMonth = new Date(date.getFullYear(), date.getMonth(), 1)
-  const dayOfWeek = (firstOfMonth.getDay() + 6) % 7 // Monday=0
-  const start = new Date(firstOfMonth)
-  start.setDate(firstOfMonth.getDate() - dayOfWeek)
-  start.setHours(0, 0, 0, 0)
-  return start
+// Monday-start week containing the given date
+function getWeekStart(date) {
+  const d = new Date(date)
+  const dayOfWeek = (d.getDay() + 6) % 7 // Monday=0
+  d.setDate(d.getDate() - dayOfWeek)
+  d.setHours(0, 0, 0, 0)
+  return d
 }
 
-// Anchor date for the 6x7 grid; we will shift this by weeks without re-rendering the grid structure
+// Compute the first visible day (Monday) for the current month view
+function getStartOfGrid(date) {
+  return getWeekStart(new Date(date.getFullYear(), date.getMonth(), 1))
+}
+
+function startOfDay(d) {
+  const x = new Date(d)
+  x.setHours(0, 0, 0, 0)
+  return x
+}
+
+function parseFocusDate(value) {
+  if (value == null) {
+    return startOfDay(new Date())
+  }
+
+  const parsed = value instanceof Date ? new Date(value) : new Date(value)
+  if (Number.isNaN(parsed.getTime())) {
+    return startOfDay(new Date())
+  }
+
+  return startOfDay(parsed)
+}
+
+function normalizeViewAnchor(mode, focusDateValue) {
+  const focus = parseFocusDate(focusDateValue)
+
+  if (mode === 'week') {
+    return getWeekStart(focus)
+  }
+  if (mode === 'day') {
+    return focus
+  }
+
+  return getStartOfGrid(currentDate.value)
+}
+
+// Anchor date for the grid; we will shift this by weeks without re-rendering the grid structure
 const gridStartDate = ref(getStartOfGrid(currentDate.value))
 // Track if we're actively scrolling to prevent watcher from resetting grid anchor
 const isScrolling = ref(false)
+const internalViewMode = ref(props.viewMode)
+const isCompactView = computed(() => internalViewMode.value !== 'month')
+
+const headerTitle = computed(() => {
+  if (internalViewMode.value === 'month') {
+    return `${props.monthNames[viewMonth.value]} ${viewYear.value}`
+  }
+
+  if (internalViewMode.value === 'day') {
+    const day = gridStartDate.value
+    return day.toLocaleDateString(undefined, {
+      weekday: 'long',
+      month: 'long',
+      day: 'numeric',
+      year: 'numeric',
+    })
+  }
+
+  const start = gridStartDate.value
+  const end = new Date(start)
+  end.setDate(start.getDate() + 6)
+
+  const startMonth = props.monthNames[start.getMonth()]
+  const endMonth = props.monthNames[end.getMonth()]
+  const startYear = start.getFullYear()
+  const endYear = end.getFullYear()
+
+  if (startYear === endYear && start.getMonth() === end.getMonth()) {
+    return `${startMonth} ${start.getDate()} – ${end.getDate()}, ${startYear}`
+  }
+  if (startYear === endYear) {
+    return `${startMonth} ${start.getDate()} – ${endMonth} ${end.getDate()}, ${startYear}`
+  }
+  return `${startMonth} ${start.getDate()}, ${startYear} – ${endMonth} ${end.getDate()}, ${endYear}`
+})
 
 // Helper function to check if a time is midnight (00:00)
 function isMidnight(dateValue) {
@@ -260,11 +343,33 @@ function getOrdinalSuffix(day) {
   return 'th'
 }
 
+function calendarDayCount(mode = internalViewMode.value) {
+  if (mode === 'week') return 7
+  if (mode === 'day') return 1
+  return 42
+}
+
+function sortedEventsForDay(day) {
+  return [...day.events].sort((a, b) => {
+    const aMultiDay = isMultiDayEvent(a)
+    const bMultiDay = isMultiDayEvent(b)
+    if (aMultiDay && !bMultiDay) return -1
+    if (!aMultiDay && bMultiDay) return 1
+    return 0
+  })
+}
+
+function visibleEventsForDay(day) {
+  const sorted = sortedEventsForDay(day)
+  return internalViewMode.value === 'day' ? sorted : sorted.slice(0, 3)
+}
+
 // Calendar generation from persistent grid start
 const calendarDays = computed(() => {
   const days = []
   const start = gridStartDate.value
-  for (let i = 0; i < 42; i++) {
+  const dayCount = calendarDayCount()
+  for (let i = 0; i < dayCount; i++) {
     const date = new Date(start)
     date.setDate(start.getDate() + i)
     days.push({
@@ -275,8 +380,68 @@ const calendarDays = computed(() => {
   return days
 })
 
+function commitViewChange(mode, focusDateValue, { emitUpdates = true } = {}) {
+  const gridStart = normalizeViewAnchor(mode, focusDateValue)
+  internalViewMode.value = mode
+  gridStartDate.value = gridStart
+
+  if (mode !== 'month') {
+    syncMonthFromGridStart()
+  }
+
+  if (emitUpdates) {
+    emit('update:viewMode', mode)
+    emit('update:focusDate', mode === 'month' ? null : gridStart)
+    emit('view-change', { mode, focusDate: mode === 'month' ? null : gridStart })
+  }
+}
+
+function applyExternalView(mode, focusDateValue) {
+  const gridStart = normalizeViewAnchor(mode, focusDateValue)
+  if (
+    mode === internalViewMode.value
+    && toDateKey(gridStartDate.value) === toDateKey(gridStart)
+  ) {
+    return
+  }
+
+  internalViewMode.value = mode
+  gridStartDate.value = gridStart
+  if (mode !== 'month') {
+    syncMonthFromGridStart()
+  }
+}
+
+watch(
+  () => [props.viewMode, props.focusDate],
+  ([mode, focusDateValue]) => {
+    applyExternalView(mode, focusDateValue)
+  },
+  { immediate: true },
+)
+
+function syncMonthFromGridStart() {
+  const { month, year } = getVisibleMonthYear(gridStartDate.value, internalViewMode.value)
+  if (props.currentMonth !== undefined && props.currentYear !== undefined) {
+    if (month !== viewMonth.value || year !== viewYear.value) {
+      emit('month-change', month, year)
+    }
+  } else {
+    internalCurrentDate.value = new Date(year, month, 1)
+  }
+}
+
 // Navigation functions
 function previousMonth() {
+  if (internalViewMode.value === 'week') {
+    adjustByWeeks(-1)
+    return
+  }
+  if (internalViewMode.value === 'day') {
+    adjustByDays(-1)
+    return
+  }
+
   if (props.currentMonth !== undefined && props.currentYear !== undefined) {
     const newMonth = viewMonth.value === 0 ? 11 : viewMonth.value - 1
     const newYear = viewMonth.value === 0 ? viewYear.value - 1 : viewYear.value
@@ -290,6 +455,15 @@ function previousMonth() {
 }
 
 function nextMonth() {
+  if (internalViewMode.value === 'week') {
+    adjustByWeeks(1)
+    return
+  }
+  if (internalViewMode.value === 'day') {
+    adjustByDays(1)
+    return
+  }
+
   if (props.currentMonth !== undefined && props.currentYear !== undefined) {
     const newMonth = viewMonth.value === 11 ? 0 : viewMonth.value + 1
     const newYear = viewMonth.value === 11 ? viewYear.value + 1 : viewYear.value
@@ -302,8 +476,17 @@ function nextMonth() {
 }
 
 function goToToday() {
+  const today = new Date()
+  if (internalViewMode.value === 'week') {
+    commitViewChange('week', today)
+    return
+  }
+  if (internalViewMode.value === 'day') {
+    commitViewChange('day', today)
+    return
+  }
+
   if (props.currentMonth !== undefined && props.currentYear !== undefined) {
-    const today = new Date()
     emit('month-change', today.getMonth(), today.getFullYear())
     gridStartDate.value = getStartOfGrid(today)
   } else {
@@ -315,31 +498,47 @@ function goToToday() {
 // Week navigation (mouse wheel)
 const lastWheelAt = ref(0)
 const wheelThrottleMs = 180
-function getVisibleMonthYear(start) {
+function getVisibleMonthYear(start, mode = internalViewMode.value) {
+  if (mode === 'day') {
+    return { month: start.getMonth(), year: start.getFullYear() }
+  }
+
   const mid = new Date(start)
-  mid.setDate(start.getDate() + 21) // middle of 6x7 grid
+  mid.setDate(start.getDate() + (mode === 'week' ? 3 : 21))
   return { month: mid.getMonth(), year: mid.getFullYear() }
+}
+
+function syncNavigationMonth(newStart) {
+  if (props.currentMonth !== undefined && props.currentYear !== undefined) {
+    const { month, year } = getVisibleMonthYear(newStart)
+    if (month !== viewMonth.value || year !== viewYear.value) {
+      emit('month-change', month, year)
+      isScrolling.value = true
+      setTimeout(() => { isScrolling.value = false }, 100)
+    }
+  } else {
+    const { month, year } = getVisibleMonthYear(newStart)
+    internalCurrentDate.value = new Date(year, month, 1)
+  }
 }
 
 function adjustByWeeks(weeks) {
   const newStart = new Date(gridStartDate.value)
   newStart.setDate(newStart.getDate() + weeks * 7)
-  gridStartDate.value = newStart
 
-  if (props.currentMonth !== undefined && props.currentYear !== undefined) {
-    const { month, year } = getVisibleMonthYear(newStart)
-    if (month !== viewMonth.value || year !== viewYear.value) {
-      emit('month-change', month, year)
-      // Set flag to prevent watcher from resetting our scroll position
-      isScrolling.value = true
-      // Clear the flag after a short delay to allow future prop-driven updates
-      setTimeout(() => { isScrolling.value = false }, 100)
-    }
-  } else {
-    // Keep internal anchor and current date roughly aligned (set to first of visible month)
-    const { month, year } = getVisibleMonthYear(newStart)
-    internalCurrentDate.value = new Date(year, month, 1)
+  if (internalViewMode.value === 'month') {
+    gridStartDate.value = newStart
+    syncNavigationMonth(newStart)
+    return
   }
+
+  commitViewChange(internalViewMode.value, newStart)
+}
+
+function adjustByDays(days) {
+  const newStart = new Date(gridStartDate.value)
+  newStart.setDate(newStart.getDate() + days)
+  commitViewChange('day', newStart)
 }
 
 function handleWheel(event) {
@@ -349,6 +548,10 @@ function handleWheel(event) {
   if (now - lastWheelAt.value < wheelThrottleMs) return
   lastWheelAt.value = now
   const direction = event.deltaY > 0 ? 1 : -1
+  if (internalViewMode.value === 'day') {
+    adjustByDays(direction)
+    return
+  }
   adjustByWeeks(direction)
 }
 
@@ -363,13 +566,132 @@ function handleContextMenu(event, mouseEvent) {
   emit('event-context-menu', event, mouseEvent)
 }
 
-// --- Date range selection (click / drag) ---
+// --- Day context menu ---
 
-function startOfDay(d) {
-  const x = new Date(d)
-  x.setHours(0, 0, 0, 0)
-  return x
+const DAY_CONTEXT_MENU_MARGIN_PX = 8
+const dayContextMenuOpen = ref(false)
+const dayContextMenuStyle = ref({ top: '0px', left: '0px' })
+const dayContextMenuDate = ref(null)
+const dayContextMenuRef = ref(null)
+
+function positionDayContextMenu(clientX, clientY) {
+  const menu = dayContextMenuRef.value
+  if (!menu) return
+
+  const rect = menu.getBoundingClientRect()
+  const margin = DAY_CONTEXT_MENU_MARGIN_PX
+  let top = clientY
+  let left = clientX
+
+  if (left + rect.width > window.innerWidth - margin) {
+    left = window.innerWidth - rect.width - margin
+  }
+  if (top + rect.height > window.innerHeight - margin) {
+    top = window.innerHeight - rect.height - margin
+  }
+  if (left < margin) left = margin
+  if (top < margin) top = margin
+
+  dayContextMenuStyle.value = {
+    top: `${top}px`,
+    left: `${left}px`,
+  }
 }
+
+function closeDayContextMenu() {
+  dayContextMenuOpen.value = false
+  dayContextMenuDate.value = null
+}
+
+function onDocumentPointerDownForDayMenu(event) {
+  if (!dayContextMenuOpen.value) return
+  if (dayContextMenuRef.value?.contains(event.target)) return
+  closeDayContextMenu()
+}
+
+function onDocumentKeyDownForDayMenu(event) {
+  if (!dayContextMenuOpen.value) return
+  if (event.key === 'Escape') {
+    closeDayContextMenu()
+  }
+}
+
+function attachDayContextMenuListeners() {
+  window.addEventListener('pointerdown', onDocumentPointerDownForDayMenu, true)
+  window.addEventListener('keydown', onDocumentKeyDownForDayMenu)
+}
+
+function detachDayContextMenuListeners() {
+  window.removeEventListener('pointerdown', onDocumentPointerDownForDayMenu, true)
+  window.removeEventListener('keydown', onDocumentKeyDownForDayMenu)
+}
+
+function onDayContextMenu(date, mouseEvent) {
+  if (isEventTarget(mouseEvent)) return
+
+  mouseEvent.preventDefault()
+  mouseEvent.stopPropagation()
+
+  dayContextMenuDate.value = startOfDay(date)
+  dayContextMenuOpen.value = true
+  dayContextMenuStyle.value = {
+    top: `${mouseEvent.clientY}px`,
+    left: `${mouseEvent.clientX}px`,
+  }
+
+  nextTick(() => {
+    positionDayContextMenu(mouseEvent.clientX, mouseEvent.clientY)
+    dayContextMenuRef.value?.querySelector('button')?.focus()
+  })
+}
+
+function showOnlyThisWeek() {
+  const date = dayContextMenuDate.value
+  if (!date) return
+
+  commitViewChange('week', date)
+  closeDayContextMenu()
+}
+
+function showOnlyThisDay() {
+  const date = dayContextMenuDate.value
+  if (!date) return
+
+  commitViewChange('day', date)
+  closeDayContextMenu()
+}
+
+function showFullMonth() {
+  commitViewChange('month', currentDate.value)
+  closeDayContextMenu()
+}
+
+function showWeekViewFromDay() {
+  commitViewChange('week', gridStartDate.value)
+}
+
+function setView({ mode, focusDate: nextFocusDate } = {}) {
+  const nextMode = mode ?? internalViewMode.value
+  const anchor = nextFocusDate ?? (nextMode === 'month' ? currentDate.value : gridStartDate.value)
+  commitViewChange(nextMode, anchor)
+}
+
+defineExpose({
+  setView,
+  showMonthView: () => commitViewChange('month', currentDate.value),
+  showWeekView: (date) => commitViewChange('week', date ?? gridStartDate.value),
+  showDayView: (date) => commitViewChange('day', date ?? gridStartDate.value),
+})
+
+watch(dayContextMenuOpen, (open) => {
+  if (open) {
+    attachDayContextMenuListeners()
+  } else {
+    detachDayContextMenuListeners()
+  }
+})
+
+// --- Date range selection (click / drag) ---
 
 function toDateKey(d) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
@@ -488,6 +810,7 @@ function onDayPointerEnter(date) {
 
 onUnmounted(() => {
   detachRangePointerListeners()
+  detachDayContextMenuListeners()
 })
 
 // --- Calendar event drag and drop (HTML5) ---
@@ -595,7 +918,7 @@ function onDayDrop(dayDate, ev) {
 
 // Sync grid start when controlled month/year props change (but not during scrolling)
 watch([viewMonth, viewYear], () => {
-  if (isScrolling.value) return
+  if (isScrolling.value || internalViewMode.value !== 'month') return
   const anchor = new Date(viewYear.value, viewMonth.value, 1)
   gridStartDate.value = getStartOfGrid(anchor)
 })
@@ -605,7 +928,7 @@ watch([viewMonth, viewYear], () => {
 <template>
   <div class="calendar-wrapper">
     <div v-if="showNavigation" class="calendar-header-nav">
-      <h2 class="calendar-title">{{ monthNames[viewMonth] }} {{ viewYear }}</h2>
+      <h2 class="calendar-title">{{ headerTitle }}</h2>
       <div class="calendar-nav-buttons">
         <slot name="nav-buttons">
           <button @click="previousMonth" class="button neutral">‹</button>
@@ -616,18 +939,40 @@ watch([viewMonth, viewYear], () => {
     </div>
 
     <div class="calendar-container">
+      <div v-if="isCompactView" class="calendar-compact-view-bar">
+        <button
+          v-if="internalViewMode === 'day'"
+          type="button"
+          class="button neutral"
+          @click="showWeekViewFromDay"
+        >
+          ‹ Week view
+        </button>
+        <button type="button" class="button neutral" @click="showFullMonth">
+          ‹ Month view
+        </button>
+      </div>
       <div v-if="error" class="calendar-error">{{ error }}</div>
       <div v-if="loading" class="calendar-loading-overlay">Loading…</div>
       <div
         class="calendar-grid"
         :class="{
           'is-dragging-range': isDraggingRange,
-          'is-dragging-event': draggingEventId !== null
+          'is-dragging-event': draggingEventId !== null,
+          'week-only': internalViewMode === 'week',
+          'day-only': internalViewMode === 'day'
         }"
         @wheel.prevent="handleWheel"
       >
         <!-- Day headers -->
-        <div v-for="day in dayNames" :key="day" class="day-header">{{ day }}</div>
+        <div
+          v-for="day in dayNames"
+          v-show="internalViewMode !== 'day'"
+          :key="day"
+          class="day-header"
+        >
+          {{ day }}
+        </div>
 
         <!-- Calendar days -->
         <div
@@ -637,6 +982,7 @@ watch([viewMonth, viewYear], () => {
           :data-calendar-date="toDateKey(day.date)"
           @mousedown="onDayPointerDown(day.date, $event)"
           @touchstart.passive="onDayPointerDown(day.date, $event)"
+          @contextmenu="onDayContextMenu(day.date, $event)"
           @mouseenter="onDayPointerEnter(day.date)"
           @dragover="onDayDragOver(day.date, $event)"
           @drop="onDayDrop(day.date, $event)"
@@ -667,13 +1013,7 @@ watch([viewMonth, viewYear], () => {
             </div>
             <div class="day-events">
               <div
-                v-for="event in day.events.sort((a, b) => {
-                  const aMultiDay = isMultiDayEvent(a);
-                  const bMultiDay = isMultiDayEvent(b);
-                  if (aMultiDay && !bMultiDay) return -1;
-                  if (!aMultiDay && bMultiDay) return 1;
-                  return 0;
-                }).slice(0, 3)"
+                v-for="event in visibleEventsForDay(day)"
                 :key="event.id"
                 class="calendar-event"
                 :class="{
@@ -714,7 +1054,10 @@ watch([viewMonth, viewYear], () => {
                   </div>
                 </slot>
               </div>
-              <div v-if="day.events.length > 3" class="more-events">
+              <div
+                v-if="internalViewMode !== 'day' && day.events.length > 3"
+                class="more-events"
+              >
                 +{{ day.events.length - 3 }} more
               </div>
             </div>
@@ -722,6 +1065,46 @@ watch([viewMonth, viewYear], () => {
         </div>
       </div>
     </div>
+
+    <Teleport to="body">
+      <div
+        v-if="dayContextMenuOpen"
+        ref="dayContextMenuRef"
+        class="calendar-day-context-menu"
+        role="menu"
+        :style="dayContextMenuStyle"
+        @click.stop
+        @contextmenu.prevent
+      >
+        <button
+          v-if="internalViewMode !== 'day'"
+          type="button"
+          role="menuitem"
+          class="calendar-day-context-menu-item"
+          @click="showOnlyThisDay"
+        >
+          Show only this day
+        </button>
+        <button
+          v-if="internalViewMode !== 'week'"
+          type="button"
+          role="menuitem"
+          class="calendar-day-context-menu-item"
+          @click="showOnlyThisWeek"
+        >
+          Show only this week
+        </button>
+        <button
+          v-if="internalViewMode !== 'month'"
+          type="button"
+          role="menuitem"
+          class="calendar-day-context-menu-item"
+          @click="showFullMonth"
+        >
+          Show full month
+        </button>
+      </div>
+    </Teleport>
   </div>
 </template>
 
@@ -781,10 +1164,40 @@ watch([viewMonth, viewYear], () => {
   position: relative;
 }
 
+.calendar-compact-view-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--calendar-border);
+  background: var(--calendar-chrome-bg);
+}
+
 .calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
   min-height: 400px;
+}
+
+.calendar-grid.week-only {
+  min-height: min(72vh, 760px);
+  grid-template-rows: auto 1fr;
+}
+
+.calendar-grid.week-only .calendar-day {
+  height: auto;
+  min-height: min(68vh, 720px);
+}
+
+.calendar-grid.day-only {
+  grid-template-columns: minmax(0, 1fr);
+  min-height: min(72vh, 760px);
+}
+
+.calendar-grid.day-only .calendar-day {
+  height: auto;
+  min-height: min(68vh, 720px);
+  border-right: none;
 }
 
 .calendar-grid.is-dragging-range,
@@ -1068,6 +1481,12 @@ watch([viewMonth, viewYear], () => {
     height: 110px;
   }
 
+  .calendar-grid.week-only .calendar-day,
+  .calendar-grid.day-only .calendar-day {
+    height: auto;
+    min-height: min(52vh, 420px);
+  }
+
   .day-number {
     font-size: 1rem;
   }
@@ -1101,5 +1520,37 @@ watch([viewMonth, viewYear], () => {
     border-radius: 4px;
     padding: 0.25rem 0.5rem;
   }
+}
+</style>
+
+<style>
+.calendar-day-context-menu {
+  position: fixed;
+  z-index: 1000;
+  min-width: 12rem;
+  padding: 0.35rem;
+  border: 1px solid var(--table-popover-border);
+  border-radius: 8px;
+  background: var(--table-popover-bg);
+  box-shadow: var(--table-popover-shadow);
+}
+
+.calendar-day-context-menu-item {
+  display: block;
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--table-popover-fg);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.calendar-day-context-menu-item:hover,
+.calendar-day-context-menu-item:focus-visible {
+  background: var(--table-popover-item-bg);
+  outline: none;
 }
 </style>

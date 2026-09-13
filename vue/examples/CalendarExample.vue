@@ -1,10 +1,16 @@
 <template>
-	<Section 
-		title="Example Calendar" 
-		padding
+	<Section
+		title="Example Calendar"
+		subtitle="Open with ?view=week&date=2026-09-08 or ?view=day&date=2026-09-13 to load a specific week or day."
+		:icon="Calendar01Icon"
+		:padding="sectionPadding"
 	>
         <template #toolbar>
-            <label class="short-month-suffix-toggle">
+            <label class="calendar-example-toggle">
+                <input type="checkbox" v-model="sectionPadding" />
+                Section padding
+            </label>
+            <label class="calendar-example-toggle">
                 <input type="checkbox" v-model="shortMonthSuffix" />
                 Short month suffix
             </label>
@@ -21,8 +27,7 @@
             </div>
             <button @click="nextMonth">›</button>
         </template>
-		<Calendar 
-            :section="true"
+		<Calendar
 			:events="events"
 			:loading="loading"
 			:error="error"
@@ -30,6 +35,8 @@
 			:short-month-suffix="shortMonthSuffix"
 			:current-month="currentMonthIndex"
 			:current-year="currentYear"
+			v-model:view-mode="calendarViewMode"
+			v-model:focus-date="calendarFocusDate"
 			@event-click="handleEventClick"
 			@date-click="handleDateClick"
 			@date-range-select="handleDateRangeSelect"
@@ -37,12 +44,14 @@
 			@event-moved="handleEventMoved"
 			@event-move-rejected="handleEventMoveRejected"
 			@month-change="handleMonthChange"
+			@view-change="handleViewChange"
 		/>
 	</Section>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import Calendar from '../components/Calendar.vue'
 import Section from '../components/Section.vue'
 import {
@@ -67,10 +76,38 @@ const EVENT_COLORS = {
 	deadline: { color: '#fde8e8', foregroundColor: '#7f1d1d' },
 }
 
+const route = useRoute()
+const router = useRouter()
+
+const VALID_VIEW_MODES = new Set(['month', 'week', 'day'])
+
+function parseRouteViewMode() {
+	const view = route.query.view
+	return typeof view === 'string' && VALID_VIEW_MODES.has(view) ? view : 'month'
+}
+
+function parseRouteFocusDate() {
+	const date = route.query.date
+	if (typeof date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+		return null
+	}
+
+	const parsed = new Date(`${date}T00:00:00`)
+	return Number.isNaN(parsed.getTime()) ? null : parsed
+}
+
+function formatFocusDateQuery(dateValue) {
+	const date = new Date(dateValue)
+	return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+}
+
 const events = ref([])
 const loading = ref(false)
 const error = ref(null)
+const sectionPadding = ref(true)
 const shortMonthSuffix = ref(false)
+const calendarViewMode = ref(parseRouteViewMode())
+const calendarFocusDate = ref(parseRouteFocusDate())
 const currentMonth = ref('?')
 const currentMonthIndex = ref(new Date().getMonth())
 const currentYear = ref(new Date().getFullYear())
@@ -368,6 +405,22 @@ function goToSelectedDate() {
 	events.value = getEventsForSurroundingMonths(monthIndex, year)
 }
 
+function handleViewChange({ mode, focusDate }) {
+	const query = { ...route.query }
+
+	if (mode === 'month') {
+		delete query.view
+		delete query.date
+	} else {
+		query.view = mode
+		if (focusDate) {
+			query.date = formatFocusDateQuery(focusDate)
+		}
+	}
+
+	router.replace({ query })
+}
+
 function handleMonthChange(month, year) {
 	console.log('Month changed:', month, year)
 	// In a real app, you might fetch events for the new month
@@ -395,29 +448,24 @@ function handleMonthChange(month, year) {
 }
 
 onMounted(() => {
-	// Generate initial events for current, previous, and next months
-	const now = new Date()
-	const initMonth = now.getMonth()
-	const initYear = now.getFullYear()
+	const initialAnchor = calendarFocusDate.value ?? new Date()
+	const initMonth = initialAnchor.getMonth()
+	const initYear = initialAnchor.getFullYear()
+
 	events.value = getEventsForSurroundingMonths(initMonth, initYear)
-	
-	// Set initial month title using native JavaScript
-	currentMonthIndex.value = now.getMonth()
-	currentYear.value = now.getFullYear()
-	currentMonth.value = now.toLocaleDateString('en-US', { 
-		month: 'long', 
-		year: 'numeric' 
+	currentMonthIndex.value = initMonth
+	currentYear.value = initYear
+	currentMonth.value = initialAnchor.toLocaleDateString('en-US', {
+		month: 'long',
+		year: 'numeric',
 	})
-	
-	// Initialize the native date picker with current month/year
-	const year = now.getFullYear()
-	const month = String(now.getMonth() + 1).padStart(2, '0')
-	selectedDate.value = `${year}-${month}`
+
+	updateDatePicker(initMonth, initYear)
 })
 </script>
 
 <style scoped>
-.short-month-suffix-toggle {
+.calendar-example-toggle {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
