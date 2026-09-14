@@ -3,7 +3,7 @@
 		:id="SIDEBAR_PANEL_ID"
 		ref="sidebarRef"
 		class="sidebar"
-		:class="{ 'shown': isOpen, 'stuck': isStuck }"
+		:class="{ 'shown': isVisible, 'stuck': isStuck }"
 		aria-label="Sidebar"
 		:aria-hidden="isVisible ? undefined : 'true'"
 		:inert="isVisible ? undefined : true"
@@ -25,14 +25,14 @@
 						:icon="Pin02Icon"
 						width="1em"
 						height="1em"
-						:strokeWidth="3"
+						:strokeWidth="1.5"
 					/>
 					<HugeiconsIcon
 						v-else
 						:icon="PinIcon"
 						width="1em"
 						height="1em"
-						:strokeWidth="3"
+						:strokeWidth="1.5"
 					/>
 				</span>
 			</button>
@@ -274,8 +274,13 @@ function unstick() {
 }
 
 function toggle() {
+	if (isStuck.value) {
+		isStuck.value = false
+		isOpen.value = false
+		return
+	}
+
 	isOpen.value = !isOpen.value
-	isStuck.value = false
 }
 
 function open() {
@@ -284,7 +289,6 @@ function open() {
 
 function close() {
 	isOpen.value = false
-	isStuck.value = false
 }
 
 function isLinkActive(link) {
@@ -408,6 +412,28 @@ li {
 
 button {
 	border: 0;
+}
+
+.stick-toggle {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	align-self: stretch;
+	flex-shrink: 0;
+	padding-top: 0;
+	padding-bottom: 0;
+	padding-left: 1em;
+	padding-right: 1em;
+	border-radius: 0;
+	color: var(--text-color);
+	background-color: transparent;
+	cursor: pointer;
+}
+
+.stick-toggle:hover,
+.stick-toggle:focus-visible {
+	background-color: var(--sidebar-hover-bg-color);
+	color: var(--hover-text-color);
 }
 
 .navigation-links,

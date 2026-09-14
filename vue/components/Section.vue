@@ -7,9 +7,6 @@
 						<HugeiconsIcon
 							:icon="icon"
 							class="section-title-icon"
-							width="1.1em"
-							height="1.1em"
-							:strokeWidth="2"
 							aria-hidden="true"
 						/>
 						<span class="section-title-text">

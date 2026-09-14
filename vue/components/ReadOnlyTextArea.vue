@@ -6,11 +6,21 @@
 			<div
 				v-if="showActions"
 				class="readonly-textarea-actions"
-				:class="{ 'readonly-textarea-actions--leading': hasActions }"
 			>
 				<div v-if="hasActions" class="readonly-textarea-actions-slot">
 					<slot name="actions" />
 				</div>
+				<button
+					v-if="showClearButton"
+					type="button"
+					class="readonly-textarea-clear neutral"
+					title="Clear contents"
+					:disabled="!modelValue"
+					@click="clear"
+				>
+					<HugeiconsIcon :icon="Delete02Icon" width="1em" height="1em" />
+					<span>{{ clearLabel }}</span>
+				</button>
 				<button
 					v-if="showCopyButton"
 					type="button"
@@ -39,7 +49,7 @@
 <script setup>
 import { ref, computed, useId, useSlots, watch, Comment } from 'vue'
 import { HugeiconsIcon } from '@hugeicons/vue'
-import { Copy01Icon, CopyCheckIcon } from '@hugeicons/core-free-icons'
+import { Copy01Icon, CopyCheckIcon, Delete02Icon } from '@hugeicons/core-free-icons'
 
 const props = defineProps({
 	modelValue: {
@@ -70,6 +80,10 @@ const props = defineProps({
 		type: Boolean,
 		default: true,
 	},
+	showClearButton: {
+		type: Boolean,
+		default: false,
+	},
 	copyLabel: {
 		type: String,
 		default: 'Copy',
@@ -77,6 +91,10 @@ const props = defineProps({
 	copiedLabel: {
 		type: String,
 		default: 'Copied',
+	},
+	clearLabel: {
+		type: String,
+		default: 'Clear',
 	},
 	copiedFeedbackMs: {
 		type: Number,
@@ -92,27 +110,40 @@ const props = defineProps({
 	},
 })
 
-const emit = defineEmits(['copy', 'copy-error', 'update:modelValue'])
+const emit = defineEmits(['copy', 'copy-error', 'clear', 'update:modelValue'])
 
 const slots = useSlots()
 
-const hasActions = computed(() => {
+const slotActionCount = computed(() => {
 	const render = slots.actions
 	if (!render) {
-		return false
+		return 0
 	}
-	return render().some((vnode) => vnode.type !== Comment)
+	return render().filter((vnode) => vnode.type !== Comment).length
 })
 
-const showActions = computed(() => hasActions.value || props.showCopyButton)
+const hasActions = computed(() => slotActionCount.value > 0)
+
+const builtInActionCount = computed(() => {
+	let count = 0
+	if (props.showClearButton) count++
+	if (props.showCopyButton) count++
+	return count
+})
+
+const actionButtonCount = computed(
+	() => slotActionCount.value + builtInActionCount.value,
+)
+
+const showActions = computed(
+	() => actionButtonCount.value > 0,
+)
 
 const showHeader = computed(
 	() => Boolean(props.label) || showActions.value,
 )
 
-const pushActionsEnd = computed(
-	() => showActions.value && !hasActions.value,
-)
+const pushActionsEnd = computed(() => showActions.value)
 
 const generatedId = useId()
 const textareaId = props.id || `readonly-textarea-${generatedId}`
@@ -156,6 +187,7 @@ function appendSection(sectionName) {
 function clear() {
 	content.value = ''
 	emit('update:modelValue', content.value)
+	emit('clear')
 }
 
 function getContentAsString() {
@@ -236,10 +268,6 @@ defineExpose({
 	flex-shrink: 0;
 }
 
-.readonly-textarea-actions--leading {
-	margin-left: 0;
-}
-
 .readonly-textarea-actions-slot {
 	display: inline-flex;
 	align-items: center;
@@ -247,7 +275,8 @@ defineExpose({
 	flex-wrap: wrap;
 }
 
-.readonly-textarea-copy {
+.readonly-textarea-copy,
+.readonly-textarea-clear {
 	display: inline-flex;
 	align-items: center;
 	gap: 0.35em;

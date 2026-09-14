@@ -222,11 +222,6 @@
 		registerSidebarNavigation(navigation.value, { onHelloWorld: helloWorld })
 		registerTopBarNavigation(topBarNavigation.value)
 
-		if (sidebar.value) {
-			sidebar.value.open();
-			sidebar.value.stick();
-		}
-
 		registerQuickSearchItems()
 	});
 
