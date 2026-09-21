@@ -1,5 +1,5 @@
 <template>
-	<header>
+	<header :class="{ fixed }">
 		<div
 			:id = "showSidebarChrome ? 'sidebar-button' : null"
 			:class="['image-and-title', 'flex-row', { 'disabled-branding': !showBranding, 'logo-home-link': !showSidebarChrome && showBranding }]"
@@ -145,6 +145,10 @@
 		themeToggleEnabled: {
 			type: Boolean,
 			default: false,
+		},
+		fixed: {
+			type: Boolean,
+			default: true,
 		},
 		navigation: {
 			type: Object,

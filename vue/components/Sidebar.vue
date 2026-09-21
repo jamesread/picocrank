@@ -401,6 +401,34 @@ defineExpose({
 </script>
 
 <style scoped>
+.sidebar {
+	display: flex;
+	flex-direction: column;
+	box-sizing: border-box;
+	overflow-x: hidden;
+	overflow-y: auto;
+	overscroll-behavior: contain;
+	/*
+	 * Sit fully below a fixed Header (Navigation, pin, and scrollbar).
+	 * Offset is 0 when no header.fixed is present (see picocrank-extensions).
+	 */
+	top: var(--picocrank-fixed-header-offset);
+	height: calc(100vh - var(--picocrank-fixed-header-offset));
+	max-height: calc(100vh - var(--picocrank-fixed-header-offset));
+}
+
+/*
+ * Stuck mode: same viewport band as overlay mode; scroll the whole contents
+ * instead of growing with content (Femtocrank defaults to height: auto).
+ */
+.sidebar.stuck {
+	align-self: flex-start;
+	position: sticky;
+	top: var(--picocrank-fixed-header-offset);
+	height: calc(100vh - var(--picocrank-fixed-header-offset));
+	max-height: calc(100vh - var(--picocrank-fixed-header-offset));
+}
+
 h2 {
 	padding: .75em;
 }
