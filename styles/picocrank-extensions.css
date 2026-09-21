@@ -91,7 +91,13 @@
 	--danger-zone-warning-fg: var(--muted-text-color);
 	--danger-zone-focus-outline: var(--karma-bad-border);
 
-	--picocrank-fixed-header-offset: 4em;
+	/* Matches Femtocrank header min-height (logo 2em + .5em padding). */
+	--picocrank-fixed-header-offset: 3em;
+}
+
+/* No fixed header → no sidebar/main offset. */
+html:not(:has(header.fixed)) {
+	--picocrank-fixed-header-offset: 0px;
 }
 
 table thead th {
@@ -172,9 +178,23 @@ select.field-invalid:focus-visible {
 }
 
 /*
- * Fixed header layout: pin the app header and offset sidebar + main content.
- * Apply .layout-fixed-header on a wrapper whose direct children are header and #layout.
+ * Fixed header layout: pin the app header and offset main content.
+ * Prefer Header's `fixed` prop (adds Femtocrank `.fixed` on <header>).
+ * Sidebar top/height use --picocrank-fixed-header-offset in Sidebar.vue
+ * (unlayered) so they are not overridden by stuck-mode defaults.
+ * Alternatively wrap with .layout-fixed-header when header and #layout are direct children.
  */
+header.fixed {
+	top: 0;
+	left: 0;
+	z-index: 5;
+}
+
+header.fixed ~ aside,
+header.fixed ~ #layout aside {
+	z-index: 3;
+}
+
 .layout-fixed-header > header {
 	position: fixed;
 	top: 0;
@@ -183,14 +203,19 @@ select.field-invalid:focus-visible {
 	z-index: 5;
 }
 
+.layout-fixed-header > aside,
 .layout-fixed-header > #layout aside {
 	z-index: 3;
-	padding-top: var(--picocrank-fixed-header-offset);
+}
 }
 
-.layout-fixed-header > #layout main {
+/*
+ * Unlayered so this wins over @layer components (same issue as Sidebar offsets).
+ * Pads #content below a fixed header — clears the chrome and leaves a readable gap.
+ */
+header.fixed ~ #layout > #content,
+.layout-fixed-header > #layout > #content {
 	padding-top: var(--picocrank-fixed-header-offset);
-}
 }
 
 /*
