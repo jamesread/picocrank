@@ -2,9 +2,53 @@
 	<Section
 		:title="tableSectionTitle"
 		:icon="TableIcon"
-		subtitle="Sortable columns, pagination, and column filters. Right-click or long-press a column header to filter."
+		subtitle="Sortable columns, pagination, and column filters. Right-click or long-press a column header to filter. Enable “Row context menu” to right-click rows."
 		:padding="false"
 	>
+		<template v-if="multiSelectEnabled" #toolbar>
+			<span v-if="selectedKeys.length" class="subtle selection-count">
+				{{ selectedKeys.length }} selected
+			</span>
+			<button
+				type="button"
+				class="inline-icon neutral"
+				:disabled="!selectedKeys.length"
+				@click="bulkExportSelected"
+			>
+				<HugeiconsIcon
+					:icon="Download01Icon"
+					width="1em"
+					height="1em"
+					:strokeWidth="iconStrokeWidth"
+					aria-hidden="true"
+				/>
+				<span>Export</span>
+			</button>
+			<button
+				type="button"
+				class="inline-icon bad"
+				:disabled="!selectedKeys.length"
+				@click="bulkDeleteSelected"
+			>
+				<HugeiconsIcon
+					:icon="Delete02Icon"
+					width="1em"
+					height="1em"
+					:strokeWidth="iconStrokeWidth"
+					aria-hidden="true"
+				/>
+				<span>Delete</span>
+			</button>
+			<button
+				type="button"
+				class="neutral"
+				:disabled="!selectedKeys.length"
+				@click="clearSelection"
+			>
+				Clear selection
+			</button>
+		</template>
+
 		<Table
 			table-id="table-example"
 			row-key="name"
@@ -14,6 +58,9 @@
 			:filterable="enabledFeatures.includes('filters')"
 			:column-options="enabledFeatures.includes('columnOptions')"
 			:loading="enabledFeatures.includes('loading')"
+			:selectable="multiSelectEnabled"
+			v-model:selected-keys="selectedKeys"
+			:row-context-menu="rowContextMenuEnabled ? rowContextMenuItems : null"
 			:horizontal-scroll="layout === 'scroll'"
 			:responsive-columns="layout === 'priorities'"
 			:sticky-cols="stickyCols"
@@ -127,6 +174,25 @@
 			<p v-else-if="enabledFeatures.includes('columnOptions')" class="event-line subtle">
 				Layout: using developer defaults (change columns, order, or filters to see a preset or “Custom” label).
 			</p>
+
+			<p v-if="multiSelectEnabled && selectedKeys.length" class="event-line">
+				<strong>Selection:</strong>
+				{{ selectedKeys.join(', ') }}
+			</p>
+			<p v-else-if="multiSelectEnabled" class="event-line subtle">
+				Selection: enable “Multi-select”, then click rows or checkboxes. Use the toolbar Export / Delete actions on the selected set.
+			</p>
+
+			<p v-if="lastContextMenuAction" class="event-line">
+				<strong>Context menu:</strong>
+				{{ lastContextMenuAction }}
+			</p>
+			<p v-else-if="rowContextMenuEnabled" class="event-line subtle">
+				Context menu: right-click a row. With multi-select, right-click inside the selection to act on all selected rows.
+			</p>
+			<p v-else-if="lastBulkAction" class="event-line subtle">
+				{{ lastBulkAction }}
+			</p>
 		</div>
 	</Section>
 
@@ -165,11 +231,13 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { TableIcon, Settings01Icon } from '@hugeicons/core-free-icons'
+import { HugeiconsIcon } from '@hugeicons/vue'
+import { TableIcon, Settings01Icon, Download01Icon, Delete02Icon, ViewIcon } from '@hugeicons/core-free-icons'
 import { getExampleTableRows } from '../data/examplePeople.js'
 import { countActiveFilters } from '../composables/tableFilters.js'
 
-const defaultFeatures = ['pagination', 'filters', 'columnOptions', 'rowClick']
+const iconStrokeWidth = 2.5
+const defaultFeatures = ['pagination', 'filters', 'columnOptions', 'rowClick', 'rowContextMenu']
 
 const defaultColumnVisibility = {
 	birthYear: false,
@@ -184,8 +252,14 @@ const dataConnected = ref(true)
 const data = ref([])
 const lastRowClick = ref(null)
 const lastQuery = ref(null)
+const lastBulkAction = ref(null)
+const lastContextMenuAction = ref(null)
+const selectedKeys = ref([])
 const tableLayoutLabel = ref('')
 const rowDialogRef = ref(null)
+
+const multiSelectEnabled = computed(() => enabledFeatures.value.includes('multiSelect'))
+const rowContextMenuEnabled = computed(() => enabledFeatures.value.includes('rowContextMenu'))
 
 const tableSectionTitle = computed(() => {
 	if (tableLayoutLabel.value) {
@@ -204,6 +278,8 @@ const featureOptions = [
 	{ value: 'filters', label: 'Column filters' },
 	{ value: 'columnOptions', label: 'Column options' },
 	{ value: 'rowClick', label: 'Row click' },
+	{ value: 'multiSelect', label: 'Multi-select' },
+	{ value: 'rowContextMenu', label: 'Row context menu' },
 	{ value: 'loading', label: 'Loading state' },
 ]
 
@@ -285,11 +361,55 @@ const tableListeners = computed(() => {
 	const listeners = {
 		onQueryChange: handleQueryChange,
 	}
-	if (enabledFeatures.value.includes('rowClick')) {
+	// Row click opens the detail dialog; multi-select uses row clicks for selection instead.
+	if (enabledFeatures.value.includes('rowClick') && !multiSelectEnabled.value) {
 		listeners.onRowClick = handleRowClick
 	}
 	return listeners
 })
+
+const rowContextMenuItems = computed(() => [
+	{
+		id: 'view',
+		label: 'View details',
+		icon: ViewIcon,
+		action: ({ row, rows }) => {
+			const target = rows[0] ?? row
+			if (!target) {
+				return
+			}
+			lastContextMenuAction.value = `View “${target.name}”`
+			lastRowClick.value = {
+				row: target,
+				index: tableData.value.findIndex((item) => item.name === target.name),
+			}
+			rowDialogRef.value?.showModal()
+		},
+	},
+	{
+		id: 'export',
+		label: 'Export',
+		icon: Download01Icon,
+		action: ({ keys }) => {
+			lastContextMenuAction.value = `Exported ${keys.length} row(s): ${keys.join(', ')}`
+			lastBulkAction.value = lastContextMenuAction.value
+		},
+	},
+	{ divider: true },
+	{
+		id: 'delete',
+		label: 'Delete',
+		icon: Delete02Icon,
+		danger: true,
+		action: ({ keys }) => {
+			const removeSet = new Set(keys)
+			data.value = data.value.filter((row) => !removeSet.has(row.name))
+			selectedKeys.value = selectedKeys.value.filter((key) => !removeSet.has(key))
+			lastContextMenuAction.value = `Deleted ${keys.length} row(s): ${keys.join(', ')}`
+			lastBulkAction.value = lastContextMenuAction.value
+		},
+	},
+])
 
 function handleRowClick(payload) {
 	lastRowClick.value = payload
@@ -304,6 +424,29 @@ function onRowDialogBackdropClick(event) {
 
 function handleQueryChange(query) {
 	lastQuery.value = query
+}
+
+function clearSelection() {
+	selectedKeys.value = []
+	lastBulkAction.value = 'Selection cleared.'
+}
+
+function bulkExportSelected() {
+	if (!selectedKeys.value.length) {
+		return
+	}
+	lastBulkAction.value = `Exported ${selectedKeys.value.length} row(s): ${selectedKeys.value.join(', ')}`
+}
+
+function bulkDeleteSelected() {
+	if (!selectedKeys.value.length) {
+		return
+	}
+	const removed = [...selectedKeys.value]
+	const removeSet = new Set(removed)
+	data.value = data.value.filter((row) => !removeSet.has(row.name))
+	selectedKeys.value = []
+	lastBulkAction.value = `Deleted ${removed.length} row(s): ${removed.join(', ')}`
 }
 
 function statusTagClass(value) {
@@ -323,7 +466,11 @@ function resetControls() {
 	stickyColsOption.value = '2'
 	wideTable.value = true
 	dataConnected.value = true
+	data.value = getExampleTableRows()
 	lastRowClick.value = null
+	lastBulkAction.value = null
+	lastContextMenuAction.value = null
+	selectedKeys.value = []
 	if (rowDialogRef.value?.open) {
 		rowDialogRef.value.close()
 	}
@@ -345,6 +492,11 @@ onMounted(() => {
 
 .event-line {
 	margin: 0.35rem 0;
+}
+
+.selection-count {
+	align-self: center;
+	margin-right: 0.5rem;
 }
 
 .row-detail-dialog .dialog-panel h3 {

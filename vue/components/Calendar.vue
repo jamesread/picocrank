@@ -641,7 +641,7 @@ function onDayContextMenu(date, mouseEvent) {
 
   nextTick(() => {
     positionDayContextMenu(mouseEvent.clientX, mouseEvent.clientY)
-    dayContextMenuRef.value?.querySelector('button')?.focus()
+    dayContextMenuRef.value?.focus({ preventScroll: true })
   })
 }
 
@@ -1067,43 +1067,53 @@ watch([viewMonth, viewYear], () => {
     </div>
 
     <Teleport to="body">
-      <div
+      <nav
         v-if="dayContextMenuOpen"
         ref="dayContextMenuRef"
-        class="calendar-day-context-menu"
+        class="menu context-menu calendar-day-context-menu"
         role="menu"
+        tabindex="-1"
         :style="dayContextMenuStyle"
+        aria-label="Day view options"
         @click.stop
         @contextmenu.prevent
       >
-        <button
-          v-if="internalViewMode !== 'day'"
-          type="button"
-          role="menuitem"
-          class="calendar-day-context-menu-item"
-          @click="showOnlyThisDay"
-        >
-          Show only this day
-        </button>
-        <button
-          v-if="internalViewMode !== 'week'"
-          type="button"
-          role="menuitem"
-          class="calendar-day-context-menu-item"
-          @click="showOnlyThisWeek"
-        >
-          Show only this week
-        </button>
-        <button
-          v-if="internalViewMode !== 'month'"
-          type="button"
-          role="menuitem"
-          class="calendar-day-context-menu-item"
-          @click="showFullMonth"
-        >
-          Show full month
-        </button>
-      </div>
+        <ul class="noListStyle">
+          <li>
+            <div>
+              <ul>
+                <li v-if="internalViewMode !== 'day'">
+                  <button
+                    type="button"
+                    role="menuitem"
+                    @click="showOnlyThisDay"
+                  >
+                    Show only this day
+                  </button>
+                </li>
+                <li v-if="internalViewMode !== 'week'">
+                  <button
+                    type="button"
+                    role="menuitem"
+                    @click="showOnlyThisWeek"
+                  >
+                    Show only this week
+                  </button>
+                </li>
+                <li v-if="internalViewMode !== 'month'">
+                  <button
+                    type="button"
+                    role="menuitem"
+                    @click="showFullMonth"
+                  >
+                    Show full month
+                  </button>
+                </li>
+              </ul>
+            </div>
+          </li>
+        </ul>
+      </nav>
     </Teleport>
   </div>
 </template>
@@ -1520,37 +1530,5 @@ watch([viewMonth, viewYear], () => {
     border-radius: 4px;
     padding: 0.25rem 0.5rem;
   }
-}
-</style>
-
-<style>
-.calendar-day-context-menu {
-  position: fixed;
-  z-index: 1000;
-  min-width: 12rem;
-  padding: 0.35rem;
-  border: 1px solid var(--table-popover-border);
-  border-radius: 8px;
-  background: var(--table-popover-bg);
-  box-shadow: var(--table-popover-shadow);
-}
-
-.calendar-day-context-menu-item {
-  display: block;
-  width: 100%;
-  padding: 0.5rem 0.75rem;
-  border: none;
-  border-radius: 4px;
-  background: transparent;
-  color: var(--table-popover-fg);
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
-}
-
-.calendar-day-context-menu-item:hover,
-.calendar-day-context-menu-item:focus-visible {
-  background: var(--table-popover-item-bg);
-  outline: none;
 }
 </style>

@@ -8,6 +8,21 @@
 			<thead>
 				<tr>
 					<th
+						v-if="selectable"
+						class="table-select-col"
+						@click.stop
+					>
+						<label class="table-select-label">
+							<input
+								type="checkbox"
+								:checked="allDisplayRowsSelected"
+								:indeterminate="someDisplayRowsSelected"
+								:aria-label="allDisplayRowsSelected ? 'Deselect all rows on this page' : 'Select all rows on this page'"
+								@change="toggleSelectAllDisplayRows"
+							>
+						</label>
+					</th>
+					<th
 						v-for="(header, index) in visibleHeaders"
 						:key="header.key || index"
 						:class="[headerClasses(header), header.class]"
@@ -62,9 +77,29 @@
 				<tr
 					v-for="(row, rowIndex) in displayRows"
 					:key="resolveRowKey(row, rowIndex)"
-					:class="{ 'row-clickable': rowClickable }"
+					:class="{
+						'row-clickable': rowClickable,
+						'row-selected': selectable && isRowSelected(row, rowIndex),
+						'row-context-menu-active': isRowContextMenuTarget(row, rowIndex),
+					}"
 					@click="onRowClick(row, rowIndex, $event)"
+					@contextmenu="onRowContextMenu(row, rowIndex, $event)"
 				>
+					<td
+						v-if="selectable"
+						class="table-select-col"
+						data-row-click-ignore
+						@click.stop
+					>
+						<label class="table-select-label">
+							<input
+								type="checkbox"
+								:checked="isRowSelected(row, rowIndex)"
+								:aria-label="`Select row ${resolveRowKey(row, rowIndex)}`"
+								@change="toggleRowSelection(row, rowIndex)"
+							>
+						</label>
+					</td>
 					<td
 						v-for="(header, cellIndex) in visibleHeaders"
 						:key="header.key || cellIndex"
@@ -120,9 +155,11 @@
 		:value="activeFilterValue"
 		:rows="props.data"
 		:select-options="activeSelectOptions"
+		:can-hide="canHideActiveFilterColumn"
 		@apply="onFilterApply"
 		@clear="onFilterClear"
 		@cancel="onFilterCancel"
+		@hide="onFilterHideColumn"
 	/>
 
 	<TableColumnOptionsPopover
@@ -148,6 +185,15 @@
 		@apply="onColumnOptionsApply"
 		@cancel="onColumnOptionsCancel"
 	/>
+
+	<TableRowContextMenu
+		v-model:open="rowContextMenuOpen"
+		:items="rowContextMenuItems"
+		:client-x="rowContextMenuX"
+		:client-y="rowContextMenuY"
+		:target-count="rowContextMenuTargetKeys.length"
+		@select="onRowContextMenuSelect"
+	/>
 </template>
 
 <script setup>
@@ -157,6 +203,7 @@ import { LayoutGridIcon } from '@hugeicons/core-free-icons'
 import Pagination from './Pagination.vue'
 import TableColumnFilterPopover from './TableColumnFilterPopover.vue'
 import TableColumnOptionsPopover from './TableColumnOptionsPopover.vue'
+import TableRowContextMenu from './TableRowContextMenu.vue'
 import { useLongPress } from '../composables/useLongPress.js'
 import {
 	buildSelectOptions,
@@ -276,6 +323,24 @@ const props = defineProps({
 		type: Object,
 		default: null,
 	},
+	selectable: {
+		type: Boolean,
+		default: false,
+	},
+	selectedKeys: {
+		type: Array,
+		default: undefined,
+	},
+	/**
+	 * Row right-click menu. Array of items, or a function that returns items
+	 * for the click context. Each item may include `action(ctx)` where
+	 * `ctx.keys` / `ctx.rows` are the target selection (clicked row, or all
+	 * selected rows when the click is inside the current multi-selection).
+	 */
+	rowContextMenu: {
+		type: [Array, Function],
+		default: null,
+	},
 })
 
 const emit = defineEmits([
@@ -284,6 +349,10 @@ const emit = defineEmits([
 	'query-change',
 	'fetch-error',
 	'row-click',
+	'update:selectedKeys',
+	'selection-change',
+	'row-context-menu',
+	'row-context-menu-action',
 	'update:columnVisibility',
 	'column-visibility-change',
 	'update:columnOrder',
@@ -297,8 +366,9 @@ const emit = defineEmits([
 const attrs = useAttrs()
 const slots = useSlots()
 
-const rowClickable = computed(() => Boolean(attrs.onRowClick))
+const rowClickable = computed(() => Boolean(attrs.onRowClick) || props.selectable)
 const internalFilters = ref({})
+const internalSelectedKeys = ref([])
 const remoteRows = ref([])
 const remoteTotal = ref(0)
 const internalLoading = ref(false)
@@ -632,6 +702,72 @@ function resolveRowKey(row, index) {
 	return index
 }
 
+const activeSelectedKeys = computed(() => (
+	props.selectedKeys !== undefined ? props.selectedKeys : internalSelectedKeys.value
+))
+
+const selectedKeySet = computed(() => new Set(activeSelectedKeys.value))
+
+function isRowSelected(row, index) {
+	return selectedKeySet.value.has(resolveRowKey(row, index))
+}
+
+function setSelectedKeys(nextKeys) {
+	const unique = [...new Set(nextKeys)]
+	if (props.selectedKeys === undefined) {
+		internalSelectedKeys.value = unique
+	}
+	emit('update:selectedKeys', unique)
+	emit('selection-change', unique)
+}
+
+function toggleRowSelection(row, index) {
+	const key = resolveRowKey(row, index)
+	const current = activeSelectedKeys.value
+	if (selectedKeySet.value.has(key)) {
+		setSelectedKeys(current.filter((item) => item !== key))
+		return
+	}
+	setSelectedKeys([...current, key])
+}
+
+const displayRowKeys = computed(() =>
+	displayRows.value.map((row, index) => resolveRowKey(row, index)),
+)
+
+const allDisplayRowsSelected = computed(() => {
+	const keys = displayRowKeys.value
+	return keys.length > 0 && keys.every((key) => selectedKeySet.value.has(key))
+})
+
+const someDisplayRowsSelected = computed(() => {
+	if (allDisplayRowsSelected.value) {
+		return false
+	}
+	return displayRowKeys.value.some((key) => selectedKeySet.value.has(key))
+})
+
+function toggleSelectAllDisplayRows() {
+	const pageKeys = displayRowKeys.value
+	if (pageKeys.length === 0) {
+		return
+	}
+
+	if (allDisplayRowsSelected.value) {
+		const pageKeySet = new Set(pageKeys)
+		setSelectedKeys(activeSelectedKeys.value.filter((key) => !pageKeySet.has(key)))
+		return
+	}
+
+	setSelectedKeys([...activeSelectedKeys.value, ...pageKeys])
+}
+
+watch(() => props.selectable, (enabled) => {
+	if (!enabled) {
+		setSelectedKeys([])
+	}
+})
+
 function setFilters(nextFilters) {
 	const cloned = cloneFilters(nextFilters)
 	if (props.filters === undefined) {
@@ -686,7 +822,150 @@ function onRowClick(row, displayIndex, event) {
 	if (event.target.closest('a, button, input, select, textarea, [data-row-click-ignore]')) {
 		return
 	}
+	if (props.selectable) {
+		toggleRowSelection(row, displayIndex)
+		return
+	}
 	emit('row-click', { row, index: filteredRowIndex(displayIndex) })
+}
+
+const rowContextMenuOpen = ref(false)
+const rowContextMenuX = ref(0)
+const rowContextMenuY = ref(0)
+const rowContextMenuItems = ref([])
+const rowContextMenuTargetKeys = ref([])
+const rowContextMenuAnchor = ref(null)
+
+const rowContextMenuTargetKeySet = computed(() => new Set(rowContextMenuTargetKeys.value))
+
+function isRowContextMenuTarget(row, index) {
+	return rowContextMenuOpen.value && rowContextMenuTargetKeySet.value.has(resolveRowKey(row, index))
+}
+
+const hasRowContextMenu = computed(() => {
+	if (typeof props.rowContextMenu === 'function') {
+		return true
+	}
+	return Array.isArray(props.rowContextMenu) && props.rowContextMenu.length > 0
+})
+
+function buildRowLookup() {
+	const map = new Map()
+	const addRows = (rows) => {
+		rows.forEach((row, index) => {
+			const key = resolveRowKey(row, index)
+			if (!map.has(key)) {
+				map.set(key, row)
+			}
+		})
+	}
+
+	if (isRemote.value) {
+		addRows(remoteRows.value)
+	} else {
+		addRows(props.data)
+	}
+	addRows(displayRows.value)
+	return map
+}
+
+function resolveTargetRows(keys) {
+	const lookup = buildRowLookup()
+	return keys.map((key) => lookup.get(key)).filter((row) => row != null)
+}
+
+function normalizeContextMenuItems(rawItems) {
+	if (!Array.isArray(rawItems)) {
+		return []
+	}
+	return rawItems.filter((item) => item && (item.divider || item.label || item.id))
+}
+
+function closeRowContextMenu() {
+	rowContextMenuOpen.value = false
+	rowContextMenuItems.value = []
+	rowContextMenuTargetKeys.value = []
+	rowContextMenuAnchor.value = null
+}
+
+function onRowContextMenu(row, displayIndex, event) {
+	if (!hasRowContextMenu.value) {
+		return
+	}
+	if (event.target.closest('a, button, input, select, textarea, [data-row-click-ignore]')) {
+		return
+	}
+
+	event.preventDefault()
+	event.stopPropagation()
+
+	const key = resolveRowKey(row, displayIndex)
+	const index = filteredRowIndex(displayIndex)
+	let targetKeys
+
+	if (props.selectable && selectedKeySet.value.has(key) && activeSelectedKeys.value.length > 0) {
+		targetKeys = [...activeSelectedKeys.value]
+	} else {
+		targetKeys = [key]
+		if (props.selectable) {
+			setSelectedKeys([key])
+		}
+	}
+
+	const rows = resolveTargetRows(targetKeys)
+	const ctx = {
+		row,
+		key,
+		index,
+		rows,
+		keys: targetKeys,
+		selectedKeys: [...activeSelectedKeys.value],
+	}
+
+	const rawItems = typeof props.rowContextMenu === 'function'
+		? props.rowContextMenu(ctx)
+		: props.rowContextMenu
+	const items = normalizeContextMenuItems(rawItems)
+	if (items.length === 0) {
+		closeRowContextMenu()
+		return
+	}
+
+	rowContextMenuAnchor.value = ctx
+	rowContextMenuTargetKeys.value = targetKeys
+	rowContextMenuItems.value = items
+	rowContextMenuX.value = event.clientX
+	rowContextMenuY.value = event.clientY
+	rowContextMenuOpen.value = true
+
+	emit('row-context-menu', {
+		...ctx,
+		event,
+	})
+}
+
+function onRowContextMenuSelect(item) {
+	const anchor = rowContextMenuAnchor.value
+	const keys = [...rowContextMenuTargetKeys.value]
+	const lookup = buildRowLookup()
+	const rows = keys.map((key) => lookup.get(key)).filter((row) => row != null)
+	const selectedKeys = [...activeSelectedKeys.value]
+	const payload = {
+		item,
+		row: anchor?.row,
+		key: anchor?.key,
+		index: anchor?.index,
+		rows,
+		keys,
+		selectedKeys,
+	}
+
+	if (typeof item.action === 'function') {
+		item.action(payload)
+	}
+
+	emit('row-context-menu-action', payload)
+	closeRowContextMenu()
 }
 
 function openFilter(header, event) {
@@ -754,6 +1033,39 @@ function onFilterCancel() {
 	activeFilterHeader.value = null
 	activeFilterAnchor.value = null
 	activeFilterValue.value = []
+}
+
+const canHideActiveFilterColumn = computed(() => {
+	if (!showColumnOptionsButton.value || !activeFilterHeader.value) {
+		return false
+	}
+	const header = activeFilterHeader.value
+	if (!header.key || header.hideable === false || header.hidden) {
+		return false
+	}
+	if (!isHeaderHidden(header) && visibleColumnKeys.value.length <= 1) {
+		return false
+	}
+	return configurableHeaders.value.some((item) => item.key === header.key)
+})
+
+function onFilterHideColumn() {
+	const header = activeFilterHeader.value
+	if (!header?.key || !canHideActiveFilterColumn.value) {
+		onFilterCancel()
+		return
+	}
+
+	const nextVisibleKeys = visibleColumnKeys.value.filter((key) => key !== header.key)
+	if (nextVisibleKeys.length === 0) {
+		onFilterCancel()
+		return
+	}
+
+	setColumnVisibility(nextVisibleKeys)
+	updateActiveLayoutLabel()
+	filterPopoverOpen.value = false
+	onFilterCancel()
 }
 
 function buildColumnVisibility(visibleKeys) {
@@ -1457,8 +1769,73 @@ th:first-child {
 	padding-left: 1rem;
 }
 
+th.table-select-col,
+td.table-select-col {
+	width: 2.5rem;
+	min-width: 2.5rem;
+	max-width: 2.5rem;
+	text-align: center;
+	vertical-align: middle;
+	padding-left: 1rem;
+	padding-right: 0.25rem;
+}
+
+.table-select-label {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	margin: 0;
+	cursor: pointer;
+}
+
 tbody tr.row-clickable {
 	cursor: pointer;
+}
+
+tbody tr.row-selected > td {
+	background-color: var(--control-checked-bg);
+	color: var(--control-checked-fg);
+}
+
+table.row-hover tbody tr.row-selected:hover > td,
+table.row-hover tbody tr.row-selected:focus-within > td,
+table.row-hover tbody tr.row-selected.row-context-menu-active > td {
+	background-color: var(--control-checked-hover-bg);
+	color: var(--control-checked-fg);
+}
+
+/* Keep hover styling while the row context menu is open (pointer has left the row). */
+table.row-hover tbody tr.row-context-menu-active > td {
+	background-color: var(--table-row-hover-bg);
+	color: var(--table-row-hover-fg);
+}
+
+/* Beat Femtocrank sticky cell backgrounds so selection remains visible while scrolling. */
+.table-scroll.sticky-cols-1 table tbody tr.row-selected > td,
+.table-scroll.sticky-cols-2 table tbody tr.row-selected > td,
+.table-scroll.sticky-cols-3 table tbody tr.row-selected > td {
+	background-color: var(--control-checked-bg);
+	color: var(--control-checked-fg);
+}
+
+.table-scroll.sticky-cols-1 table.row-hover tbody tr.row-selected:hover > td,
+.table-scroll.sticky-cols-1 table.row-hover tbody tr.row-selected:focus-within > td,
+.table-scroll.sticky-cols-1 table.row-hover tbody tr.row-selected.row-context-menu-active > td,
+.table-scroll.sticky-cols-2 table.row-hover tbody tr.row-selected:hover > td,
+.table-scroll.sticky-cols-2 table.row-hover tbody tr.row-selected:focus-within > td,
+.table-scroll.sticky-cols-2 table.row-hover tbody tr.row-selected.row-context-menu-active > td,
+.table-scroll.sticky-cols-3 table.row-hover tbody tr.row-selected:hover > td,
+.table-scroll.sticky-cols-3 table.row-hover tbody tr.row-selected:focus-within > td,
+.table-scroll.sticky-cols-3 table.row-hover tbody tr.row-selected.row-context-menu-active > td {
+	background-color: var(--control-checked-hover-bg);
+	color: var(--control-checked-fg);
+}
+
+.table-scroll.sticky-cols-1 table.row-hover tbody tr.row-context-menu-active > td,
+.table-scroll.sticky-cols-2 table.row-hover tbody tr.row-context-menu-active > td,
+.table-scroll.sticky-cols-3 table.row-hover tbody tr.row-context-menu-active > td {
+	background-color: var(--table-row-hover-bg);
+	color: var(--table-row-hover-fg);
 }
 
 .table-empty-state {

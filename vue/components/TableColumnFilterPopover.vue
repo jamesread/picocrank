@@ -10,9 +10,27 @@
 			@click.stop
 		>
 			<div class="popover-body">
-				<h4 :id="titleId" ref="titleRef" class="popover-title">
-					{{ popoverTitle }}
-				</h4>
+				<div class="popover-title-row">
+					<h4 :id="titleId" ref="titleRef" class="popover-title">
+						{{ popoverTitle }}
+					</h4>
+					<button
+						v-if="canHide"
+						type="button"
+						class="neutral inline-icon popover-hide-column"
+						:aria-label="`Hide ${columnLabel || 'column'} column`"
+						title="Hide column"
+						@click="hideColumn"
+					>
+						<HugeiconsIcon
+							:icon="ViewOffIcon"
+							width="1em"
+							height="1em"
+							:strokeWidth="2.5"
+							aria-hidden="true"
+						/>
+					</button>
+				</div>
 
 				<div v-if="filterType === 'text'" class="filter-fields">
 					<label>
@@ -148,7 +166,7 @@
 <script setup>
 import { computed, nextTick, onBeforeUnmount, ref, useId, watch } from 'vue'
 import { HugeiconsIcon } from '@hugeicons/vue'
-import { Delete02Icon } from '@hugeicons/core-free-icons'
+import { Delete02Icon, ViewOffIcon } from '@hugeicons/core-free-icons'
 import CheckGroup from './CheckGroup.vue'
 import RadioGroup from './RadioGroup.vue'
 import {
@@ -186,9 +204,13 @@ const props = defineProps({
 		type: Array,
 		default: () => [],
 	},
+	canHide: {
+		type: Boolean,
+		default: false,
+	},
 })
 
-const emit = defineEmits(['update:open', 'apply', 'clear', 'cancel'])
+const emit = defineEmits(['update:open', 'apply', 'clear', 'cancel', 'hide'])
 
 const MIN_VISIBLE_OPTIONS = 3
 const MAX_VISIBLE_OPTIONS = 20
@@ -441,6 +463,14 @@ function cancel() {
 	emit('cancel')
 }
 
+function hideColumn() {
+	if (!props.canHide) {
+		return
+	}
+	emit('hide')
+	emit('update:open', false)
+}
+
 function detachDocumentListeners() {
 	document.removeEventListener('pointerdown', onDocumentPointerDown)
 	document.removeEventListener('keydown', onDocumentKeyDown)
@@ -459,7 +489,9 @@ async function initializePopover() {
 	updateCheckGroupScrollLimit()
 	await nextTick()
 	positionPopover()
-	popoverRef.value?.querySelector('input, select, button')?.focus()
+	popoverRef.value?.querySelector(
+		'.filter-fields input, .filter-fields select, .filter-fields button, .popover-actions button',
+	)?.focus()
 	attachDocumentListeners()
 }
 
@@ -511,10 +543,26 @@ onBeforeUnmount(() => {
 	flex-direction: column;
 }
 
-.popover-title {
-	margin: 0 0 0.75rem;
-	font-size: 0.95rem;
+.popover-title-row {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 0.5rem;
+	margin-bottom: 0.75rem;
 	flex-shrink: 0;
+}
+
+.popover-title {
+	margin: 0;
+	font-size: 0.95rem;
+	min-width: 0;
+	flex: 1 1 auto;
+}
+
+.popover-hide-column {
+	flex: 0 0 auto;
+	padding: 0.2em 0.45em;
+	line-height: 1;
 }
 
 .filter-fields {

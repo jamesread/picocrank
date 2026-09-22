@@ -112,6 +112,11 @@ export const navSectionHubs = {
 				title: 'Dialog',
 				options: { description: 'Modal dialogs and confirmations' },
 			},
+			{
+				name: 'LoadingAreaExample',
+				title: 'Loading area',
+				options: { description: 'Async placeholder with spinner' },
+			},
 		],
 	},
 	NavPatternsHub: {

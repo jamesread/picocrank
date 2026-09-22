@@ -252,3 +252,68 @@ header.fixed ~ #layout > #content,
 @container responsive-cols (max-width: 22rem) {
 	:is(th, td).col-priority-5 { display: none; }
 }
+
+/*
+ * Floating context menu: reuse Femtocrank nav.menu dropdown chrome, forced open
+ * for cursor-positioned / teleported menus (table rows, calendar days, etc.).
+ */
+nav.menu.context-menu {
+	position: fixed;
+	z-index: 1000;
+	margin: 0;
+}
+
+nav.menu.context-menu:focus,
+nav.menu.context-menu:focus-visible {
+	outline: none;
+}
+
+nav.menu.context-menu > ul {
+	margin: 0;
+	padding: 0;
+}
+
+nav.menu.context-menu > ul > li {
+	display: block;
+	margin: 0;
+	padding: 0;
+	border-radius: 0;
+	background: transparent;
+}
+
+nav.menu.context-menu > ul > li:hover,
+nav.menu.context-menu > ul > li:focus-within {
+	background: transparent;
+	color: inherit;
+}
+
+nav.menu.context-menu > ul > li > div {
+	display: block;
+	position: static;
+	top: auto;
+	left: auto;
+	min-width: 12em;
+	padding: var(--menu-dropdown-padding);
+	border-radius: var(--menu-dropdown-radius);
+	background-color: var(--menu-dropdown-background-color);
+	box-shadow: var(--menu-dropdown-shadow);
+}
+
+nav.menu.context-menu > ul > li > div::before {
+	content: none;
+}
+
+nav.menu.context-menu > ul div ul button.inline-icon {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.45em;
+}
+
+nav.menu.context-menu > ul div ul li[role="separator"] {
+	height: 1px;
+	margin: 0.25em 0.35em;
+	padding: 0;
+	background: var(--menu-dropdown-border-color, var(--border-color));
+	border-radius: 0;
+	pointer-events: none;
+}

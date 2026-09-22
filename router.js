@@ -15,6 +15,7 @@ import { StatusIcon } from '@hugeicons/core-free-icons';
 import { PaintBoardIcon } from '@hugeicons/core-free-icons';
 import { UserIcon } from '@hugeicons/core-free-icons';
 import { InformationCircleIcon } from '@hugeicons/core-free-icons';
+import { Loading03Icon } from '@hugeicons/core-free-icons';
 
 import {
 	hubChildBreadcrumbs,
@@ -174,6 +175,16 @@ const routes = [
       title: 'Dialog',
       icon: InformationCircleIcon,
       breadcrumbs: hubChildBreadcrumbs('NavFeedbackStatusHub', 'DialogExample', 'Dialog'),
+    }
+  },
+  {
+    name: 'LoadingAreaExample',
+    path: '/loading-area-example',
+    component: () => import('./vue/examples/LoadingAreaExample.vue'),
+    meta: {
+      title: 'Loading area',
+      icon: Loading03Icon,
+      breadcrumbs: hubChildBreadcrumbs('NavFeedbackStatusHub', 'LoadingAreaExample', 'Loading area'),
     }
   },
   {
