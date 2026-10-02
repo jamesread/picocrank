@@ -387,7 +387,7 @@ export function cloneColumnFilterEntries(value, header = null, rows = []) {
 	return normalizeColumnFilterEntries(value, header, rows).map((entry) => ({ ...entry }))
 }
 
-export function sortRows(rows, sortBy, sortDir) {
+export function sortRows(rows, sortBy, sortDir, comparator = null) {
 	if (!sortBy) {
 		return [...rows]
 	}
@@ -399,6 +399,11 @@ export function sortRows(rows, sortBy, sortDir) {
 		if (av === bv) return 0
 		if (av === null || av === undefined) return 1
 		if (bv === null || bv === undefined) return -1
+		if (typeof comparator === 'function') {
+			const result = Number(comparator(av, bv, a, b))
+			if (!Number.isFinite(result) || result === 0) return 0
+			return sortDir === 'asc' ? result : -result
+		}
 		if (typeof av === 'string' && typeof bv === 'string') {
 			return sortDir === 'asc' ? av.localeCompare(bv) : bv.localeCompare(av)
 		}
