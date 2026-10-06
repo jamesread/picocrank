@@ -17,12 +17,12 @@
 				<Tabs
 					class="column-options-tabs"
 					:tabs="optionTabs"
-					default-tab="custom"
+					default-tab="current"
 					@tab-change="onOptionTabChange"
 				>
-					<template #tab-custom>
+					<template #tab-current>
 						<p class="subtle column-options-help">
-							Drag rows or use the arrows to reorder. Toggle checkboxes to show or hide columns. Set responsive priority (1 hides first) when using column priorities layout.
+							Drag the handle to reorder columns. Toggle checkboxes to show or hide columns. Set responsive priority (1 hides first) when using column priorities layout.
 						</p>
 
 						<label v-if="groupableColumnOptions.length > 0" class="column-options-group-by">
@@ -44,99 +44,48 @@
 						</label>
 
 						<div ref="listScrollRef" class="column-options-scroll" :style="listScrollStyle">
-							<ul class="column-options-list">
-								<li
-									v-for="key in draftOrder"
-									:key="key"
-									class="column-options-item"
-									:class="{
-										'is-dragging': draggingKey === key,
-										'is-drag-over': dragOverKey === key && draggingKey !== key,
-										'is-fixed': !isOrderable(key),
-									}"
-									:draggable="isOrderable(key)"
-									@dragstart="onDragStart(key, $event)"
-									@dragover.prevent="onDragOver(key)"
-									@drop.prevent="onDrop(key)"
-									@dragend="onDragEnd"
-								>
-									<label class="column-options-label">
-										<input
-											type="checkbox"
-											:checked="isVisible(key)"
-											:disabled="!isHideable(key) || (isVisible(key) && draftVisibleKeys.length <= 1)"
-											@change="toggleVisible(key)"
-										/>
-										<span>{{ columnDisplayLabel(key) }}</span>
-									</label>
-
-									<select
-										v-if="isPriorityConfigurable(key)"
-										class="column-options-priority"
-										:value="prioritySelectValue(key)"
-										:aria-label="`Priority for ${columnLabel(key)} column`"
-										@change="setPriority(key, $event.target.value)"
-									>
-										<option value="">Never hide</option>
-										<option
-											v-for="level in priorityLevels"
-											:key="level"
-											:value="level"
-										>
-											{{ priorityOptionLabel(level) }}
-										</option>
-									</select>
-									<span v-else class="column-options-priority-spacer" aria-hidden="true" />
-
-									<div class="column-options-reorder">
-										<div class="column-options-move" role="group" :aria-label="`Move ${columnLabel(key)} column`">
-											<button
-												type="button"
-												class="neutral column-options-move-button"
-												:disabled="!canMove(key, -1)"
-												:aria-label="`Move ${columnLabel(key)} up`"
-												@click="moveColumn(key, -1)"
-											>
-												<HugeiconsIcon
-													:icon="ArrowUp01Icon"
-													width="0.9em"
-													height="0.9em"
-													:strokeWidth="2"
-													aria-hidden="true"
-												/>
-											</button>
-											<button
-												type="button"
-												class="neutral column-options-move-button"
-												:disabled="!canMove(key, 1)"
-												:aria-label="`Move ${columnLabel(key)} down`"
-												@click="moveColumn(key, 1)"
-											>
-												<HugeiconsIcon
-													:icon="ArrowDown01Icon"
-													width="0.9em"
-													height="0.9em"
-													:strokeWidth="2"
-													aria-hidden="true"
-												/>
-											</button>
-										</div>
-
-										<span
-											class="column-options-drag-handle"
-											:class="{ disabled: !isOrderable(key) }"
-											aria-hidden="true"
-										>
-											<HugeiconsIcon
-												:icon="DragDropVerticalIcon"
-												width="0.95em"
-												height="0.95em"
-												:strokeWidth="2"
+							<ReorderList
+								:model-value="draftOrder"
+								:item-key="columnKeyIdentity"
+								:item-label="columnLabel"
+								:is-item-reorder-disabled="(key) => !isOrderable(key)"
+								aria-label="Column order"
+								:show-move-buttons="false"
+								:show-drag-handles="true"
+								@update:model-value="onDraftOrderUpdate"
+							>
+								<template #item="{ item: key }">
+									<div class="column-options-row-body">
+										<label class="column-options-label">
+											<input
+												type="checkbox"
+												:checked="isVisible(key)"
+												:disabled="!isHideable(key) || (isVisible(key) && draftVisibleKeys.length <= 1)"
+												@change="toggleVisible(key)"
 											/>
-										</span>
+											<span>{{ columnDisplayLabel(key) }}</span>
+										</label>
+
+										<select
+											v-if="isPriorityConfigurable(key)"
+											class="column-options-priority"
+											:value="prioritySelectValue(key)"
+											:aria-label="`Priority for ${columnLabel(key)} column`"
+											@change="setPriority(key, $event.target.value)"
+										>
+											<option value="">Never hide</option>
+											<option
+												v-for="level in priorityLevels"
+												:key="level"
+												:value="level"
+											>
+												{{ priorityOptionLabel(level) }}
+											</option>
+										</select>
+										<span v-else class="column-options-priority-spacer" aria-hidden="true" />
 									</div>
-								</li>
-							</ul>
+								</template>
+							</ReorderList>
 						</div>
 					</template>
 
@@ -191,13 +140,15 @@
 								<p v-else class="subtle column-options-tab-placeholder">No saved layouts yet.</p>
 							</template>
 							<p v-else class="subtle column-options-tab-placeholder">
-								Provide a <code>table-id</code> or remote <code>layout-presets</code> callbacks to enable saved layouts.
+								Set <code>view-control-mode="localStorageControlled"</code> with a
+								<code>table-id</code>, or <code>view-control-mode="callbackControlled"</code>
+								with <code>view-settings</code> callbacks, to enable saved layouts.
 							</p>
 
 							<p v-if="loadError" class="column-options-tab-error">{{ loadError }}</p>
 
-							<div class="column-options-load-default">
-								<button type="button" class="neutral" @click="submitLoadDeveloperDefaults">
+							<div v-if="defaultPresetId" class="column-options-load-default">
+								<button type="button" class="neutral" @click="submitLoadPreset(defaultPresetId)">
 									Load default
 								</button>
 							</div>
@@ -206,35 +157,76 @@
 
 					<template #tab-save>
 						<div v-if="!layoutPresetsEnabled" class="column-options-tab-placeholder">
-							<p class="subtle">Provide a <code>table-id</code> or remote <code>layout-presets</code> callbacks to enable saved layouts.</p>
+							<p class="subtle">
+								Set <code>view-control-mode="localStorageControlled"</code> with a
+								<code>table-id</code>, or <code>view-control-mode="callbackControlled"</code>
+								with <code>view-settings</code> callbacks, to enable saved layouts.
+							</p>
 						</div>
 						<div v-else class="column-options-save-panel">
-							<p class="subtle column-options-save-help">
-								Saves the current table view (filters, group by, page size, column order, visibility, and priorities).
-							</p>
-							<label class="column-options-save-field">
-								<span class="field-label">Layout name</span>
-								<input
-									v-model="savePresetName"
-									type="text"
-									placeholder="e.g. Managers view"
-									@keydown.enter.prevent="submitSavePreset"
-								/>
-							</label>
-							<label class="column-options-save-default">
-								<input v-model="saveAsDefault" type="checkbox" />
-								<span>Set as default</span>
-							</label>
-							<p v-if="saveError" class="column-options-tab-error">{{ saveError }}</p>
-							<p v-if="saveSuccess" class="column-options-tab-success">{{ saveSuccess }}</p>
-							<button type="button" @click="submitSavePreset">Save layout</button>
+							<div class="column-options-save-overwrite">
+								<p class="field-label">Saved views</p>
+								<ul v-if="presets.length > 0" class="column-options-preset-list">
+									<li
+										v-for="preset in presets"
+										:key="preset.id"
+										class="column-options-preset-item"
+									>
+										<div class="column-options-preset-meta">
+											<strong>{{ preset.name }}</strong>
+											<span v-if="preset.id === defaultPresetId" class="tag">Default</span>
+											<p class="subtle column-options-preset-date">{{ formatPresetDate(preset.savedAt) }}</p>
+										</div>
+										<div
+											class="column-options-preset-actions"
+											role="group"
+											:aria-label="`Overwrite ${preset.name}`"
+										>
+											<button
+												type="button"
+												class="neutral"
+												@click="submitOverwritePreset(preset.id, preset.name)"
+											>
+												Overwrite
+											</button>
+										</div>
+									</li>
+								</ul>
+								<p v-else class="subtle column-options-tab-placeholder">No saved layouts yet.</p>
+							</div>
+
+							<div class="column-options-save-as">
+								<p class="field-label">Save as</p>
+								<p class="subtle column-options-save-help">
+									Saves the current table view (filters, group by, page size, column order, visibility, and priorities).
+								</p>
+								<label class="column-options-save-field">
+									<span class="field-label">Layout name</span>
+									<input
+										v-model="savePresetName"
+										type="text"
+										placeholder="e.g. Managers view"
+										@keydown.enter.prevent="submitSavePreset"
+									/>
+								</label>
+								<label class="column-options-save-default">
+									<input v-model="saveAsDefault" type="checkbox" />
+									<span>Set as default</span>
+								</label>
+								<p v-if="saveError" class="column-options-tab-error">{{ saveError }}</p>
+								<button type="button" @click="submitSavePreset">Save as new layout</button>
+							</div>
 						</div>
 					</template>
 				</Tabs>
 			</div>
 
-			<div ref="actionsRef" role="toolbar" class="popover-actions">
-				<button type="button" class="neutral" @click="close">Close</button>
+			<div
+				v-if="activeOptionTab === 'current'"
+				ref="actionsRef"
+				role="toolbar"
+				class="popover-actions"
+			>
 				<button type="button" class="neutral" @click="showAll">Show all</button>
 			</div>
 		</div>
@@ -243,24 +235,24 @@
 
 <script setup>
 import { computed, nextTick, onBeforeUnmount, ref, useId, watch } from 'vue'
-import { HugeiconsIcon } from '@hugeicons/vue'
-import {
-	ArrowDown01Icon,
-	ArrowUp01Icon,
-	DragDropVerticalIcon,
-} from '@hugeicons/core-free-icons'
 import {
 	isFilterEntryActive,
 	normalizeColumnFilterEntries,
 } from '../composables/tableFilters.js'
 import { groupableHeaders } from '../composables/tableGroupBy.js'
+import { useNotificationPopups } from '../composables/useNotificationPopups.js'
+import ReorderList from './ReorderList.vue'
 import Tabs from './Tabs.vue'
 
+const { show: showNotificationPopup } = useNotificationPopups()
+
 const optionTabs = [
-	{ id: 'custom', label: 'Custom' },
+	{ id: 'current', label: 'Current' },
 	{ id: 'load', label: 'Load' },
 	{ id: 'save', label: 'Save' },
 ]
+
+const activeOptionTab = ref('current')
 
 const props = defineProps({
 	open: {
@@ -319,6 +311,10 @@ const props = defineProps({
 		type: Function,
 		default: null,
 	},
+	overwriteLayoutPreset: {
+		type: Function,
+		default: null,
+	},
 	loadLayoutPreset: {
 		type: Function,
 		default: null,
@@ -363,12 +359,9 @@ const draftOrder = ref([])
 const draftVisibleKeys = ref([])
 const draftPriorities = ref({})
 const draftGroupBy = ref(null)
-const draggingKey = ref(null)
-const dragOverKey = ref(null)
 const savePresetName = ref('')
 const saveAsDefault = ref(false)
 const saveError = ref('')
-const saveSuccess = ref('')
 const loadError = ref('')
 
 const headerByKey = computed(() => new Map(
@@ -381,6 +374,10 @@ const groupableColumnOptions = computed(() => groupableHeaders(props.headers, pr
 
 function columnLabel(key) {
 	return headerByKey.value.get(key)?.label || key
+}
+
+function columnKeyIdentity(key) {
+	return key
 }
 
 function columnFilterCount(key) {
@@ -504,7 +501,7 @@ function positionPopover() {
 function updateListScrollLimit() {
 	listScrollStyle.value = {}
 
-	if (!popoverRef.value || !listScrollRef.value) {
+	if (activeOptionTab.value !== 'current' || !popoverRef.value || !listScrollRef.value) {
 		return
 	}
 
@@ -513,8 +510,9 @@ function updateListScrollLimit() {
 	const popoverEl = popoverRef.value
 	const titleHeight = titleRef.value?.offsetHeight ?? 0
 	const tabsHeaderHeight = popoverEl.querySelector('.column-options-tabs .tabs-header')?.offsetHeight ?? 0
-	const helpHeight = popoverEl.querySelector('.column-options-help')?.offsetHeight ?? 0
-	const groupByHeight = popoverEl.querySelector('.column-options-group-by')?.offsetHeight ?? 0
+	const activePanel = popoverEl.querySelector('.column-options-tabs .tab-panel.active')
+	const helpHeight = activePanel?.querySelector('.column-options-help')?.offsetHeight ?? 0
+	const groupByHeight = activePanel?.querySelector('.column-options-group-by')?.offsetHeight ?? 0
 	const actionsHeight = actionsRef.value?.offsetHeight ?? 0
 	const popoverStyles = window.getComputedStyle(popoverEl)
 	const paddingTop = Number.parseFloat(popoverStyles.paddingTop) || 0
@@ -531,7 +529,7 @@ function updateListScrollLimit() {
 	const reservedHeight = paddingTop + paddingBottom + titleHeight + tabsHeaderHeight + helpHeight + groupByHeight + actionsHeight + bodyGap
 	const optionsAreaBudget = Math.max(0, availablePopoverHeight - reservedHeight)
 
-	const firstItem = listScrollRef.value.querySelector('.column-options-item')
+	const firstItem = listScrollRef.value.querySelector('.reorder-list-row')
 	const rowHeight = firstItem?.offsetHeight || 40
 	const optionCount = draftOrder.value.length
 
@@ -560,7 +558,6 @@ function resetPresetForm() {
 	savePresetName.value = ''
 	saveAsDefault.value = false
 	saveError.value = ''
-	saveSuccess.value = ''
 	loadError.value = ''
 }
 
@@ -577,7 +574,6 @@ function formatPresetDate(savedAt) {
 
 async function submitSavePreset() {
 	saveError.value = ''
-	saveSuccess.value = ''
 
 	if (!props.saveLayoutPreset) {
 		saveError.value = 'Save is unavailable.'
@@ -594,9 +590,38 @@ async function submitSavePreset() {
 		return
 	}
 
-	saveSuccess.value = `Saved “${result.preset.name}”.`
+	showNotificationPopup({
+		label: 'Saved',
+		class: 'success',
+		message: `Saved “${result.preset.name}”.`,
+	})
 	savePresetName.value = ''
 	saveAsDefault.value = false
+}
+
+async function submitOverwritePreset(presetId, presetName) {
+	saveError.value = ''
+
+	if (!props.overwriteLayoutPreset) {
+		saveError.value = 'Overwrite is unavailable.'
+		return
+	}
+
+	if (!globalThis.confirm?.(`Overwrite saved layout “${presetName}” with the current table view?`)) {
+		return
+	}
+
+	const result = await Promise.resolve(props.overwriteLayoutPreset({ presetId }))
+	if (!result?.ok) {
+		saveError.value = result?.error || 'Unable to overwrite layout.'
+		return
+	}
+
+	showNotificationPopup({
+		label: 'Saved',
+		class: 'success',
+		message: `Overwrote “${presetName}”.`,
+	})
 }
 
 async function submitLoadPreset(presetId) {
@@ -669,88 +694,20 @@ function toggleVisible(key) {
 	emitLiveChange()
 }
 
-function canMove(key, direction) {
-	if (!isOrderable(key)) {
-		return false
-	}
-
-	let index = draftOrder.value.indexOf(key)
-	while (index >= 0 && index < draftOrder.value.length) {
-		index += direction
-		if (index < 0 || index >= draftOrder.value.length) {
-			return false
-		}
-		if (isOrderable(draftOrder.value[index])) {
-			return true
-		}
-	}
-
-	return false
-}
-
-function moveColumn(key, direction) {
-	if (!canMove(key, direction)) {
+function onDraftOrderUpdate(next) {
+	if (!Array.isArray(next) || next.length !== draftOrder.value.length) {
 		return
 	}
 
-	const order = [...draftOrder.value]
-	let index = order.indexOf(key)
-
-	while (true) {
-		const targetIndex = index + direction
-		if (targetIndex < 0 || targetIndex >= order.length) {
+	for (let index = 0; index < next.length; index += 1) {
+		const previousKey = draftOrder.value[index]
+		if (!isOrderable(previousKey) && next[index] !== previousKey) {
 			return
 		}
-		if (isOrderable(order[targetIndex])) {
-			const swapKey = order[targetIndex]
-			order[index] = swapKey
-			order[targetIndex] = key
-			draftOrder.value = order
-			emitLiveChange()
-			return
-		}
-		index = targetIndex
-	}
-}
-
-function onDragStart(key, event) {
-	if (!isOrderable(key)) {
-		event.preventDefault()
-		return
-	}
-	draggingKey.value = key
-	dragOverKey.value = key
-	event.dataTransfer.effectAllowed = 'move'
-	event.dataTransfer.setData('text/plain', key)
-}
-
-function onDragOver(key) {
-	if (!draggingKey.value || draggingKey.value === key) {
-		return
-	}
-	dragOverKey.value = key
-}
-
-function onDrop(targetKey) {
-	const sourceKey = draggingKey.value
-	if (!sourceKey || sourceKey === targetKey) {
-		return
 	}
 
-	const order = draftOrder.value.filter((key) => key !== sourceKey)
-	const targetIndex = order.indexOf(targetKey)
-	if (targetIndex === -1) {
-		return
-	}
-
-	order.splice(targetIndex, 0, sourceKey)
-	draftOrder.value = order
+	draftOrder.value = next
 	emitLiveChange()
-}
-
-function onDragEnd() {
-	draggingKey.value = null
-	dragOverKey.value = null
 }
 
 function onDocumentPointerDown(event) {
@@ -818,7 +775,8 @@ function showAll() {
 	emitLiveChange()
 }
 
-async function onOptionTabChange() {
+async function onOptionTabChange(_tab, tabKey) {
+	activeOptionTab.value = tabKey ?? 'current'
 	await nextTick()
 	updateListScrollLimit()
 	await nextTick()
@@ -831,6 +789,7 @@ function close() {
 }
 
 async function initializePopover() {
+	activeOptionTab.value = 'current'
 	resetDraft()
 	resetPresetForm()
 	await nextTick()
@@ -845,8 +804,6 @@ watch(
 	async (isOpen, wasOpen) => {
 		if (!isOpen) {
 			listScrollStyle.value = {}
-			draggingKey.value = null
-			dragOverKey.value = null
 			document.removeEventListener('pointerdown', onDocumentPointerDown)
 			document.removeEventListener('keydown', onDocumentKeyDown)
 			return
@@ -939,12 +896,16 @@ onBeforeUnmount(() => {
 	min-height: 0;
 }
 
-.column-options-tabs :deep(.tab-panel) {
+.column-options-tabs :deep(.tab-panel:not([hidden])) {
 	padding-block: 0.75rem;
 	padding-inline: 0;
 	min-height: 0;
 	display: flex;
 	flex-direction: column;
+}
+
+.column-options-tabs :deep(.tab-panel[hidden]) {
+	display: none;
 }
 
 .column-options-tabs :deep(.tab-button) {
@@ -980,6 +941,21 @@ onBeforeUnmount(() => {
 	gap: 0.45rem;
 }
 
+.column-options-save-overwrite {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+}
+
+.column-options-save-as {
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+	margin-top: 1.25rem;
+	padding-top: 1rem;
+	border-top: 1px solid var(--border-color);
+}
+
 .field-label {
 	font-size: 0.85rem;
 	color: var(--table-popover-muted-fg);
@@ -989,12 +965,6 @@ onBeforeUnmount(() => {
 	margin: 0;
 	font-size: 0.85rem;
 	color: var(--table-popover-error-fg);
-}
-
-.column-options-tab-success {
-	margin: 0;
-	font-size: 0.85rem;
-	color: var(--table-popover-success-fg);
 }
 
 .column-options-load-panel {
@@ -1058,49 +1028,23 @@ onBeforeUnmount(() => {
 	overscroll-behavior: contain;
 }
 
-.column-options-list {
-	list-style: none;
-	margin: 0;
-	padding: 0;
-	display: flex;
-	flex-direction: column;
+.column-options-scroll :deep(.reorder-list) {
 	gap: 0.35rem;
 }
 
-.column-options-item {
-	display: grid;
-	grid-template-columns: minmax(0, 1fr) 5.5rem auto;
-	align-items: center;
-	gap: 0.5rem;
+.column-options-scroll :deep(.reorder-list-row) {
 	padding: 0.25rem 0.45rem;
-	border: 1px solid var(--table-popover-border);
-	border-radius: 0.35rem;
+	gap: 0.5rem;
+	border-color: var(--table-popover-border);
 	background: var(--table-popover-item-bg);
 }
 
-.column-options-item.is-dragging {
-	opacity: 0.55;
-}
-
-.column-options-item.is-drag-over {
-	border-color: var(--table-popover-item-drag-border);
-}
-
-.column-options-item.is-fixed {
-	opacity: 0.85;
-}
-
-.column-options-drag-handle {
-	display: inline-flex;
+.column-options-row-body {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) 5.5rem;
 	align-items: center;
-	color: var(--table-popover-fg, inherit);
-	opacity: 0.65;
-	cursor: grab;
-}
-
-.column-options-item.is-fixed .column-options-drag-handle.disabled {
-	opacity: 0.35;
-	cursor: default;
+	gap: 0.5rem;
+	min-width: 0;
 }
 
 .column-options-label {
@@ -1127,25 +1071,6 @@ onBeforeUnmount(() => {
 
 .column-options-priority-spacer {
 	display: block;
-}
-
-.column-options-reorder {
-	display: inline-flex;
-	align-items: center;
-	gap: 0.25rem;
-}
-
-.column-options-move {
-	display: inline-flex;
-	gap: 0.2rem;
-}
-
-.column-options-move-button {
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	min-width: 1.75rem;
-	padding: 0.2rem 0.35rem;
 }
 
 .popover-actions {

@@ -233,6 +233,30 @@ export function savePreset(tableId, { name, state, setAsDefault = false }) {
 	return { ok: true, preset, defaultPresetId: store.defaultPresetId }
 }
 
+export function overwritePreset(tableId, presetId, { state }) {
+	if (!tableId || !presetId) {
+		return { ok: false, error: 'Preset not found.' }
+	}
+	if (!state || typeof state !== 'object') {
+		return { ok: false, error: 'Nothing to save.' }
+	}
+
+	const store = readPresetStore(tableId)
+	const index = store.presets.findIndex((item) => item.id === presetId)
+	if (index === -1) {
+		return { ok: false, error: 'Preset not found.' }
+	}
+
+	const preset = {
+		...store.presets[index],
+		savedAt: new Date().toISOString(),
+		state: JSON.parse(JSON.stringify(state)),
+	}
+	store.presets[index] = preset
+	writePresetStore(tableId, store)
+	return { ok: true, preset, defaultPresetId: store.defaultPresetId }
+}
+
 export function deletePreset(tableId, presetId) {
 	if (!tableId || !presetId) {
 		return { ok: false, error: 'Preset not found.' }

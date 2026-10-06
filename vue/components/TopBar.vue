@@ -80,14 +80,18 @@ function handleLinkClick(callback = null) {
 
 <style scoped>
 .topbar {
-	width: 100%;
+	flex: 1 1 auto;
+	min-width: 0;
+	max-width: 100%;
+	overflow: hidden;
 }
 
 .topbar-links {
 	display: flex;
 	align-items: center;
 	gap: 0.125rem;
-	flex-wrap: wrap;
+	flex-wrap: nowrap;
+	overflow: hidden;
 }
 
 .topbar-link {

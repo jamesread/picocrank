@@ -124,6 +124,7 @@ describe('FormField', () => {
 
 			const errorBlock = wrapper.find('.form-field-error')
 			expect(errorBlock.exists()).toBe(true)
+			expect(errorBlock.classes()).toContain('attached-below')
 			expect(errorBlock.attributes('role')).toBe('alert')
 			expect(errorBlock.text()).toContain('This field is required.')
 		})

@@ -46,11 +46,16 @@ export const navSectionHubs = {
 				title: 'Tabs',
 				options: { description: 'Tabbed content regions' },
 			},
+			{
+				name: 'AccordionExample',
+				title: 'Accordion',
+				options: { description: 'Collapsible subsections' },
+			},
 		],
 	},
 	NavDataDisplayHub: {
 		title: 'Data display',
-		subtitle: 'Tables, calendars, and read-only output',
+		subtitle: 'Tables, calendars, row lists, and read-only output',
 		sectionId: 'nav-data',
 		links: [
 			{
@@ -67,6 +72,11 @@ export const navSectionHubs = {
 				name: 'CalendarExample',
 				title: 'Calendar',
 				options: { description: 'Month view with events' },
+			},
+			{
+				name: 'ReorderListExample',
+				title: 'Reorder list',
+				options: { description: 'Drag and drop to reorder row components' },
 			},
 			{
 				name: 'ReadOnlyTextAreaExample',
@@ -89,6 +99,11 @@ export const navSectionHubs = {
 				name: 'FormExample',
 				title: 'Forms',
 				options: { description: 'Labels, inputs, and fieldsets' },
+			},
+			{
+				name: 'FieldValueExample',
+				title: 'Field value',
+				options: { description: 'Read-only, inline edit, and outline edit' },
 			},
 			{
 				name: 'LoginExample',

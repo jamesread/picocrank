@@ -1,5 +1,5 @@
 <template>
-	<header :class="{ fixed }">
+	<header ref="headerRoot" :class="{ fixed }">
 		<div
 			:id = "showSidebarChrome ? 'sidebar-button' : null"
 			:class="['image-and-title', 'flex-row', { 'disabled-branding': !showBranding, 'logo-home-link': !showSidebarChrome && showBranding }]"
@@ -71,7 +71,7 @@
 </template>
 
 <script setup>
-	import { computed, ref } from "vue";
+	import { computed, nextTick, ref, watch } from "vue";
 	import { RouterLink } from "vue-router";
 	import { HugeiconsIcon } from "@hugeicons/vue";
 	import { BulbIcon, Menu01Icon, Moon02Icon, Sun01Icon, UserIcon } from "@hugeicons/core-free-icons";
@@ -80,6 +80,7 @@
 	import TopBar from "./TopBar.vue";
 	import Sidebar from "./Sidebar.vue";
 	import { useTheme } from '../composables/useTheme.js';
+	import { useHeaderTopBarFit } from '../composables/useHeaderTopBarFit.js';
 	import { useResponsiveNav } from '../composables/useResponsiveNav.js';
 
 	const { theme, nextTheme, toggleTheme } = useTheme();
@@ -161,10 +162,31 @@
 	});
 
 	const fallbackSidebar = ref(null);
+	const headerRoot = ref(null);
+	const topBarSpaceLimited = ref(false);
 
 	const { showTopBar, showSidebarChrome, needsFallbackSidebar, isMobile } = useResponsiveNav(
 		() => props.sidebarEnabled,
 		() => props.topBarEnabled,
+		topBarSpaceLimited,
+	);
+
+	const topBarMeasureActive = computed(
+		() => props.topBarEnabled && !isMobile.value,
+	);
+
+	const { remeasure: remeasureTopBar } = useHeaderTopBarFit(
+		headerRoot,
+		topBarMeasureActive,
+		topBarSpaceLimited,
+	);
+
+	watch(showTopBar, () => nextTick(() => remeasureTopBar()));
+
+	watch(
+		() => props.topBarNavigation,
+		() => remeasureTopBar(),
+		{ deep: true },
 	);
 
 	const showBreadcrumbsBar = computed(

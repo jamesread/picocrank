@@ -101,12 +101,17 @@
 				/>
 			</FormField>
 
-			<FormField label="Is Administrator?">
-				<input 
-					type="checkbox" 
-					id="is-admin"
-					v-model="formData.isAdmin"
-				/>
+			<FormField label="Is Administrator?" component-has-label>
+				<div>
+					<label>
+						<input
+							id="is-admin"
+							v-model="formData.isAdmin"
+							type="checkbox"
+						/>
+						<span>Administrator</span>
+					</label>
+				</div>
 			</FormField>
 
 			<FormField

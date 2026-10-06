@@ -160,7 +160,11 @@ To mirror client semantics in Node without reimplementing operators, reuse `appl
 
 ## Layout presets vs filterQuery
 
-Saved layouts (localStorage or `layoutPresets` callbacks) store **`filters`** (UI storage shape) inside `state`, not `filterQuery`. When a preset is applied, the table rebuilds `filterQuery` automatically. Server-side layout persistence can store either:
+Saved layouts store **`filters`** (UI storage shape) inside `state`, not `filterQuery`. When a preset is applied, the table rebuilds `filterQuery` automatically.
+
+Table **`viewControlMode`**: `localStorageControlled` (default; needs `tableId`) or `callbackControlled` (needs `viewSettings` with `list` / `save` / `load` / etc.). Legacy `layoutPresets` is an alias for `viewSettings`.
+
+Callback-backed persistence can store either:
 
 - **`state.filters`** — round-trips the table UI exactly, or  
 - **`filterQuery`** — if you control load/save; convert with `filterQueryToFilters` before `setFilters` if needed.

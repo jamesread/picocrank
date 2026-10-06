@@ -2,7 +2,7 @@
 	<Section
 		title="Remote table"
 		:icon="CloudServerIcon"
-		subtitle="Server-style pagination with fetchRows. Filter queries, sort, and page changes are sent to the callback. Right-click or long-press a column header to filter. Layout save/load uses server callbacks instead of localStorage."
+		subtitle="Server-style pagination with fetchRows. Filter queries, sort, and page changes are sent to the callback. Saved views use callbackControlled view settings (not localStorage)."
 		:padding="false"
 	>
 		<p v-if="lastQuerySummary" class="subtle query-summary">{{ lastQuerySummary }}</p>
@@ -11,7 +11,8 @@
 			row-key="name"
 			:headers="headers"
 			:fetch-rows="fetchRows"
-			:layout-presets="layoutPresets"
+			view-control-mode="callbackControlled"
+			:view-settings="viewSettings"
 			:show-pagination="true"
 			:remote-debounce-ms="250"
 		/>
@@ -61,7 +62,7 @@ function createRemotePresetId() {
 	return `remote-preset-${remotePresetCounter}`
 }
 
-const layoutPresets = {
+const viewSettings = {
 	async list() {
 		return {
 			presets: remoteLayoutStore.value.presets.map((preset) => ({ ...preset })),
@@ -98,6 +99,29 @@ const layoutPresets = {
 		}
 
 		console.info('[remote table] saved layout preset', preset)
+		return {
+			ok: true,
+			preset,
+			defaultPresetId: remoteLayoutStore.value.defaultPresetId,
+		}
+	},
+
+	async overwrite({ presetId, state }) {
+		const index = remoteLayoutStore.value.presets.findIndex((item) => item.id === presetId)
+		if (index === -1) {
+			return { ok: false, error: 'Preset not found.' }
+		}
+
+		const preset = {
+			...remoteLayoutStore.value.presets[index],
+			savedAt: new Date().toISOString(),
+			state: JSON.parse(JSON.stringify(state)),
+		}
+		remoteLayoutStore.value.presets = remoteLayoutStore.value.presets.map((item, i) => (
+			i === index ? preset : item
+		))
+
+		console.info('[remote table] overwrote layout preset', preset)
 		return {
 			ok: true,
 			preset,

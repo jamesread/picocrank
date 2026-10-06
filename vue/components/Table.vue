@@ -41,13 +41,38 @@
 
 						<span v-if="filterable && isHeaderFiltered(header)" class="filter-indicator" title="Filtered" aria-hidden="true">⧩</span>
 
-						<span v-if="isHeaderGrouped(header)" class="group-indicator" title="Grouped" aria-hidden="true">⊟</span>
+						<span
+							v-if="isHeaderGrouped(header)"
+							class="group-indicator"
+							title="Grouped"
+							aria-hidden="true"
+						>
+							<HugeiconsIcon
+								:icon="Group01Icon"
+								width="0.95em"
+								height="0.95em"
+								:strokeWidth="2"
+								aria-hidden="true"
+							/>
+						</span>
 
 						<span v-if="header.sortable" class="sort-indicator">
-							<span v-if="sortBy === header.key">
-								<span v-if="sortDir === 'asc'">▲</span>
-								<span v-else-if="sortDir === 'desc'">▼</span>
-							</span>
+							<HugeiconsIcon
+								v-if="sortBy === header.key && sortDir === 'asc'"
+								:icon="SortByUp02Icon"
+								width="0.95em"
+								height="0.95em"
+								:strokeWidth="2"
+								aria-hidden="true"
+							/>
+							<HugeiconsIcon
+								v-else-if="sortBy === header.key && sortDir === 'desc'"
+								:icon="SortByDown02Icon"
+								width="0.95em"
+								height="0.95em"
+								:strokeWidth="2"
+								aria-hidden="true"
+							/>
 						</span>
 					</th>
 					<th
@@ -99,7 +124,13 @@
 								data-row-click-ignore
 								@click.stop="toggleGroupCollapsed(item.groupId)"
 							>
-								<span aria-hidden="true">{{ item.collapsed ? '▶' : '▼' }}</span>
+								<HugeiconsIcon
+									class="table-group-chevron"
+									:icon="ArrowDown01Icon"
+									width="1em"
+									height="1em"
+									aria-hidden="true"
+								/>
 							</button>
 							<span class="table-group-label">{{ formatGroupValue(item.value) }}</span>
 							<span class="table-group-count subtle">({{ item.count }})</span>
@@ -229,6 +260,7 @@
 		:presets="savedPresets"
 		:default-preset-id="defaultPresetId"
 		:save-layout-preset="onSavePreset"
+		:overwrite-layout-preset="onOverwritePreset"
 		:load-layout-preset="onLoadPreset"
 		:delete-layout-preset="onDeletePreset"
 		:set-default-layout-preset="onSetDefaultPreset"
@@ -253,7 +285,13 @@
 <script setup>
 import { ref, computed, watch, nextTick, onMounted, onBeforeUnmount, useSlots, useAttrs } from 'vue'
 import { HugeiconsIcon } from '@hugeicons/vue'
-import { LayoutGridIcon } from '@hugeicons/core-free-icons'
+import {
+	ArrowDown01Icon,
+	Group01Icon,
+	LayoutGridIcon,
+	SortByDown02Icon,
+	SortByUp02Icon,
+} from '@hugeicons/core-free-icons'
 import Pagination from './Pagination.vue'
 import TableColumnFilterPopover from './TableColumnFilterPopover.vue'
 import TableColumnOptionsPopover from './TableColumnOptionsPopover.vue'
@@ -278,11 +316,17 @@ import {
 	getPresetById,
 	listPresets,
 	savePreset,
+	overwritePreset,
 	deletePreset,
 	setDefaultPreset,
 	sanitizePresetState,
 	layoutStatesEqual,
 } from '../composables/tableColumnPresets.js'
+import {
+	getViewSettingsHandlers,
+	isViewSettingsControlEnabled,
+	VIEW_CONTROL_CALLBACK,
+} from '../composables/tableViewSettings.js'
 import {
 	defaultColumnPriorityForIndex,
 	isValidColPriority,
@@ -384,6 +428,21 @@ const props = defineProps({
 		type: String,
 		default: '',
 	},
+	/**
+	 * How saved table views (column order, visibility, filters in presets, etc.) are stored.
+	 * - `localStorageControlled`: requires `tableId`; uses browser localStorage (default).
+	 * - `callbackControlled`: requires `viewSettings` callbacks (server or app-owned persistence).
+	 */
+	viewControlMode: {
+		type: String,
+		default: 'localStorageControlled',
+		validator: (value) => ['localStorageControlled', 'callbackControlled'].includes(value),
+	},
+	/** Callback handlers when `viewControlMode` is `callbackControlled`. */
+	viewSettings: {
+		type: Object,
+		default: null,
+	},
 	loadSavedLayout: {
 		type: Boolean,
 		default: true,
@@ -396,6 +455,7 @@ const props = defineProps({
 		type: [String, Function],
 		default: 'id',
 	},
+	/** @deprecated Use `viewSettings` with `viewControlMode="callbackControlled"`. */
 	layoutPresets: {
 		type: Object,
 		default: null,
@@ -617,12 +677,19 @@ const collapsedGroupIds = ref([])
 
 const isRemote = computed(() => typeof props.fetchRows === 'function')
 
-const layoutPresetsAvailable = computed(() => {
-	if (isRemote.value) {
-		return props.layoutPresets != null
-	}
-	return Boolean(props.tableId)
-})
+const viewSettingsHandlers = computed(() =>
+	getViewSettingsHandlers(props.viewSettings, props.layoutPresets))
+
+const isCallbackViewControl = computed(
+	() => props.viewControlMode === VIEW_CONTROL_CALLBACK,
+)
+
+const layoutPresetsAvailable = computed(() =>
+	isViewSettingsControlEnabled(
+		props.viewControlMode,
+		props.tableId,
+		viewSettingsHandlers.value,
+	))
 
 const activeFilters = computed(() => {
 	if (!props.filterable) {
@@ -1811,15 +1878,16 @@ function onColumnOptionsCancel() {
 }
 
 async function refreshSavedPresets() {
-	if (isRemote.value) {
-		if (!props.layoutPresets || typeof props.layoutPresets.list !== 'function') {
+	if (isCallbackViewControl.value) {
+		const handlers = viewSettingsHandlers.value
+		if (!handlers || typeof handlers.list !== 'function') {
 			savedPresets.value = []
 			defaultPresetId.value = null
 			return
 		}
 
 		try {
-			const result = await props.layoutPresets.list()
+			const result = await handlers.list()
 			savedPresets.value = Array.isArray(result?.presets) ? result.presets : []
 			defaultPresetId.value = result?.defaultPresetId ?? null
 		} catch {
@@ -1918,13 +1986,14 @@ function applyPresetState(state) {
 async function onSavePreset({ name, setAsDefault }) {
 	const state = getCurrentLayoutState()
 
-	if (isRemote.value) {
-		if (!props.layoutPresets || typeof props.layoutPresets.save !== 'function') {
-			return { ok: false, error: 'Remote layout save is unavailable.' }
+	if (isCallbackViewControl.value) {
+		const handlers = viewSettingsHandlers.value
+		if (!handlers || typeof handlers.save !== 'function') {
+			return { ok: false, error: 'View save callback is unavailable.' }
 		}
 
 		try {
-			const result = await props.layoutPresets.save({ name, state, setAsDefault })
+			const result = await handlers.save({ name, state, setAsDefault })
 			if (result?.ok) {
 				await refreshSavedPresets()
 				if (result.preset?.id) {
@@ -1957,14 +2026,50 @@ async function onSavePreset({ name, setAsDefault }) {
 	return result
 }
 
-async function onLoadPreset(presetId) {
-	if (isRemote.value) {
-		if (!props.layoutPresets || typeof props.layoutPresets.load !== 'function') {
-			return { ok: false, error: 'Remote layout load is unavailable.' }
+async function onOverwritePreset({ presetId }) {
+	const state = getCurrentLayoutState()
+
+	if (isCallbackViewControl.value) {
+		const handlers = viewSettingsHandlers.value
+		if (!handlers || typeof handlers.overwrite !== 'function') {
+			return { ok: false, error: 'View overwrite callback is unavailable.' }
 		}
 
 		try {
-			const result = await props.layoutPresets.load(presetId)
+			const result = await handlers.overwrite({ presetId, state })
+			if (result?.ok) {
+				await refreshSavedPresets()
+				activeLayoutPresetId.value = presetId
+				updateActiveLayoutLabel()
+			}
+			return result ?? { ok: false, error: 'Unable to overwrite layout.' }
+		} catch {
+			return { ok: false, error: 'Unable to overwrite layout.' }
+		}
+	}
+
+	if (!props.tableId) {
+		return { ok: false, error: 'Table identity is required.' }
+	}
+
+	const result = overwritePreset(props.tableId, presetId, { state })
+	if (result.ok) {
+		refreshSavedPresets()
+		activeLayoutPresetId.value = presetId
+		updateActiveLayoutLabel()
+	}
+	return result
+}
+
+async function onLoadPreset(presetId) {
+	if (isCallbackViewControl.value) {
+		const handlers = viewSettingsHandlers.value
+		if (!handlers || typeof handlers.load !== 'function') {
+			return { ok: false, error: 'View load callback is unavailable.' }
+		}
+
+		try {
+			const result = await handlers.load(presetId)
 			if (!result?.ok || !result.preset?.state) {
 				return result ?? { ok: false, error: 'Preset not found.' }
 			}
@@ -1994,13 +2099,14 @@ async function onLoadPreset(presetId) {
 }
 
 async function onDeletePreset(presetId) {
-	if (isRemote.value) {
-		if (!props.layoutPresets || typeof props.layoutPresets.delete !== 'function') {
-			return { ok: false, error: 'Remote layout delete is unavailable.' }
+	if (isCallbackViewControl.value) {
+		const handlers = viewSettingsHandlers.value
+		if (!handlers || typeof handlers.delete !== 'function') {
+			return { ok: false, error: 'View delete callback is unavailable.' }
 		}
 
 		try {
-			const result = await props.layoutPresets.delete(presetId)
+			const result = await handlers.delete(presetId)
 			if (result?.ok) {
 				await refreshSavedPresets()
 				if (activeLayoutPresetId.value === presetId) {
@@ -2030,13 +2136,14 @@ async function onDeletePreset(presetId) {
 }
 
 async function onSetDefaultPreset(presetId) {
-	if (isRemote.value) {
-		if (!props.layoutPresets || typeof props.layoutPresets.setDefault !== 'function') {
+	if (isCallbackViewControl.value) {
+		const handlers = viewSettingsHandlers.value
+		if (!handlers || typeof handlers.setDefault !== 'function') {
 			return { ok: false, error: 'Unable to update default layout.' }
 		}
 
 		try {
-			const result = await props.layoutPresets.setDefault(presetId)
+			const result = await handlers.setDefault(presetId)
 			if (result?.ok) {
 				await refreshSavedPresets()
 			}
@@ -2393,7 +2500,7 @@ watch(
 )
 
 watch(
-	() => [props.tableId, props.layoutPresets],
+	() => [props.viewControlMode, props.tableId, viewSettingsHandlers.value],
 	() => {
 		void refreshSavedPresets()
 		updateActiveLayoutLabel()
@@ -2437,17 +2544,18 @@ watch(
 
 onMounted(async () => {
 	if (props.loadSavedLayout) {
-		if (isRemote.value && props.layoutPresets && typeof props.layoutPresets.getDefault === 'function') {
+		const handlers = viewSettingsHandlers.value
+		if (isCallbackViewControl.value && handlers && typeof handlers.getDefault === 'function') {
 			try {
-				const result = await props.layoutPresets.getDefault()
+				const result = await handlers.getDefault()
 				if (result?.preset?.state) {
 					applyPresetState(result.preset.state)
 					activeLayoutPresetId.value = result.preset.id
 				}
 			} catch {
-				// Ignore default layout load failures in remote mode.
+				// Ignore default layout load failures in callback mode.
 			}
-		} else if (!isRemote.value && props.tableId) {
+		} else if (!isCallbackViewControl.value && props.tableId) {
 			const preset = getDefaultPreset(props.tableId)
 			if (preset?.state) {
 				applyPresetState(preset.state)
@@ -2520,15 +2628,17 @@ table.loading tbody {
 }
 
 .sort-indicator {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
 	width: 1.5em;
-	display: inline-block;
-	text-align: center;
+	vertical-align: middle;
 }
 
 .group-indicator {
-	display: inline-block;
+	display: inline-flex;
+	vertical-align: middle;
 	margin-right: 0.25rem;
-	font-size: 0.85em;
 	opacity: 0.85;
 }
 
@@ -2552,6 +2662,15 @@ tbody tr.table-group-row > td.table-group-cell {
 	margin-right: 0.35rem;
 	padding: 0.1rem 0.35rem;
 	vertical-align: middle;
+}
+
+.table-group-chevron {
+	flex-shrink: 0;
+	transition: transform 0.15s ease;
+}
+
+.table-group-row:not(.table-group-row-collapsed) .table-group-chevron {
+	transform: rotate(180deg);
 }
 
 .table-group-label {

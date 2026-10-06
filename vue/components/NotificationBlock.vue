@@ -89,6 +89,14 @@ const props = defineProps({
 		type: String,
 		default: 'status',
 	},
+	/**
+	 * Nest the block directly under a control (flat top edge, shared width).
+	 * Pair with an input, select, or textarea immediately above.
+	 */
+	attachedBelow: {
+		type: Boolean,
+		default: false,
+	},
 })
 
 const emit = defineEmits(['click', 'dismiss'])
@@ -108,6 +116,7 @@ const hasLink = computed(() => Boolean(
 const rootClasses = computed(() => ({
 	notification: true,
 	[props.type]: true,
+	'attached-below': props.attachedBelow,
 	clickable: props.clickable || props.dismissible,
 }))
 
@@ -118,3 +127,19 @@ function handleClick(event) {
 	}
 }
 </script>
+
+<style scoped>
+.notification.attached-below {
+	box-sizing: border-box;
+	width: 100%;
+	margin: 0;
+	border-top: none;
+	border-radius: 0 0 0.4em 0.4em;
+}
+
+.notification.attached-below.bad,
+.notification.attached-below.error,
+.notification.attached-below.critical {
+	border-color: var(--karma-bad-border);
+}
+</style>

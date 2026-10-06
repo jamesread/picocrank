@@ -13,7 +13,7 @@ export const MOBILE_NAV_QUERY = '(max-width: 768px)'
  * Explicit sidebar mounting stays with the app. Header owns the top-bar-only
  * mobile fallback via `needsFallbackSidebar`.
  */
-export function useResponsiveNav(sidebarEnabled, topBarEnabled) {
+export function useResponsiveNav(sidebarEnabled, topBarEnabled, topBarSpaceLimited) {
 	const isMobile = useMediaQuery(MOBILE_NAV_QUERY)
 
 	const hasExplicitSidebar = computed(() => !!toValue(sidebarEnabled))
@@ -21,8 +21,10 @@ export function useResponsiveNav(sidebarEnabled, topBarEnabled) {
 		() => !!toValue(topBarEnabled) && !toValue(sidebarEnabled),
 	)
 
+	const topBarCrowded = computed(() => !!toValue(topBarSpaceLimited))
+
 	const needsFallbackSidebar = computed(
-		() => topBarOnly.value && isMobile.value,
+		() => topBarOnly.value && (isMobile.value || topBarCrowded.value),
 	)
 
 	const showSidebarChrome = computed(
@@ -30,7 +32,7 @@ export function useResponsiveNav(sidebarEnabled, topBarEnabled) {
 	)
 
 	const showTopBar = computed(
-		() => !!toValue(topBarEnabled) && !isMobile.value,
+		() => !!toValue(topBarEnabled) && !isMobile.value && !topBarCrowded.value,
 	)
 
 	return {

@@ -20,16 +20,19 @@
 				rel="noopener noreferrer"
 			>{{ docsLinkTitle }}</a>
 		</div>
-		<slot />
-		<NotificationBlock
-			v-if="fieldError"
-			:id="errorId"
-			class="form-field-error"
-			type="bad"
-			label="Error"
-			:message="fieldError"
-			role="alert"
-		/>
+		<div class="form-field-value-stack">
+			<slot />
+			<NotificationBlock
+				v-if="fieldError"
+				:id="errorId"
+				class="form-field-error"
+				type="bad"
+				label="Error"
+				:message="fieldError"
+				attached-below
+				role="alert"
+			/>
+		</div>
 		<div v-if="!descriptionAbove && hasFieldMeta" class="form-field-meta">
 			<p v-if="description" class="subtle form-field-description">{{ description }}</p>
 			<a
@@ -303,8 +306,33 @@ label.disabled,
 	align-self: flex-start;
 }
 
+.form-field-value-stack {
+	display: flex;
+	flex-direction: column;
+	gap: 0;
+	width: 100%;
+	min-width: 0;
+}
+
 .form-field-control :deep(.form-field-error) {
 	font-size: 0.9em;
+}
+
+.form-field-value-stack:has(> :is(input, textarea, select).field-invalid + :deep(.form-field-error.attached-below)) {
+	box-shadow: var(--field-invalid-outline);
+	border-radius: 0.4em;
+	overflow: hidden;
+}
+
+.form-field-value-stack:has(> :is(input, textarea, select).field-invalid + :deep(.form-field-error.attached-below)) > :is(input, textarea, select).field-invalid {
+	border-bottom-left-radius: 0;
+	border-bottom-right-radius: 0;
+	box-shadow: none;
+}
+
+.form-field-value-stack:has(> :is(input, textarea, select).field-invalid + :deep(.form-field-error.attached-below)) :deep(.form-field-error.attached-below) {
+	margin: 0;
+	box-shadow: none;
 }
 
 .form-field-required {

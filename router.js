@@ -6,6 +6,7 @@ import { ViewIcon } from '@hugeicons/core-free-icons';
 import { SecurityValidationIcon } from '@hugeicons/core-free-icons';
 import { CalendarIcon } from '@hugeicons/core-free-icons';
 import { EditIcon } from '@hugeicons/core-free-icons';
+import { Edit03Icon } from '@hugeicons/core-free-icons';
 import { Menu01Icon } from '@hugeicons/core-free-icons';
 import { Navigation01Icon } from '@hugeicons/core-free-icons';
 import { ClipboardCopyIcon } from '@hugeicons/core-free-icons';
@@ -16,6 +17,8 @@ import { PaintBoardIcon } from '@hugeicons/core-free-icons';
 import { UserIcon } from '@hugeicons/core-free-icons';
 import { InformationCircleIcon } from '@hugeicons/core-free-icons';
 import { Loading03Icon } from '@hugeicons/core-free-icons';
+import { DragDropVerticalIcon } from '@hugeicons/core-free-icons';
+import { ArrowDown01Icon } from '@hugeicons/core-free-icons';
 
 import {
 	hubChildBreadcrumbs,
@@ -118,6 +121,16 @@ const routes = [
     }
   },
   {
+    name: 'ReorderListExample',
+    path: '/reorder-list-example',
+    component: () => import('./vue/examples/ReorderListExample.vue'),
+    meta: {
+      title: 'Reorder list',
+      icon: DragDropVerticalIcon,
+      breadcrumbs: hubChildBreadcrumbs('NavDataDisplayHub', 'ReorderListExample', 'Reorder list'),
+    }
+  },
+  {
     name: 'Login',
     path: '/login',
     component: () => import('./vue/examples/Login.vue'),
@@ -145,6 +158,16 @@ const routes = [
       title: 'Forms',
       icon: EditIcon,
       breadcrumbs: hubChildBreadcrumbs('NavFormsInputHub', 'FormExample', 'Forms'),
+    }
+  },
+  {
+    name: 'FieldValueExample',
+    path: '/field-value-example',
+    component: () => import('./vue/examples/FieldValueExample.vue'),
+    meta: {
+      title: 'Field value',
+      icon: Edit03Icon,
+      breadcrumbs: hubChildBreadcrumbs('NavFormsInputHub', 'FieldValueExample', 'Field value'),
     }
   },
   {
@@ -185,6 +208,16 @@ const routes = [
       title: 'Loading area',
       icon: Loading03Icon,
       breadcrumbs: hubChildBreadcrumbs('NavFeedbackStatusHub', 'LoadingAreaExample', 'Loading area'),
+    }
+  },
+  {
+    name: 'AccordionExample',
+    path: '/accordion-example',
+    component: () => import('./vue/examples/AccordionExample.vue'),
+    meta: {
+      title: 'Accordion',
+      icon: ArrowDown01Icon,
+      breadcrumbs: hubChildBreadcrumbs('NavLayoutsHub', 'AccordionExample', 'Accordion'),
     }
   },
   {

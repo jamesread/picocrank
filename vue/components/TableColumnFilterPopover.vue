@@ -18,14 +18,15 @@
 						<button
 							v-if="canGroupBy"
 							type="button"
-							class="neutral inline-icon popover-title-action"
+							class="neutral inline-icon popover-title-action popover-title-action-toggle"
 							:class="{ active: isGroupedColumn }"
+							:aria-pressed="isGroupedColumn ? 'true' : 'false'"
 							:aria-label="isGroupedColumn ? `Ungroup ${columnLabel || 'column'}` : `Group by ${columnLabel || 'column'}`"
 							:title="isGroupedColumn ? 'Ungroup' : `Group by ${columnLabel}`"
 							@click="groupByColumn"
 						>
 							<HugeiconsIcon
-								:icon="isGroupedColumn ? UngroupLayersIcon : GroupLayersIcon"
+								:icon="Group01Icon"
 								width="1em"
 								height="1em"
 								:strokeWidth="2.5"
@@ -41,7 +42,7 @@
 							@click="hideColumn"
 						>
 							<HugeiconsIcon
-								:icon="ViewOffIcon"
+								:icon="EyeOffIcon"
 								width="1em"
 								height="1em"
 								:strokeWidth="2.5"
@@ -185,7 +186,7 @@
 <script setup>
 import { computed, nextTick, onBeforeUnmount, ref, useId, watch } from 'vue'
 import { HugeiconsIcon } from '@hugeicons/vue'
-import { Delete02Icon, GroupLayersIcon, UngroupLayersIcon, ViewOffIcon } from '@hugeicons/core-free-icons'
+import { Delete02Icon, EyeOffIcon, Group01Icon } from '@hugeicons/core-free-icons'
 import CheckGroup from './CheckGroup.vue'
 import RadioGroup from './RadioGroup.vue'
 import {
@@ -603,8 +604,9 @@ onBeforeUnmount(() => {
 	line-height: 1;
 }
 
-.popover-title-action.active {
+.popover-title-action-toggle.active {
 	color: var(--table-header-active-fg);
+	background-color: var(--table-header-active-bg);
 }
 
 .filter-fields {

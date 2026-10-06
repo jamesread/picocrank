@@ -93,6 +93,8 @@
 
 	/* Matches Femtocrank header min-height (logo 2em + .5em padding). */
 	--picocrank-fixed-header-offset: 3em;
+
+	--field-invalid-outline: 0 0 0 3px color-mix(in srgb, var(--karma-bad) 35%, transparent);
 }
 
 /* No fixed header → no sidebar/main offset. */
@@ -133,9 +135,16 @@ section .section-header [role="toolbar"] .button {
 	flex-shrink: 0;
 }
 
-section .section-header [role="toolbar"] > :not(button):not(.button) {
+/* Grow search/filter controls only — toolbar labels stay content-sized. */
+section .section-header [role="toolbar"] > :not(button):not(.button):not(label):not(span) {
 	flex: 1 1 auto;
 	min-width: 0;
+}
+
+section .section-header [role="toolbar"] > label {
+	flex: 0 0 auto;
+	width: auto;
+	min-width: auto;
 }
 
 section.narrow {
@@ -157,6 +166,10 @@ form > .form-field-label-skip {
 	grid-column: 1 / -1;
 }
 
+label > input[type="checkbox"] {
+	margin-right: 0.35em;
+}
+
 /*
  * FormField applies .field-invalid when an error is set programmatically.
  * Mirrors femtocrank :user-invalid (which only applies after user interaction).
@@ -167,7 +180,11 @@ select.field-invalid {
 	border-color: var(--karma-bad-border);
 	background-color: var(--karma-bad-wash);
 	color: var(--text-color);
-	box-shadow: 0 0 0 3px color-mix(in srgb, var(--karma-bad) 35%, transparent);
+	box-shadow: var(--field-invalid-outline);
+}
+
+.notification.attached-below {
+	margin: 0;
 }
 
 input.field-invalid:focus-visible,
@@ -184,6 +201,10 @@ select.field-invalid:focus-visible {
  * (unlayered) so they are not overridden by stuck-mode defaults.
  * Alternatively wrap with .layout-fixed-header when header and #layout are direct children.
  */
+header {
+	flex-wrap: nowrap;
+}
+
 header.fixed {
 	top: 0;
 	left: 0;
