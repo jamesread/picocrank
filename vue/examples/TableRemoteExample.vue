@@ -171,7 +171,7 @@ async function fetchRows(query, { signal } = {}) {
 	const start = (query.page - 1) * query.pageSize
 	const rows = sorted.slice(start, start + query.pageSize)
 
-	lastQuerySummary.value = `Last query: page ${query.page}, ${countActiveFilterQuery(query.filterQuery, headers.value, allRows)} active filter(s), ${sorted.length} matching row(s).`
+	lastQuerySummary.value = `Last query: page ${query.page}, group ${query.groupBy ?? 'none'}, ${countActiveFilterQuery(query.filterQuery, headers.value, allRows)} active filter(s), ${sorted.length} matching row(s).`
 
 	return {
 		rows,

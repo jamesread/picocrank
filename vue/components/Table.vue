@@ -41,6 +41,8 @@
 
 						<span v-if="filterable && isHeaderFiltered(header)" class="filter-indicator" title="Filtered" aria-hidden="true">⧩</span>
 
+						<span v-if="isHeaderGrouped(header)" class="group-indicator" title="Grouped" aria-hidden="true">⊟</span>
+
 						<span v-if="header.sortable" class="sort-indicator">
 							<span v-if="sortBy === header.key">
 								<span v-if="sortDir === 'asc'">▲</span>
@@ -74,59 +76,88 @@
 				</tr>
 			</thead>
 			<tbody v-if="hasRows">
-				<tr
-					v-for="(row, rowIndex) in displayRows"
-					:key="resolveRowKey(row, rowIndex)"
-					:class="{
-						'row-clickable': rowClickable,
-						'row-selected': selectable && isRowSelected(row, rowIndex),
-						'row-context-menu-active': isRowContextMenuTarget(row, rowIndex),
-					}"
-					@click="onRowClick(row, rowIndex, $event)"
-					@contextmenu="onRowContextMenu(row, rowIndex, $event)"
-				>
-					<td
-						v-if="selectable"
-						class="table-select-col"
-						data-row-click-ignore
-						@click.stop
+				<template v-for="(item, itemIndex) in displayBodyItems" :key="bodyItemKey(item, itemIndex)">
+					<tr
+						v-if="item.kind === 'group'"
+						class="table-group-row"
+						:class="{ 'table-group-row-collapsed': item.collapsed }"
 					>
-						<label class="table-select-label">
-							<input
-								type="checkbox"
-								:checked="isRowSelected(row, rowIndex)"
-								:aria-label="`Select row ${resolveRowKey(row, rowIndex)}`"
-								@change="toggleRowSelection(row, rowIndex)"
+						<td
+							v-if="selectable"
+							class="table-select-col table-group-cell"
+							data-row-click-ignore
+						/>
+						<td
+							:colspan="bodyGroupColspan"
+							class="table-group-cell"
+						>
+							<button
+								type="button"
+								class="table-group-toggle neutral"
+								:aria-expanded="item.collapsed ? 'false' : 'true'"
+								:aria-label="item.collapsed ? 'Expand group' : 'Collapse group'"
+								data-row-click-ignore
+								@click.stop="toggleGroupCollapsed(item.groupId)"
 							>
-						</label>
-					</td>
-					<td
-						v-for="(header, cellIndex) in visibleHeaders"
-						:key="header.key || cellIndex"
-						:colspan="bodyColumnColspan(cellIndex) || undefined"
-						:class="[
-							cellClasses(header),
-							header.class,
-							isLastColumnWithOptions(cellIndex) ? 'table-last-column-with-options' : null,
-						]"
+								<span aria-hidden="true">{{ item.collapsed ? '▶' : '▼' }}</span>
+							</button>
+							<span class="table-group-label">{{ formatGroupValue(item.value) }}</span>
+							<span class="table-group-count subtle">({{ item.count }})</span>
+						</td>
+					</tr>
+					<tr
+						v-else
+						:class="{
+							'row-clickable': rowClickable,
+							'row-selected': selectable && isRowSelected(item.row, item.sourceIndex),
+							'row-context-menu-active': isRowContextMenuTarget(item.row, item.sourceIndex),
+						}"
+						@click="onRowClick(item.row, item.sourceIndex, $event)"
+						@contextmenu="onRowContextMenu(item.row, item.sourceIndex, $event)"
 					>
-						<slot
-							v-if="slots[`cell-${header.key}`]"
-							:name="`cell-${header.key}`"
-							:row="row"
-							:value="row[header.key]"
-						/>
-						<slot
-							v-else-if="slots.cell"
-							name="cell"
-							:row="row"
-							:value="row[header.key]"
-						/>
-						<span v-else>
-							{{ row[header.key] }}
-						</span>
-					</td>
-				</tr>
+						<td
+							v-if="selectable"
+							class="table-select-col"
+							data-row-click-ignore
+							@click.stop
+						>
+							<label class="table-select-label">
+								<input
+									type="checkbox"
+									:checked="isRowSelected(item.row, item.sourceIndex)"
+									:aria-label="`Select row ${resolveRowKey(item.row, item.sourceIndex)}`"
+									@change="toggleRowSelection(item.row, item.sourceIndex)"
+								>
+							</label>
+						</td>
+						<td
+							v-for="(header, cellIndex) in visibleHeaders"
+							:key="header.key || cellIndex"
+							:colspan="bodyColumnColspan(cellIndex) || undefined"
+							:class="[
+								cellClasses(header),
+								header.class,
+								isLastColumnWithOptions(cellIndex) ? 'table-last-column-with-options' : null,
+							]"
+						>
+							<slot
+								v-if="slots[`cell-${header.key}`]"
+								:name="`cell-${header.key}`"
+								:row="item.row"
+								:value="item.row[header.key]"
+							/>
+							<slot
+								v-else-if="slots.cell"
+								name="cell"
+								:row="item.row"
+								:value="item.row[header.key]"
+							/>
+							<span v-else>
+								{{ item.row[header.key] }}
+							</span>
+						</td>
+					</tr>
+				</template>
 			</tbody>
 		</table>
 
@@ -156,10 +187,13 @@
 		:rows="props.data"
 		:select-options="activeSelectOptions"
 		:can-hide="canHideActiveFilterColumn"
+		:can-group-by="canGroupByActiveFilterColumn"
+		:is-grouped-column="isActiveFilterHeaderGrouped"
 		@apply="onFilterApply"
 		@clear="onFilterClear"
 		@cancel="onFilterCancel"
 		@hide="onFilterHideColumn"
+		@group-by="onFilterGroupBy"
 	/>
 
 	<TableColumnOptionsPopover
@@ -181,6 +215,8 @@
 		:delete-layout-preset="onDeletePreset"
 		:set-default-layout-preset="onSetDefaultPreset"
 		:load-developer-defaults="loadDeveloperDefaults"
+		:group-by="activeGroupBy"
+		:groupable="props.groupable"
 		:anchor-el="columnOptionsButtonRef"
 		@apply="onColumnOptionsApply"
 		@cancel="onColumnOptionsCancel"
@@ -233,6 +269,11 @@ import {
 	defaultColumnPriorityForIndex,
 	isValidColPriority,
 } from '../composables/tableColumnPriorities.js'
+import {
+	buildDisplayBodyItems,
+	formatGroupValue,
+	isHeaderGroupable,
+} from '../composables/tableGroupBy.js'
 
 const DEFAULT_PAGE_SIZE = 10
 
@@ -341,6 +382,14 @@ const props = defineProps({
 		type: [Array, Function],
 		default: null,
 	},
+	groupable: {
+		type: Boolean,
+		default: true,
+	},
+	groupBy: {
+		type: String,
+		default: undefined,
+	},
 })
 
 const emit = defineEmits([
@@ -361,6 +410,8 @@ const emit = defineEmits([
 	'column-priorities-change',
 	'update:layoutLabel',
 	'layout-label-change',
+	'update:groupBy',
+	'group-by-change',
 ])
 
 const attrs = useAttrs()
@@ -388,6 +439,8 @@ const internalColumnPriorities = ref({})
 const savedPresets = ref([])
 const defaultPresetId = ref(null)
 const activeLayoutPresetId = ref(null)
+const internalGroupBy = ref(null)
+const collapsedGroupIds = ref([])
 
 const isRemote = computed(() => typeof props.fetchRows === 'function')
 
@@ -454,6 +507,53 @@ function isLastColumnWithOptions(index) {
 
 function bodyColumnColspan(index) {
 	return isLastColumnWithOptions(index) ? 2 : null
+}
+
+const bodyGroupColspan = computed(() => {
+	let colspan = visibleHeaders.value.length
+	if (showColumnOptionsButton.value) {
+		colspan += 1
+	}
+	return colspan
+})
+
+function bodyItemKey(item, index) {
+	if (item.kind === 'group') {
+		return `group-${item.groupId}`
+	}
+	return resolveRowKey(item.row, item.sourceIndex ?? index)
+}
+
+function isHeaderGrouped(header) {
+	return Boolean(activeGroupBy.value && header?.key === activeGroupBy.value)
+}
+
+function toggleGroupCollapsed(groupId) {
+	const next = new Set(collapsedGroupIdSet.value)
+	if (next.has(groupId)) {
+		next.delete(groupId)
+	} else {
+		next.add(groupId)
+	}
+	collapsedGroupIds.value = [...next]
+}
+
+function setGroupBy(nextGroupBy) {
+	const header = props.headers.find((item) => item.key === nextGroupBy)
+	const normalized = isHeaderGroupable(header, props.groupable) ? nextGroupBy : null
+
+	if (props.groupBy === undefined) {
+		internalGroupBy.value = normalized
+	}
+
+	collapsedGroupIds.value = []
+	page.value = 1
+	emit('update:groupBy', normalized)
+	emit('group-by-change', normalized)
+	if (isRemote.value) {
+		scheduleFetchRows()
+	}
+	emitQueryChange()
 }
 
 function isHeaderHidden(header) {
@@ -568,16 +668,36 @@ const sortedItems = computed(() => {
 	return sortRows(filteredItems.value, sortBy.value, sortDir.value)
 })
 
-const displayRows = computed(() => {
-	if (isRemote.value || !props.showPagination) {
-		return sortedItems.value
+const activeGroupBy = computed(() => {
+	if (!props.groupable) {
+		return null
 	}
-
-	const start = (page.value - 1) * pageSize.value
-	return sortedItems.value.slice(start, start + pageSize.value)
+	if (props.groupBy !== undefined) {
+		return props.groupBy || null
+	}
+	return internalGroupBy.value
 })
 
-const hasRows = computed(() => displayRows.value.length > 0)
+const collapsedGroupIdSet = computed(() => new Set(collapsedGroupIds.value))
+
+const displayBodyItems = computed(() => {
+	const paginate = !isRemote.value && props.showPagination
+	return buildDisplayBodyItems(sortedItems.value, {
+		groupBy: activeGroupBy.value,
+		page: page.value,
+		pageSize: pageSize.value,
+		paginate,
+		collapsedGroupIds: collapsedGroupIdSet.value,
+	})
+})
+
+const displayRows = computed(() =>
+	displayBodyItems.value
+		.filter((item) => item.kind === 'row')
+		.map((item) => item.row),
+)
+
+const hasRows = computed(() => displayBodyItems.value.length > 0)
 
 const hasActiveFilters = computed(() =>
 	isFilterQueryActive(activeFilterQuery.value, props.headers, props.data),
@@ -631,6 +751,7 @@ const queryParams = computed(() => {
 		pageSize: pageSize.value,
 		sortBy: sortBy.value,
 		sortDir: sortDir.value,
+		groupBy: activeGroupBy.value,
 		filterQuery: activeFilterQuery.value,
 	}
 
@@ -670,6 +791,7 @@ function headerClasses(header) {
 		sortable: header.sortable,
 		filterable: isHeaderFilterable(header),
 		filtered: isHeaderFiltered(header),
+		grouped: isHeaderGrouped(header),
 		'menu-open': filterPopoverOpen.value && activeFilterHeader.value?.key === header.key,
 		[colPriorityClass(priority)]: isValidColPriority(priority),
 	}
@@ -811,22 +933,22 @@ function onHeaderClick(header, event) {
 	toggleSort(header)
 }
 
-function filteredRowIndex(displayIndex) {
-	if (props.showPagination) {
-		return (page.value - 1) * pageSize.value + displayIndex
+function filteredRowIndex(sourceIndex) {
+	if (typeof sourceIndex === 'number') {
+		return sourceIndex
 	}
-	return displayIndex
+	return 0
 }
 
-function onRowClick(row, displayIndex, event) {
+function onRowClick(row, sourceIndex, event) {
 	if (event.target.closest('a, button, input, select, textarea, [data-row-click-ignore]')) {
 		return
 	}
 	if (props.selectable) {
-		toggleRowSelection(row, displayIndex)
+		toggleRowSelection(row, sourceIndex)
 		return
 	}
-	emit('row-click', { row, index: filteredRowIndex(displayIndex) })
+	emit('row-click', { row, index: filteredRowIndex(sourceIndex) })
 }
 
 const rowContextMenuOpen = ref(false)
@@ -888,7 +1010,7 @@ function closeRowContextMenu() {
 	rowContextMenuAnchor.value = null
 }
 
-function onRowContextMenu(row, displayIndex, event) {
+function onRowContextMenu(row, sourceIndex, event) {
 	if (!hasRowContextMenu.value) {
 		return
 	}
@@ -899,8 +1021,8 @@ function onRowContextMenu(row, displayIndex, event) {
 	event.preventDefault()
 	event.stopPropagation()
 
-	const key = resolveRowKey(row, displayIndex)
-	const index = filteredRowIndex(displayIndex)
+	const key = resolveRowKey(row, sourceIndex)
+	const index = filteredRowIndex(sourceIndex)
 	let targetKeys
 
 	if (props.selectable && selectedKeySet.value.has(key) && activeSelectedKeys.value.length > 0) {
@@ -1035,6 +1157,17 @@ function onFilterCancel() {
 	activeFilterValue.value = []
 }
 
+const canGroupByActiveFilterColumn = computed(() => {
+	if (!props.groupable || !activeFilterHeader.value) {
+		return false
+	}
+	return isHeaderGroupable(activeFilterHeader.value, props.groupable)
+})
+
+const isActiveFilterHeaderGrouped = computed(() =>
+	Boolean(activeFilterHeader.value?.key && activeFilterHeader.value.key === activeGroupBy.value),
+)
+
 const canHideActiveFilterColumn = computed(() => {
 	if (!showColumnOptionsButton.value || !activeFilterHeader.value) {
 		return false
@@ -1048,6 +1181,12 @@ const canHideActiveFilterColumn = computed(() => {
 	}
 	return configurableHeaders.value.some((item) => item.key === header.key)
 })
+
+function onFilterGroupBy(columnKey) {
+	setGroupBy(columnKey || null)
+	filterPopoverOpen.value = false
+	onFilterCancel()
+}
 
 function onFilterHideColumn() {
 	const header = activeFilterHeader.value
@@ -1134,10 +1273,13 @@ function openColumnOptions() {
 	void refreshSavedPresets()
 }
 
-function onColumnOptionsApply({ order, visibleKeys, priorities }) {
+function onColumnOptionsApply({ order, visibleKeys, priorities, groupBy }) {
 	setColumnOrder(order)
 	setColumnVisibility(visibleKeys)
 	setColumnPriorities(priorities)
+	if (groupBy !== undefined && groupBy !== activeGroupBy.value) {
+		setGroupBy(groupBy)
+	}
 	updateActiveLayoutLabel()
 }
 
@@ -1192,6 +1334,7 @@ function getCurrentLayoutState() {
 		filters: cloneFilters(activeFilters.value),
 		sortBy: sortBy.value,
 		sortDir: sortDir.value,
+		groupBy: activeGroupBy.value,
 		pageSize: pageSize.value,
 	}
 }
@@ -1229,6 +1372,12 @@ function applyPresetState(state) {
 	} else {
 		sortBy.value = null
 		sortDir.value = 'asc'
+	}
+
+	if (sanitized.groupBy) {
+		setGroupBy(sanitized.groupBy)
+	} else {
+		setGroupBy(null)
 	}
 
 	if (sanitized.pageSize) {
@@ -1407,6 +1556,7 @@ function getDeveloperDefaultLayoutState() {
 		filters: {},
 		sortBy: null,
 		sortDir: 'asc',
+		groupBy: null,
 		pageSize: DEFAULT_PAGE_SIZE,
 	}
 }
@@ -1466,6 +1616,7 @@ function loadDeveloperDefaults() {
 	setFilters({})
 	sortBy.value = null
 	sortDir.value = 'asc'
+	setGroupBy(null)
 	setColumnOrder(getDeveloperDefaultColumnOrder())
 	setColumnPriorities({})
 
@@ -1550,7 +1701,7 @@ function scheduleFetchRows() {
 }
 
 watch(
-	() => [pageSize.value, sortBy.value, sortDir.value],
+	() => [pageSize.value, sortBy.value, sortDir.value, activeGroupBy.value],
 	() => {
 		page.value = 1
 		if (isRemote.value) {
@@ -1624,6 +1775,24 @@ watch(
 )
 
 watch(
+	() => props.groupBy,
+	(nextGroupBy) => {
+		if (nextGroupBy !== undefined) {
+			collapsedGroupIds.value = []
+		}
+	},
+)
+
+watch(
+	() => props.groupable,
+	(enabled) => {
+		if (!enabled) {
+			setGroupBy(null)
+		}
+	},
+)
+
+watch(
 	() => props.columnPriorities,
 	(nextPriorities) => {
 		if (nextPriorities === undefined) {
@@ -1660,6 +1829,7 @@ watch(
 		activeFilters,
 		sortBy,
 		sortDir,
+		activeGroupBy,
 		pageSize,
 		() => props.headers,
 		savedPresets,
@@ -1762,6 +1932,43 @@ table.loading tbody {
 	width: 1.5em;
 	display: inline-block;
 	text-align: center;
+}
+
+.group-indicator {
+	display: inline-block;
+	margin-right: 0.25rem;
+	font-size: 0.85em;
+	opacity: 0.85;
+}
+
+table thead th.grouped {
+	color: var(--table-header-active-fg);
+}
+
+tbody tr.table-group-row > td.table-group-cell {
+	background-color: var(--table-header-active-bg);
+	color: var(--table-header-fg);
+	font-weight: 600;
+	padding-top: 0.65rem;
+	padding-bottom: 0.65rem;
+}
+
+.table-group-toggle {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 1.5rem;
+	margin-right: 0.35rem;
+	padding: 0.1rem 0.35rem;
+	vertical-align: middle;
+}
+
+.table-group-label {
+	margin-right: 0.35rem;
+}
+
+.table-group-count {
+	font-weight: normal;
 }
 
 td:first-child,

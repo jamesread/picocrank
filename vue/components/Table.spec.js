@@ -227,6 +227,33 @@ describe('Table row context menu', () => {
 		expect(action.mock.calls[0][0].keys).toEqual(['Katherine'])
 	})
 
+	it('renders group header rows when groupBy is set', async () => {
+		const wrapper = mountTable({
+			props: {
+				selectable: false,
+				groupBy: 'city',
+			},
+		})
+
+		expect(wrapper.findAll('tbody tr.table-group-row')).toHaveLength(3)
+		expect(wrapper.find('.table-group-label').text()).toBe('London')
+		expect(wrapper.text()).toContain('(1)')
+	})
+
+	it('includes groupBy in query-change payloads', async () => {
+		const wrapper = mountTable({
+			props: {
+				selectable: false,
+				groupBy: 'city',
+			},
+		})
+
+		await nextTick()
+
+		const latestQuery = wrapper.emitted('query-change')?.at(-1)?.[0]
+		expect(latestQuery?.groupBy).toBe('city')
+	})
+
 	it('keeps a hover class on target rows while the menu is open', async () => {
 		const wrapper = mountTable({
 			props: {

@@ -2,6 +2,7 @@ import {
 	normalizeColumnFilterEntries,
 	normalizeStoredFilterEntry,
 } from './tableFilters.js'
+import { isHeaderGroupable } from './tableGroupBy.js'
 
 export const PRESET_STORE_VERSION = 1
 export const MAX_PRESETS_PER_TABLE = 20
@@ -181,6 +182,13 @@ export function sanitizePresetState(state, headers = [], rows = []) {
 		}
 	}
 
+	if (state.groupBy) {
+		const header = headerByKey.get(state.groupBy)
+		if (isHeaderGroupable(header)) {
+			sanitized.groupBy = state.groupBy
+		}
+	}
+
 	const rawPageSize = Number(state.pageSize)
 	if (Number.isFinite(rawPageSize)) {
 		const normalizedPageSize = Math.floor(rawPageSize)
@@ -286,6 +294,7 @@ export function normalizeLayoutStateForCompare(state, headers = [], rows = []) {
 		filters: sanitized.filters ?? {},
 		sortBy: sanitized.sortBy ?? null,
 		sortDir: sanitized.sortDir === 'desc' ? 'desc' : 'asc',
+		groupBy: sanitized.groupBy ?? null,
 		pageSize: sanitized.pageSize ?? ALLOWED_PAGE_SIZES[0],
 	}
 }

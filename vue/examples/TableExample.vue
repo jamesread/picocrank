@@ -2,7 +2,7 @@
 	<Section
 		:title="tableSectionTitle"
 		:icon="TableIcon"
-		subtitle="Sortable columns, pagination, and column filters. Right-click or long-press a column header to filter. Enable “Row context menu” to right-click rows."
+		subtitle="Sortable columns, pagination, column filters, and group-by. Right-click or long-press a column header to filter or group. Use Column options for group-by as well."
 		:padding="false"
 	>
 		<template v-if="multiSelectEnabled" #toolbar>
@@ -66,6 +66,7 @@
 			:sticky-cols="stickyCols"
 			v-model:column-visibility="columnVisibility"
 			v-model:layout-label="tableLayoutLabel"
+			v-model:group-by="tableGroupBy"
 			:default-column-visibility="defaultColumnVisibility"
 			v-bind="tableListeners"
 		>
@@ -163,6 +164,7 @@
 				<strong>Query:</strong>
 				page {{ lastQuery.page }},
 				sort {{ lastQuery.sortBy ?? 'none' }} {{ lastQuery.sortDir }},
+				group {{ lastQuery.groupBy ?? 'none' }},
 				{{ activeFilterCount }} active filter(s)
 			</p>
 			<p v-else class="event-line subtle">Query: waiting for the first table update…</p>
@@ -256,6 +258,7 @@ const lastBulkAction = ref(null)
 const lastContextMenuAction = ref(null)
 const selectedKeys = ref([])
 const tableLayoutLabel = ref('')
+const tableGroupBy = ref(null)
 const rowDialogRef = ref(null)
 
 const multiSelectEnabled = computed(() => enabledFeatures.value.includes('multiSelect'))
@@ -471,6 +474,7 @@ function resetControls() {
 	lastBulkAction.value = null
 	lastContextMenuAction.value = null
 	selectedKeys.value = []
+	tableGroupBy.value = null
 	if (rowDialogRef.value?.open) {
 		rowDialogRef.value.close()
 	}

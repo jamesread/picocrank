@@ -14,22 +14,41 @@
 					<h4 :id="titleId" ref="titleRef" class="popover-title">
 						{{ popoverTitle }}
 					</h4>
-					<button
-						v-if="canHide"
-						type="button"
-						class="neutral inline-icon popover-hide-column"
-						:aria-label="`Hide ${columnLabel || 'column'} column`"
-						title="Hide column"
-						@click="hideColumn"
-					>
-						<HugeiconsIcon
-							:icon="ViewOffIcon"
-							width="1em"
-							height="1em"
-							:strokeWidth="2.5"
-							aria-hidden="true"
-						/>
-					</button>
+					<div v-if="canGroupBy || canHide" class="popover-title-actions">
+						<button
+							v-if="canGroupBy"
+							type="button"
+							class="neutral inline-icon popover-title-action"
+							:class="{ active: isGroupedColumn }"
+							:aria-label="isGroupedColumn ? `Ungroup ${columnLabel || 'column'}` : `Group by ${columnLabel || 'column'}`"
+							:title="isGroupedColumn ? 'Ungroup' : `Group by ${columnLabel}`"
+							@click="groupByColumn"
+						>
+							<HugeiconsIcon
+								:icon="isGroupedColumn ? UngroupLayersIcon : GroupLayersIcon"
+								width="1em"
+								height="1em"
+								:strokeWidth="2.5"
+								aria-hidden="true"
+							/>
+						</button>
+						<button
+							v-if="canHide"
+							type="button"
+							class="neutral inline-icon popover-title-action"
+							:aria-label="`Hide ${columnLabel || 'column'} column`"
+							title="Hide column"
+							@click="hideColumn"
+						>
+							<HugeiconsIcon
+								:icon="ViewOffIcon"
+								width="1em"
+								height="1em"
+								:strokeWidth="2.5"
+								aria-hidden="true"
+							/>
+						</button>
+					</div>
 				</div>
 
 				<div v-if="filterType === 'text'" class="filter-fields">
@@ -166,7 +185,7 @@
 <script setup>
 import { computed, nextTick, onBeforeUnmount, ref, useId, watch } from 'vue'
 import { HugeiconsIcon } from '@hugeicons/vue'
-import { Delete02Icon, ViewOffIcon } from '@hugeicons/core-free-icons'
+import { Delete02Icon, GroupLayersIcon, UngroupLayersIcon, ViewOffIcon } from '@hugeicons/core-free-icons'
 import CheckGroup from './CheckGroup.vue'
 import RadioGroup from './RadioGroup.vue'
 import {
@@ -208,9 +227,17 @@ const props = defineProps({
 		type: Boolean,
 		default: false,
 	},
+	canGroupBy: {
+		type: Boolean,
+		default: false,
+	},
+	isGroupedColumn: {
+		type: Boolean,
+		default: false,
+	},
 })
 
-const emit = defineEmits(['update:open', 'apply', 'clear', 'cancel', 'hide'])
+const emit = defineEmits(['update:open', 'apply', 'clear', 'cancel', 'hide', 'group-by'])
 
 const MIN_VISIBLE_OPTIONS = 3
 const MAX_VISIBLE_OPTIONS = 20
@@ -471,6 +498,11 @@ function hideColumn() {
 	emit('update:open', false)
 }
 
+function groupByColumn() {
+	emit('group-by', props.isGroupedColumn ? null : props.header?.key)
+	emit('update:open', false)
+}
+
 function detachDocumentListeners() {
 	document.removeEventListener('pointerdown', onDocumentPointerDown)
 	document.removeEventListener('keydown', onDocumentKeyDown)
@@ -559,10 +591,20 @@ onBeforeUnmount(() => {
 	flex: 1 1 auto;
 }
 
-.popover-hide-column {
+.popover-title-actions {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.15rem;
 	flex: 0 0 auto;
+}
+
+.popover-title-action {
 	padding: 0.2em 0.45em;
 	line-height: 1;
+}
+
+.popover-title-action.active {
+	color: var(--table-header-active-fg);
 }
 
 .filter-fields {

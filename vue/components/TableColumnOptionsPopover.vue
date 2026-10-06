@@ -25,6 +25,24 @@
 							Drag rows or use the arrows to reorder. Toggle checkboxes to show or hide columns. Set responsive priority (1 hides first) when using column priorities layout.
 						</p>
 
+						<label v-if="groupableColumnOptions.length > 0" class="column-options-group-by">
+							<span class="field-label">Group by</span>
+							<select
+								:value="draftGroupBy ?? ''"
+								aria-label="Group table rows by column"
+								@change="setGroupBy($event.target.value)"
+							>
+								<option value="">None</option>
+								<option
+									v-for="header in groupableColumnOptions"
+									:key="header.key"
+									:value="header.key"
+								>
+									{{ header.label || header.key }}
+								</option>
+							</select>
+						</label>
+
 						<div ref="listScrollRef" class="column-options-scroll" :style="listScrollStyle">
 							<ul class="column-options-list">
 								<li
@@ -192,7 +210,7 @@
 						</div>
 						<div v-else class="column-options-save-panel">
 							<p class="subtle column-options-save-help">
-								Saves the current table view (filters, page size, column order, visibility, and priorities).
+								Saves the current table view (filters, group by, page size, column order, visibility, and priorities).
 							</p>
 							<label class="column-options-save-field">
 								<span class="field-label">Layout name</span>
@@ -235,6 +253,7 @@ import {
 	isFilterEntryActive,
 	normalizeColumnFilterEntries,
 } from '../composables/tableFilters.js'
+import { groupableHeaders } from '../composables/tableGroupBy.js'
 import Tabs from './Tabs.vue'
 
 const optionTabs = [
@@ -316,6 +335,14 @@ const props = defineProps({
 		type: Function,
 		default: null,
 	},
+	groupBy: {
+		type: String,
+		default: null,
+	},
+	groupable: {
+		type: Boolean,
+		default: true,
+	},
 })
 
 const emit = defineEmits(['update:open', 'apply', 'cancel'])
@@ -335,6 +362,7 @@ const priorityLevels = [1, 2, 3, 4, 5]
 const draftOrder = ref([])
 const draftVisibleKeys = ref([])
 const draftPriorities = ref({})
+const draftGroupBy = ref(null)
 const draggingKey = ref(null)
 const dragOverKey = ref(null)
 const savePresetName = ref('')
@@ -348,6 +376,8 @@ const headerByKey = computed(() => new Map(
 		.filter((header) => header?.key)
 		.map((header) => [header.key, header]),
 ))
+
+const groupableColumnOptions = computed(() => groupableHeaders(props.headers, props.groupable))
 
 function columnLabel(key) {
 	return headerByKey.value.get(key)?.label || key
@@ -484,6 +514,7 @@ function updateListScrollLimit() {
 	const titleHeight = titleRef.value?.offsetHeight ?? 0
 	const tabsHeaderHeight = popoverEl.querySelector('.column-options-tabs .tabs-header')?.offsetHeight ?? 0
 	const helpHeight = popoverEl.querySelector('.column-options-help')?.offsetHeight ?? 0
+	const groupByHeight = popoverEl.querySelector('.column-options-group-by')?.offsetHeight ?? 0
 	const actionsHeight = actionsRef.value?.offsetHeight ?? 0
 	const popoverStyles = window.getComputedStyle(popoverEl)
 	const paddingTop = Number.parseFloat(popoverStyles.paddingTop) || 0
@@ -497,7 +528,7 @@ function updateListScrollLimit() {
 		availablePopoverHeight = Math.max(spaceBelow, spaceAbove)
 	}
 
-	const reservedHeight = paddingTop + paddingBottom + titleHeight + tabsHeaderHeight + helpHeight + actionsHeight + bodyGap
+	const reservedHeight = paddingTop + paddingBottom + titleHeight + tabsHeaderHeight + helpHeight + groupByHeight + actionsHeight + bodyGap
 	const optionsAreaBudget = Math.max(0, availablePopoverHeight - reservedHeight)
 
 	const firstItem = listScrollRef.value.querySelector('.column-options-item')
@@ -612,6 +643,12 @@ function resetDraft() {
 	draftOrder.value = [...props.columnKeys]
 	draftVisibleKeys.value = [...props.visibleKeys]
 	draftPriorities.value = { ...props.columnPriorities }
+	draftGroupBy.value = props.groupBy || null
+}
+
+function setGroupBy(rawValue) {
+	draftGroupBy.value = rawValue || null
+	emitLiveChange()
 }
 
 function toggleVisible(key) {
@@ -772,6 +809,7 @@ function emitLiveChange() {
 		order: [...draftOrder.value],
 		visibleKeys,
 		priorities: buildPriorityOverrides(),
+		groupBy: draftGroupBy.value || null,
 	})
 }
 
@@ -873,6 +911,18 @@ onBeforeUnmount(() => {
 	margin: 0 0 0.75rem;
 	font-size: 0.85rem;
 	flex-shrink: 0;
+}
+
+.column-options-group-by {
+	display: flex;
+	flex-direction: column;
+	gap: 0.35rem;
+	margin: 0 0 0.75rem;
+	flex-shrink: 0;
+}
+
+.column-options-group-by select {
+	width: 100%;
 }
 
 .column-options-tabs {
