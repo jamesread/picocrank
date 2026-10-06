@@ -107,13 +107,17 @@
 					</tr>
 					<tr
 						v-else
-						:class="{
-							'row-clickable': rowClickable,
-							'row-selected': selectable && isRowSelected(item.row, item.sourceIndex),
-							'row-context-menu-active': isRowContextMenuTarget(item.row, item.sourceIndex),
-						}"
-						@click="onRowClick(item.row, item.sourceIndex, $event)"
-						@contextmenu="onRowContextMenu(item.row, item.sourceIndex, $event)"
+						:class="[
+							{
+								'row-clickable': rowClickable,
+								'row-selected': selectable && isRowSelected(item.row, item.displayIndex),
+								'row-context-menu-active': isRowContextMenuTarget(item.row, item.displayIndex),
+							},
+							resolveRowClass(item.row, item.displayIndex),
+						]"
+						:style="resolveRowStyle(item.row, item.displayIndex)"
+						@click="onRowClick(item.row, item.displayIndex, $event)"
+						@contextmenu="onRowContextMenu(item.row, item.displayIndex, $event)"
 					>
 						<td
 							v-if="selectable"
@@ -124,33 +128,47 @@
 							<label class="table-select-label">
 								<input
 									type="checkbox"
-									:checked="isRowSelected(item.row, item.sourceIndex)"
-									:aria-label="`Select row ${resolveRowKey(item.row, item.sourceIndex)}`"
-									@change="toggleRowSelection(item.row, item.sourceIndex)"
+									:checked="isRowSelected(item.row, item.displayIndex)"
+									:aria-label="`Select row ${resolveRowKey(item.row, item.displayIndex)}`"
+									@click.stop="rememberSelectionCheckboxClick(item.row, item.displayIndex, $event)"
+									@change="onSelectionCheckboxChange(item.row, item.displayIndex)"
 								>
 							</label>
 						</td>
 						<td
 							v-for="(header, cellIndex) in visibleHeaders"
 							:key="header.key || cellIndex"
+							:ref="(element) => registerCellElement(element, item.row, header, item.displayIndex)"
+							v-bind="resolveCellAttrs(item.row, header, item.displayIndex)"
 							:colspan="bodyColumnColspan(cellIndex) || undefined"
 							:class="[
 								cellClasses(header),
 								header.class,
+								resolveCellClass(item.row, header, item.displayIndex),
+								{ 'table-active-cell': isActiveCell(item.row, header, item.displayIndex) },
 								isLastColumnWithOptions(cellIndex) ? 'table-last-column-with-options' : null,
 							]"
+							:style="resolveCellStyle(item.row, header, item.displayIndex)"
+							:tabindex="isActiveCell(item.row, header, item.displayIndex) ? 0 : -1"
+							@click="onCellClick(item.row, header, item.displayIndex, $event)"
 						>
 							<slot
 								v-if="slots[`cell-${header.key}`]"
 								:name="`cell-${header.key}`"
 								:row="item.row"
 								:value="item.row[header.key]"
+								:header="header"
+								:row-index="item.displayIndex"
+								:source-index="sourceRowIndex(item.row, item.displayIndex)"
 							/>
 							<slot
 								v-else-if="slots.cell"
 								name="cell"
 								:row="item.row"
 								:value="item.row[header.key]"
+								:header="header"
+								:row-index="item.displayIndex"
+								:source-index="sourceRowIndex(item.row, item.displayIndex)"
 							/>
 							<span v-else>
 								{{ item.row[header.key] }}
@@ -233,7 +251,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted, onBeforeUnmount, useSlots, useAttrs } from 'vue'
+import { ref, computed, watch, nextTick, onMounted, onBeforeUnmount, useSlots, useAttrs } from 'vue'
 import { HugeiconsIcon } from '@hugeicons/vue'
 import { LayoutGridIcon } from '@hugeicons/core-free-icons'
 import Pagination from './Pagination.vue'
@@ -277,11 +295,6 @@ import {
 
 const DEFAULT_PAGE_SIZE = 10
 
-const sortBy = ref(null)
-const sortDir = ref('asc')
-const page = ref(1)
-const pageSize = ref(DEFAULT_PAGE_SIZE)
-
 const props = defineProps({
 	headers: {
 		type: Array,
@@ -290,6 +303,29 @@ const props = defineProps({
 	data: {
 		type: Array,
 		default: () => [],
+	},
+	sortBy: {
+		type: [String, Number],
+		default: undefined,
+	},
+	sortDir: {
+		type: String,
+		default: undefined,
+		validator: (value) => value === undefined || value === 'asc' || value === 'desc',
+	},
+	page: {
+		type: Number,
+		default: undefined,
+		validator: (value) => value === undefined || (Number.isFinite(value) && value >= 1),
+	},
+	pageSize: {
+		type: Number,
+		default: undefined,
+		validator: (value) => value === undefined || (Number.isFinite(value) && value >= 1),
+	},
+	resetPageOnSort: {
+		type: Boolean,
+		default: true,
 	},
 	showPagination: {
 		type: Boolean,
@@ -372,6 +408,35 @@ const props = defineProps({
 		type: Array,
 		default: undefined,
 	},
+	selectionClickMode: {
+		type: String,
+		default: 'row',
+		validator: (value) => ['row', 'checkbox', 'modifier', 'extended'].includes(value),
+	},
+	activeCell: {
+		type: Object,
+		default: undefined,
+	},
+	rowClass: {
+		type: Function,
+		default: null,
+	},
+	rowStyle: {
+		type: Function,
+		default: null,
+	},
+	cellClass: {
+		type: Function,
+		default: null,
+	},
+	cellStyle: {
+		type: Function,
+		default: null,
+	},
+	cellAttrs: {
+		type: Function,
+		default: null,
+	},
 	/**
 	 * Row right-click menu. Array of items, or a function that returns items
 	 * for the click context. Each item may include `action(ctx)` where
@@ -398,8 +463,14 @@ const emit = defineEmits([
 	'query-change',
 	'fetch-error',
 	'row-click',
+	'cell-click',
+	'update:sortBy',
+	'update:sortDir',
+	'update:page',
+	'update:pageSize',
 	'update:selectedKeys',
 	'selection-change',
+	'update:activeCell',
 	'row-context-menu',
 	'row-context-menu-action',
 	'update:columnVisibility',
@@ -417,9 +488,111 @@ const emit = defineEmits([
 const attrs = useAttrs()
 const slots = useSlots()
 
-const rowClickable = computed(() => Boolean(attrs.onRowClick) || props.selectable)
+function normalizePage(value) {
+	const numeric = Number(value)
+	return Number.isFinite(numeric) && numeric >= 1 ? Math.floor(numeric) : 1
+}
+
+function normalizePageSize(value) {
+	const numeric = Number(value)
+	return Number.isFinite(numeric) && numeric >= 1 ? Math.floor(numeric) : DEFAULT_PAGE_SIZE
+}
+
+function normalizeSortDir(value) {
+	return value === 'desc' ? 'desc' : 'asc'
+}
+
+function normalizeActiveCell(value) {
+	if (
+		!value
+		|| typeof value !== 'object'
+		|| value.rowKey === null
+		|| value.rowKey === undefined
+		|| value.columnKey === null
+		|| value.columnKey === undefined
+	) {
+		return null
+	}
+	return {
+		rowKey: value.rowKey,
+		columnKey: value.columnKey,
+	}
+}
+
+const internalSortBy = ref(props.sortBy !== undefined ? props.sortBy : null)
+const internalSortDir = ref(normalizeSortDir(props.sortDir))
+const internalPage = ref(normalizePage(props.page))
+const internalPageSize = ref(normalizePageSize(props.pageSize))
+const internalActiveCell = ref(normalizeActiveCell(props.activeCell))
+
+const sortBy = computed({
+	get: () => props.sortBy !== undefined ? props.sortBy : internalSortBy.value,
+	set: (value) => {
+		const nextValue = value ?? null
+		if (nextValue === sortBy.value) {
+			return
+		}
+		if (props.sortBy === undefined) {
+			internalSortBy.value = nextValue
+		}
+		emit('update:sortBy', nextValue)
+	},
+})
+
+const sortDir = computed({
+	get: () => props.sortDir !== undefined ? normalizeSortDir(props.sortDir) : internalSortDir.value,
+	set: (value) => {
+		const nextValue = normalizeSortDir(value)
+		if (nextValue === sortDir.value) {
+			return
+		}
+		if (props.sortDir === undefined) {
+			internalSortDir.value = nextValue
+		}
+		emit('update:sortDir', nextValue)
+	},
+})
+
+const page = computed({
+	get: () => props.page !== undefined ? normalizePage(props.page) : internalPage.value,
+	set: (value) => {
+		const nextValue = normalizePage(value)
+		if (nextValue === page.value) {
+			return
+		}
+		if (props.page === undefined) {
+			internalPage.value = nextValue
+		}
+		emit('update:page', nextValue)
+	},
+})
+
+const pageSize = computed({
+	get: () => props.pageSize !== undefined ? normalizePageSize(props.pageSize) : internalPageSize.value,
+	set: (value) => {
+		const nextValue = normalizePageSize(value)
+		if (nextValue === pageSize.value) {
+			return
+		}
+		if (props.pageSize === undefined) {
+			internalPageSize.value = nextValue
+		}
+		emit('update:pageSize', nextValue)
+	},
+})
+
+const activeCell = computed(() => (
+	props.activeCell !== undefined ? normalizeActiveCell(props.activeCell) : internalActiveCell.value
+))
+
+const rowClickable = computed(() =>
+	Boolean(attrs.onRowClick)
+	|| (props.selectable && props.selectionClickMode !== 'checkbox'),
+)
 const internalFilters = ref({})
 const internalSelectedKeys = ref([])
+const selectionAnchorKey = ref(null)
+const pendingSelectionCheckboxClick = ref(null)
 const remoteRows = ref([])
 const remoteTotal = ref(0)
 const internalLoading = ref(false)
@@ -661,11 +834,20 @@ const filteredItems = computed(() => {
 	return applyFilterQuery(props.data, props.headers, activeFilterQuery.value)
 })
 
+const activeSortHeader = computed(() =>
+	props.headers.find((header) => header?.key === sortBy.value),
+)
+
 const sortedItems = computed(() => {
 	if (isRemote.value) {
 		return filteredItems.value
 	}
-	return sortRows(filteredItems.value, sortBy.value, sortDir.value)
+	return sortRows(
+		filteredItems.value,
+		sortBy.value,
+		sortDir.value,
+		activeSortHeader.value?.comparator,
+	)
 })
 
 const activeGroupBy = computed(() => {
@@ -682,12 +864,21 @@ const collapsedGroupIdSet = computed(() => new Set(collapsedGroupIds.value))
 
 const displayBodyItems = computed(() => {
 	const paginate = !isRemote.value && props.showPagination
-	return buildDisplayBodyItems(sortedItems.value, {
+	const items = buildDisplayBodyItems(sortedItems.value, {
 		groupBy: activeGroupBy.value,
 		page: page.value,
 		pageSize: pageSize.value,
 		paginate,
 		collapsedGroupIds: collapsedGroupIdSet.value,
+	})
+	let displayIndex = 0
+	return items.map((item) => {
+		if (item.kind !== 'row') {
+			return item
+		}
+		const indexed = { ...item, displayIndex }
+		displayIndex += 1
+		return indexed
 	})
 })
 
@@ -805,6 +996,60 @@ function cellClasses(header) {
 	}
 }
 
+function sourceRowIndex(row, displayIndex) {
+	const sourceRows = isRemote.value ? remoteRows.value : props.data
+	const index = sourceRows.indexOf(row)
+	return index >= 0 ? index : filteredRowIndex(displayIndex)
+}
+
+function rowContext(row, rowIndex) {
+	return {
+		row,
+		rowIndex,
+		sourceIndex: sourceRowIndex(row, rowIndex),
+	}
+}
+
+function cellContext(row, header, rowIndex) {
+	return {
+		...rowContext(row, rowIndex),
+		value: row?.[header.key],
+		header,
+	}
+}
+
+function resolveRowClass(row, rowIndex) {
+	return props.rowClass?.(rowContext(row, rowIndex))
+}
+
+function resolveRowStyle(row, rowIndex) {
+	return props.rowStyle?.(rowContext(row, rowIndex))
+}
+
+function resolveCellClass(row, header, rowIndex) {
+	return props.cellClass?.(cellContext(row, header, rowIndex))
+}
+
+function resolveCellStyle(row, header, rowIndex) {
+	return props.cellStyle?.(cellContext(row, header, rowIndex))
+}
+
+function resolveCellAttrs(row, header, rowIndex) {
+	const value = props.cellAttrs?.(cellContext(row, header, rowIndex))
+	if (!value || typeof value !== 'object' || Array.isArray(value)) {
+		return {}
+	}
+
+	const {
+		class: _class,
+		style: _style,
+		key: _key,
+		ref: _ref,
+		...safeAttrs
+	} = value
+	return safeAttrs
+}
+
 function resolveRowKey(row, index) {
 	if (typeof props.rowKey === 'function') {
 		const key = props.rowKey(row, index)
@@ -822,6 +1067,192 @@ function resolveRowKey(row, index) {
 	}
 
 	return index
+}
+
+function activeCellsEqual(left, right) {
+	return left?.rowKey === right?.rowKey && left?.columnKey === right?.columnKey
+}
+
+function setActiveCell(nextCell) {
+	const normalized = normalizeActiveCell(nextCell)
+	if (activeCellsEqual(normalized, activeCell.value)) {
+		return
+	}
+	if (props.activeCell === undefined) {
+		internalActiveCell.value = normalized
+	}
+	emit('update:activeCell', normalized)
+}
+
+function clearActiveCell() {
+	setActiveCell(null)
+}
+
+function isActiveCell(row, header, rowIndex) {
+	const current = activeCell.value
+	return Boolean(
+		current
+		&& current.rowKey === resolveRowKey(row, rowIndex)
+		&& current.columnKey === header.key,
+	)
+}
+
+const activeCellElements = new Map()
+
+function registerCellElement(element, row, header, rowIndex) {
+	const rowKey = resolveRowKey(row, rowIndex)
+	let rowCells = activeCellElements.get(rowKey)
+
+	if (!element) {
+		rowCells?.delete(header.key)
+		if (rowCells?.size === 0) {
+			activeCellElements.delete(rowKey)
+		}
+		return
+	}
+
+	if (!rowCells) {
+		rowCells = new Map()
+		activeCellElements.set(rowKey, rowCells)
+	}
+	rowCells.set(header.key, element)
+}
+
+function focusCell(cell, options) {
+	if (!cell) {
+		return false
+	}
+	const element = activeCellElements.get(cell.rowKey)?.get(cell.columnKey)
+	if (!element) {
+		return false
+	}
+	element.focus(options)
+	return true
+}
+
+function focusActiveCell(options) {
+	return focusCell(activeCell.value, options)
+}
+
+function cellContextAt(rowIndex, columnIndex) {
+	const row = displayRows.value[rowIndex]
+	const header = visibleHeaders.value[columnIndex]
+	if (!row || !header) {
+		return null
+	}
+
+	return {
+		...cellContext(row, header, rowIndex),
+		rowKey: resolveRowKey(row, rowIndex),
+		columnKey: header.key,
+		columnIndex,
+	}
+}
+
+function getActiveCellContext() {
+	const current = activeCell.value
+	if (!current) {
+		return null
+	}
+
+	const rowIndex = displayRows.value.findIndex(
+		(row, index) => resolveRowKey(row, index) === current.rowKey,
+	)
+	const columnIndex = visibleHeaders.value.findIndex(
+		(header) => header.key === current.columnKey,
+	)
+	if (rowIndex < 0 || columnIndex < 0) {
+		return null
+	}
+
+	return cellContextAt(rowIndex, columnIndex)
+}
+
+function clampGridIndex(value, maximum) {
+	const numeric = Number(value)
+	const normalized = Number.isFinite(numeric) ? Math.trunc(numeric) : 0
+	return Math.min(Math.max(normalized, 0), maximum)
+}
+
+function scheduleCellFocus(cell, options) {
+	if (!options?.focus) {
+		return
+	}
+	void nextTick(() => focusCell(cell, options.focusOptions))
+}
+
+function activateCellAt(rowIndex, columnIndex, options = {}) {
+	if (displayRows.value.length === 0 || visibleHeaders.value.length === 0) {
+		return null
+	}
+
+	const nextRowIndex = clampGridIndex(rowIndex, displayRows.value.length - 1)
+	const nextColumnIndex = clampGridIndex(columnIndex, visibleHeaders.value.length - 1)
+	const context = cellContextAt(nextRowIndex, nextColumnIndex)
+	const nextActiveCell = {
+		rowKey: context.rowKey,
+		columnKey: context.columnKey,
+	}
+
+	setActiveCell(nextActiveCell)
+	scheduleCellFocus(nextActiveCell, options)
+	return context
+}
+
+function moveActiveCell(rowDelta, columnDelta, options = {}) {
+	if (displayRows.value.length === 0 || visibleHeaders.value.length === 0) {
+		return null
+	}
+
+	const current = getActiveCellContext()
+	if (!current) {
+		return activateCellAt(0, 0, options)
+	}
+
+	const normalizedRowDelta = Number.isFinite(Number(rowDelta)) ? Math.trunc(Number(rowDelta)) : 0
+	const normalizedColumnDelta = Number.isFinite(Number(columnDelta))
+		? Math.trunc(Number(columnDelta))
+		: 0
+	const rowIndex = clampGridIndex(
+		current.rowIndex + normalizedRowDelta,
+		displayRows.value.length - 1,
+	)
+	let columnIndex
+
+	if (options.wrapColumns) {
+		const linearIndex = (rowIndex * visibleHeaders.value.length)
+			+ current.columnIndex
+			+ normalizedColumnDelta
+		const clampedLinearIndex = clampGridIndex(
+			linearIndex,
+			(displayRows.value.length * visibleHeaders.value.length) - 1,
+		)
+		return activateCellAt(
+			Math.floor(clampedLinearIndex / visibleHeaders.value.length),
+			clampedLinearIndex % visibleHeaders.value.length,
+			options,
+		)
+	}
+
+	columnIndex = clampGridIndex(
+		current.columnIndex + normalizedColumnDelta,
+		visibleHeaders.value.length - 1,
+	)
+	return activateCellAt(rowIndex, columnIndex, options)
+}
+
+function onCellClick(row, header, rowIndex, event) {
+	const context = cellContext(row, header, rowIndex)
+	const nextActiveCell = {
+		rowKey: resolveRowKey(row, rowIndex),
+		columnKey: header.key,
+	}
+	setActiveCell(nextActiveCell)
+	emit('cell-click', {
+		...context,
+		...nextActiveCell,
+		event,
+	})
 }
 
 const activeSelectedKeys = computed(() => (
@@ -846,6 +1277,7 @@ function setSelectedKeys(nextKeys) {
 function toggleRowSelection(row, index) {
 	const key = resolveRowKey(row, index)
 	const current = activeSelectedKeys.value
+	selectionAnchorKey.value = key
 	if (selectedKeySet.value.has(key)) {
 		setSelectedKeys(current.filter((item) => item !== key))
 		return
@@ -853,9 +1285,59 @@ function toggleRowSelection(row, index) {
 	setSelectedKeys([...current, key])
 }
 
+function replaceRowSelection(row, index) {
+	const key = resolveRowKey(row, index)
+	selectionAnchorKey.value = key
+	setSelectedKeys([key])
+}
+
 const displayRowKeys = computed(() =>
 	displayRows.value.map((row, index) => resolveRowKey(row, index)),
 )
+
+function selectRowRange(row, index, { updateAnchor = true } = {}) {
+	const key = resolveRowKey(row, index)
+	const anchorIndex = displayRowKeys.value.findIndex((item) => item === selectionAnchorKey.value)
+	const targetIndex = displayRowKeys.value.findIndex((item) => item === key)
+
+	if (anchorIndex < 0 || targetIndex < 0) {
+		setSelectedKeys([...activeSelectedKeys.value, key])
+		selectionAnchorKey.value = key
+		return
+	}
+
+	const from = Math.min(anchorIndex, targetIndex)
+	const to = Math.max(anchorIndex, targetIndex)
+	setSelectedKeys([
+		...activeSelectedKeys.value,
+		...displayRowKeys.value.slice(from, to + 1),
+	])
+	if (updateAnchor) {
+		selectionAnchorKey.value = key
+	}
+}
+
+function rememberSelectionCheckboxClick(row, index, event) {
+	pendingSelectionCheckboxClick.value = {
+		key: resolveRowKey(row, index),
+		shiftKey: event.shiftKey,
+	}
+}
+
+function onSelectionCheckboxChange(row, index) {
+	const key = resolveRowKey(row, index)
+	const shiftKey = (
+		pendingSelectionCheckboxClick.value?.key === key
+		&& pendingSelectionCheckboxClick.value.shiftKey
+	)
+	pendingSelectionCheckboxClick.value = null
+
+	if (shiftKey) {
+		selectRowRange(row, index)
+		return
+	}
+	toggleRowSelection(row, index)
+}
 
 const allDisplayRowsSelected = computed(() => {
 	const keys = displayRowKeys.value
@@ -878,15 +1360,18 @@ function toggleSelectAllDisplayRows() {
 	if (allDisplayRowsSelected.value) {
 		const pageKeySet = new Set(pageKeys)
 		setSelectedKeys(activeSelectedKeys.value.filter((key) => !pageKeySet.has(key)))
+		selectionAnchorKey.value = null
 		return
 	}
 
 	setSelectedKeys([...activeSelectedKeys.value, ...pageKeys])
+	selectionAnchorKey.value = pageKeys.at(-1) ?? null
 }
 
 watch(() => props.selectable, (enabled) => {
 	if (!enabled) {
 		setSelectedKeys([])
+		selectionAnchorKey.value = null
 	}
 })
 
@@ -933,22 +1418,60 @@ function onHeaderClick(header, event) {
 	toggleSort(header)
 }
 
-function filteredRowIndex(sourceIndex) {
-	if (typeof sourceIndex === 'number') {
-		return sourceIndex
+function filteredRowIndex(displayIndex) {
+	if (props.showPagination) {
+		return (page.value - 1) * pageSize.value + displayIndex
 	}
-	return 0
+	return displayIndex
 }
 
-function onRowClick(row, sourceIndex, event) {
+function onRowClick(row, displayIndex, event) {
 	if (event.target.closest('a, button, input, select, textarea, [data-row-click-ignore]')) {
 		return
 	}
+
 	if (props.selectable) {
-		toggleRowSelection(row, sourceIndex)
-		return
+		if (props.selectionClickMode === 'extended') {
+			if (event.ctrlKey || event.metaKey) {
+				toggleRowSelection(row, displayIndex)
+				return
+			}
+
+			const hasRangeAnchor = displayRowKeys.value.includes(selectionAnchorKey.value)
+			if (event.shiftKey && hasRangeAnchor) {
+				selectRowRange(row, displayIndex, { updateAnchor: false })
+				return
+			}
+
+			replaceRowSelection(row, displayIndex)
+			return
+		}
+
+		if (
+			props.selectionClickMode !== 'checkbox'
+			&& event.shiftKey
+		) {
+			selectRowRange(row, displayIndex)
+			return
+		}
+
+		if (
+			props.selectionClickMode === 'row'
+			|| (
+				props.selectionClickMode === 'modifier'
+				&& (event.ctrlKey || event.metaKey)
+			)
+		) {
+			toggleRowSelection(row, displayIndex)
+			return
+		}
 	}
-	emit('row-click', { row, index: filteredRowIndex(sourceIndex) })
+
+	emit('row-click', {
+		row,
+		index: filteredRowIndex(displayIndex),
+		event,
+	})
 }
 
 const rowContextMenuOpen = ref(false)
@@ -1701,9 +2224,33 @@ function scheduleFetchRows() {
 }
 
 watch(
-	() => [pageSize.value, sortBy.value, sortDir.value, activeGroupBy.value],
+	pageSize,
 	() => {
 		page.value = 1
+		if (isRemote.value) {
+			scheduleFetchRows()
+		}
+		emitQueryChange()
+	},
+)
+
+watch(
+	activeGroupBy,
+	() => {
+		page.value = 1
+		if (isRemote.value) {
+			scheduleFetchRows()
+		}
+		emitQueryChange()
+	},
+)
+
+watch(
+	() => [sortBy.value, sortDir.value],
+	() => {
+		if (props.resetPageOnSort) {
+			page.value = 1
+		}
 		if (isRemote.value) {
 			scheduleFetchRows()
 		}
@@ -1717,6 +2264,40 @@ watch(page, () => {
 	}
 	emitQueryChange()
 })
+
+watch(() => props.sortBy, (value) => {
+	if (value !== undefined) {
+		internalSortBy.value = value ?? null
+	}
+})
+
+watch(() => props.sortDir, (value) => {
+	if (value !== undefined) {
+		internalSortDir.value = normalizeSortDir(value)
+	}
+})
+
+watch(() => props.page, (value) => {
+	if (value !== undefined) {
+		internalPage.value = normalizePage(value)
+	}
+})
+
+watch(() => props.pageSize, (value) => {
+	if (value !== undefined) {
+		internalPageSize.value = normalizePageSize(value)
+	}
+})
+
+watch(
+	() => props.activeCell,
+	(value) => {
+		if (value !== undefined) {
+			internalActiveCell.value = normalizeActiveCell(value)
+		}
+	},
+	{ deep: true },
+)
 
 watch(
 	activeFilters,
@@ -1844,11 +2425,15 @@ watch(activeLayoutLabel, (label) => {
 	emitLayoutLabelChange(label)
 }, { immediate: true })
 
-watch(sortedItems, () => {
-	if (!isRemote.value) {
-		page.value = 1
-	}
-})
+watch(
+	() => props.data,
+	() => {
+		if (!isRemote.value) {
+			page.value = 1
+		}
+	},
+	{ deep: true },
+)
 
 onMounted(async () => {
 	if (props.loadSavedLayout) {
@@ -1891,6 +2476,12 @@ onBeforeUnmount(() => {
 defineExpose({
 	layoutLabel: activeLayoutLabel,
 	loadDeveloperDefaults,
+	clearFilters: clearAllFilters,
+	focusActiveCell,
+	clearActiveCell,
+	activateCellAt,
+	moveActiveCell,
+	getActiveCellContext,
 })
 </script>
 
@@ -1997,6 +2588,16 @@ td.table-select-col {
 
 tbody tr.row-clickable {
 	cursor: pointer;
+}
+
+tbody td.table-active-cell {
+	outline: 2px solid currentColor;
+	outline-offset: -2px;
+}
+
+tbody td.table-active-cell:focus,
+tbody td.table-active-cell:focus-visible {
+	outline-width: 3px;
 }
 
 tbody tr.row-selected > td {
