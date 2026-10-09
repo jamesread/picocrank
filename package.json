@@ -24,7 +24,7 @@
     "url": "https://github.com/jamesread/picocrank/issues"
   },
   "dependencies": {
-    "@hugeicons/core-free-icons": "^4.3.0",
+    "@hugeicons/core-free-icons": "^4.3.5",
     "@hugeicons/vue": "^1.0.8",
     "@vitejs/plugin-vue": "^6.0.8",
     "femtocrank": "^2.7.1",
