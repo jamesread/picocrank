@@ -36,6 +36,16 @@ their rows. `Table` reverses its result for descending order and keeps null
 values last. `sortRows(rows, sortBy, sortDir, comparator)` accepts the same
 optional comparator.
 
+## Column resize
+
+Hover a data-column header to reveal a drag handle on its right edge. Drag to
+set a pixel width; the first drag freezes sibling column widths so only the
+active column changes. Double-click the handle to clear that column’s width and
+return it to browser auto sizing. Set `resizable: false` on a header to hide its
+handle. Initial widths still come from optional `header.width`. While any
+column has a resized width, overflowing header and cell content is clipped with
+ellipsis.
+
 ## Cells and display hooks
 
 Named `#cell-{key}` slots and the generic `#cell` slot receive:
@@ -79,8 +89,17 @@ the native click event.
 />
 ```
 
-Clicking a data cell emits `cell-click` with the enriched cell context and adds
-the visibly outlined `table-active-cell` class. The component ref exposes:
+Clicking a data cell emits `cell-click` with the enriched cell context, focuses
+the cell when the click target is not interactive, and adds the visibly outlined
+`table-active-cell` class. While an active cell is focused, arrow keys move
+selection within the displayed grid (with focus following).
+
+Sortable headers expose `aria-sort` (`none` / `ascending` / `descending`).
+Filterable headers use `aria-haspopup="dialog"` and `aria-expanded`. The table
+sets `aria-busy` while loading and `aria-colcount` for the visible column count
+(including select and column-options columns when present).
+
+The component ref exposes:
 
 - `clearFilters()`
 - `focusActiveCell(options?)` (returns whether a displayed active cell was focused)

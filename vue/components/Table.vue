@@ -4,11 +4,31 @@
 		:class="needsTableWrapper ? tableWrapperClasses : undefined"
 		:style="needsTableWrapper ? undefined : { display: 'contents' }"
 	>
-		<table class="row-hover" :class="{ loading: isLoading }">
+		<table
+			ref="tableElementRef"
+			class="row-hover"
+			:class="{
+				loading: isLoading,
+				'has-column-widths': hasResizedColumns,
+				'is-column-resizing': activeResizeKey != null,
+			}"
+			:aria-busy="isLoading ? 'true' : undefined"
+			:aria-colcount="ariaColCount"
+		>
+			<colgroup>
+				<col v-if="selectable" class="table-select-col-width" />
+				<col
+					v-for="(header, index) in visibleHeaders"
+					:key="header.key || index"
+					:style="columnWidthStyle(header)"
+				/>
+				<col v-if="showColumnOptionsButton" class="table-column-options-col-width" />
+			</colgroup>
 			<thead>
 				<tr>
 					<th
 						v-if="selectable"
+						scope="col"
 						class="table-select-col"
 						@click.stop
 					>
@@ -25,8 +45,13 @@
 					<th
 						v-for="(header, index) in visibleHeaders"
 						:key="header.key || index"
-						:class="[headerClasses(header), header.class]"
-						:style="{ width: header.width || 'auto' }"
+						scope="col"
+						:data-column-key="header.key"
+						:class="[headerClasses(header), header.class, { 'is-resizing': activeResizeKey === header.key }]"
+						:style="[columnWidthStyle(header), columnOverflowStyle()]"
+						:aria-sort="headerAriaSort(header)"
+						:aria-haspopup="isHeaderFilterable(header) ? 'dialog' : undefined"
+						:aria-expanded="headerFilterExpanded(header)"
 						@click="onHeaderClick(header, $event)"
 						@contextmenu.prevent="openFilter(header, $event)"
 						@pointerdown="onHeaderPointerDown(header, $event)"
@@ -56,7 +81,7 @@
 							/>
 						</span>
 
-						<span v-if="header.sortable" class="sort-indicator">
+						<span v-if="header.sortable" class="sort-indicator" aria-hidden="true">
 							<HugeiconsIcon
 								v-if="sortBy === header.key && sortDir === 'asc'"
 								:icon="SortByUp02Icon"
@@ -74,9 +99,25 @@
 								aria-hidden="true"
 							/>
 						</span>
+
+						<span
+							v-if="isHeaderResizable(header)"
+							class="column-resize-handle"
+							role="separator"
+							aria-orientation="vertical"
+							:aria-label="`Resize ${header.label || header.key} column`"
+							:aria-valuemin="MIN_COLUMN_WIDTH"
+							:aria-valuenow="columnResizeValueNow(header)"
+							:class="{ 'is-active': activeResizeKey === header.key }"
+							@pointerdown.stop="onResizePointerDown(header, $event)"
+							@dblclick.stop="onResizeDoubleClick(header, $event)"
+							@click.stop
+							@contextmenu.stop.prevent
+						/>
 					</th>
 					<th
 						v-if="showColumnOptionsButton"
+						scope="col"
 						class="actions table-column-options-header"
 					>
 						<span class="actions-menu-trigger">
@@ -179,9 +220,10 @@
 								{ 'table-active-cell': isActiveCell(item.row, header, item.displayIndex) },
 								isLastColumnWithOptions(cellIndex) ? 'table-last-column-with-options' : null,
 							]"
-							:style="resolveCellStyle(item.row, header, item.displayIndex)"
+							:style="[resolveCellStyle(item.row, header, item.displayIndex), columnOverflowStyle()]"
 							:tabindex="isActiveCell(item.row, header, item.displayIndex) ? 0 : -1"
 							@click="onCellClick(item.row, header, item.displayIndex, $event)"
+							@keydown="onCellKeydown(item.row, header, item.displayIndex, $event)"
 						>
 							<slot
 								v-if="slots[`cell-${header.key}`]"
@@ -338,6 +380,7 @@ import {
 } from '../composables/tableGroupBy.js'
 
 const DEFAULT_PAGE_SIZE = 10
+const MIN_COLUMN_WIDTH = 48
 
 const props = defineProps({
 	headers: {
@@ -674,8 +717,176 @@ const defaultPresetId = ref(null)
 const activeLayoutPresetId = ref(null)
 const internalGroupBy = ref(null)
 const collapsedGroupIds = ref([])
+/** @type {import('vue').Ref<Record<string, number | null>>} */
+const columnWidths = ref({})
+const activeResizeKey = ref(null)
+const tableElementRef = ref(null)
+let resizeSession = null
 
 const isRemote = computed(() => typeof props.fetchRows === 'function')
+
+const hasResizedColumns = computed(() =>
+	Object.values(columnWidths.value).some((width) => width != null),
+)
+
+function isHeaderResizable(header) {
+	return Boolean(header?.key) && header.resizable !== false
+}
+
+function formatColumnWidth(width) {
+	if (width == null || width === '') {
+		return undefined
+	}
+	return typeof width === 'number' ? `${width}px` : width
+}
+
+function columnWidthStyle(header) {
+	if (!header?.key) {
+		return header?.width ? { width: formatColumnWidth(header.width) } : undefined
+	}
+
+	if (Object.prototype.hasOwnProperty.call(columnWidths.value, header.key)) {
+		const resized = columnWidths.value[header.key]
+		if (resized == null) {
+			return undefined
+		}
+		return { width: `${resized}px` }
+	}
+
+	if (header.width) {
+		return { width: formatColumnWidth(header.width) }
+	}
+
+	return undefined
+}
+
+function columnOverflowStyle() {
+	if (!hasResizedColumns.value) {
+		return undefined
+	}
+	return {
+		overflow: 'hidden',
+		textOverflow: 'ellipsis',
+		whiteSpace: 'nowrap',
+	}
+}
+
+function columnResizeValueNow(header) {
+	const width = columnWidths.value[header.key]
+	return typeof width === 'number' ? width : undefined
+}
+
+function setColumnWidths(nextWidths) {
+	columnWidths.value = nextWidths
+}
+
+function setColumnWidth(columnKey, width) {
+	columnWidths.value = {
+		...columnWidths.value,
+		[columnKey]: width,
+	}
+}
+
+function freezeSiblingColumnWidths(tableEl, activeKey, activeWidth) {
+	const next = { ...columnWidths.value }
+	tableEl?.querySelectorAll('thead th[data-column-key]').forEach((th) => {
+		const key = th.dataset.columnKey
+		if (!key || key === activeKey) {
+			return
+		}
+		if (typeof next[key] === 'number') {
+			return
+		}
+		next[key] = Math.max(MIN_COLUMN_WIDTH, Math.round(th.getBoundingClientRect().width))
+	})
+	next[activeKey] = activeWidth
+	setColumnWidths(next)
+}
+
+function endColumnResize() {
+	if (!resizeSession) {
+		return
+	}
+
+	const { moveListener, upListener, previousUserSelect, previousCursor } = resizeSession
+	window.removeEventListener('pointermove', moveListener)
+	window.removeEventListener('pointerup', upListener)
+	window.removeEventListener('pointercancel', upListener)
+	document.body.style.userSelect = previousUserSelect
+	document.body.style.cursor = previousCursor
+	activeResizeKey.value = null
+	resizeSession = null
+}
+
+function onResizePointerDown(header, event) {
+	if (!isHeaderResizable(header) || event.button !== 0) {
+		return
+	}
+
+	const handle = event.currentTarget
+	const headerCell = handle?.closest('th')
+	if (!headerCell) {
+		return
+	}
+
+	event.preventDefault()
+	endColumnResize()
+
+	const startX = event.clientX
+	const startWidth = Math.max(MIN_COLUMN_WIDTH, Math.round(headerCell.getBoundingClientRect().width))
+	activeResizeKey.value = header.key
+	freezeSiblingColumnWidths(
+		tableElementRef.value ?? headerCell.closest('table'),
+		header.key,
+		startWidth,
+	)
+
+	const previousUserSelect = document.body.style.userSelect
+	const previousCursor = document.body.style.cursor
+	document.body.style.userSelect = 'none'
+	document.body.style.cursor = 'col-resize'
+
+	const moveListener = (moveEvent) => {
+		const nextWidth = Math.max(
+			MIN_COLUMN_WIDTH,
+			Math.round(startWidth + (moveEvent.clientX - startX)),
+		)
+		setColumnWidth(header.key, nextWidth)
+	}
+
+	const upListener = () => {
+		endColumnResize()
+	}
+
+	resizeSession = {
+		moveListener,
+		upListener,
+		previousUserSelect,
+		previousCursor,
+	}
+
+	window.addEventListener('pointermove', moveListener)
+	window.addEventListener('pointerup', upListener)
+	window.addEventListener('pointercancel', upListener)
+
+	if (typeof handle.setPointerCapture === 'function') {
+		try {
+			handle.setPointerCapture(event.pointerId)
+		} catch {
+			// Ignore capture failures (e.g. unsupported pointer type in tests).
+		}
+	}
+}
+
+function onResizeDoubleClick(header, event) {
+	if (!isHeaderResizable(header)) {
+		return
+	}
+
+	event.preventDefault()
+	endColumnResize()
+	setColumnWidth(header.key, null)
+}
 
 const viewSettingsHandlers = computed(() =>
 	getViewSettingsHandlers(props.viewSettings, props.layoutPresets))
@@ -807,6 +1018,17 @@ function isHeaderHidden(header) {
 }
 
 const visibleHeaders = computed(() => orderedHeaders.value.filter((header) => !isHeaderHidden(header)))
+
+const ariaColCount = computed(() => {
+	let count = visibleHeaders.value.length
+	if (props.selectable) {
+		count += 1
+	}
+	if (showColumnOptionsButton.value) {
+		count += 1
+	}
+	return count > 0 ? count : undefined
+})
 
 const visibleColumnKeys = computed(() =>
 	orderedHeaders.value
@@ -1041,6 +1263,25 @@ function isHeaderFilterable(header) {
 
 function isHeaderFiltered(header) {
 	return isColumnFiltered(activeFilters.value?.[header.key], header, props.data)
+}
+
+function headerAriaSort(header) {
+	if (!header?.sortable) {
+		return undefined
+	}
+	if (sortBy.value !== header.key) {
+		return 'none'
+	}
+	return sortDir.value === 'desc' ? 'descending' : 'ascending'
+}
+
+function headerFilterExpanded(header) {
+	if (!isHeaderFilterable(header)) {
+		return undefined
+	}
+	return filterPopoverOpen.value && activeFilterHeader.value?.key === header.key
+		? 'true'
+		: 'false'
 }
 
 function headerClasses(header) {
@@ -1308,6 +1549,14 @@ function moveActiveCell(rowDelta, columnDelta, options = {}) {
 	return activateCellAt(rowIndex, columnIndex, options)
 }
 
+function isInteractiveCellTarget(target) {
+	return Boolean(
+		target?.closest?.(
+			'a, button, input, select, textarea, [contenteditable="true"], [data-row-click-ignore]',
+		),
+	)
+}
+
 function onCellClick(row, header, rowIndex, event) {
 	const context = cellContext(row, header, rowIndex)
 	const nextActiveCell = {
@@ -1315,11 +1564,47 @@ function onCellClick(row, header, rowIndex, event) {
 		columnKey: header.key,
 	}
 	setActiveCell(nextActiveCell)
+	if (!isInteractiveCellTarget(event.target)) {
+		scheduleCellFocus(nextActiveCell, { focus: true })
+	}
 	emit('cell-click', {
 		...context,
 		...nextActiveCell,
 		event,
 	})
+}
+
+function onCellKeydown(row, header, rowIndex, event) {
+	if (!activeCell.value || !isActiveCell(row, header, rowIndex)) {
+		return
+	}
+
+	if (isInteractiveCellTarget(event.target) && event.target !== event.currentTarget) {
+		return
+	}
+
+	let rowDelta = 0
+	let columnDelta = 0
+
+	switch (event.key) {
+	case 'ArrowUp':
+		rowDelta = -1
+		break
+	case 'ArrowDown':
+		rowDelta = 1
+		break
+	case 'ArrowLeft':
+		columnDelta = -1
+		break
+	case 'ArrowRight':
+		columnDelta = 1
+		break
+	default:
+		return
+	}
+
+	event.preventDefault()
+	moveActiveCell(rowDelta, columnDelta, { focus: true })
 }
 
 const activeSelectedKeys = computed(() => (
@@ -2573,6 +2858,7 @@ onMounted(async () => {
 })
 
 onBeforeUnmount(() => {
+	endColumnResize()
 	if (fetchAbortController.value) {
 		fetchAbortController.value.abort()
 	}
@@ -2594,9 +2880,83 @@ defineExpose({
 </script>
 
 <style scoped>
+table.has-column-widths {
+	table-layout: fixed;
+	width: 100%;
+}
+
+/* Force fixed-layout cells to respect column widths so overflow clipping/ellipsis work. */
+table.has-column-widths th,
+table.has-column-widths td {
+	max-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+table.has-column-widths th.table-select-col,
+table.has-column-widths td.table-select-col,
+table.has-column-widths th.table-column-options-header {
+	max-width: none;
+}
+
+table.is-column-resizing {
+	cursor: col-resize;
+}
+
+table.is-column-resizing thead th.sortable:hover {
+	cursor: col-resize;
+}
+
+col.table-select-col-width,
+col.table-column-options-col-width {
+	width: 2.5rem;
+}
+
+table thead th {
+	position: relative;
+}
+
 table thead th.sortable:hover {
 	cursor: pointer;
 	color: var(--table-header-active-fg);
+}
+
+.column-resize-handle {
+	position: absolute;
+	top: 0;
+	right: -0.2rem;
+	z-index: 2;
+	width: 0.55rem;
+	height: 100%;
+	padding: 0;
+	border: 0;
+	background: transparent;
+	cursor: col-resize;
+	touch-action: none;
+	user-select: none;
+	opacity: 0;
+}
+
+.column-resize-handle::after {
+	content: '';
+	position: absolute;
+	top: 20%;
+	bottom: 20%;
+	left: 50%;
+	width: 2px;
+	transform: translateX(-50%);
+	border-radius: 1px;
+	background-color: var(--border-color, currentColor);
+	opacity: 0.85;
+}
+
+table thead th:hover .column-resize-handle,
+table thead th.is-resizing .column-resize-handle,
+.column-resize-handle:hover,
+.column-resize-handle:focus-visible,
+.column-resize-handle.is-active {
+	opacity: 1;
 }
 
 table thead th.filterable {

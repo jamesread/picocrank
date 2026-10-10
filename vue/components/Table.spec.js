@@ -740,3 +740,169 @@ describe('Table row context menu', () => {
 		expect(wrapper.findAll('tbody tr')[0].classes()).not.toContain('row-context-menu-active')
 	})
 })
+
+describe('Table column resize', () => {
+	it('renders resize handles for resizable headers', () => {
+		const wrapper = mountTable({
+			props: {
+				selectable: false,
+				headers: [
+					{ key: 'name', label: 'Name', sortable: true },
+					{ key: 'city', label: 'City', resizable: false },
+				],
+			},
+		})
+
+		expect(wrapper.findAll('.column-resize-handle')).toHaveLength(1)
+		expect(wrapper.find('th[data-column-key="name"] .column-resize-handle').exists()).toBe(true)
+		expect(wrapper.find('th[data-column-key="city"] .column-resize-handle').exists()).toBe(false)
+	})
+
+	function mockHeaderWidths(wrapper, widthsByKey) {
+		wrapper.findAll('th[data-column-key]').forEach((headerCell) => {
+			const key = headerCell.attributes('data-column-key')
+			const width = widthsByKey[key] ?? 100
+			vi.spyOn(headerCell.element, 'getBoundingClientRect').mockReturnValue({
+				width,
+				height: 32,
+				top: 0,
+				left: 0,
+				right: width,
+				bottom: 32,
+				x: 0,
+				y: 0,
+				toJSON: () => ({}),
+			})
+		})
+	}
+
+	it('sets a pixel width while dragging, freezes siblings, and restores auto on double-click', async () => {
+		const wrapper = mountTable({
+			props: {
+				selectable: false,
+			},
+		})
+
+		const headerCell = wrapper.find('th[data-column-key="name"]')
+		const cityHeader = wrapper.find('th[data-column-key="city"]')
+		const handle = headerCell.find('.column-resize-handle')
+		mockHeaderWidths(wrapper, { name: 120, city: 160 })
+
+		await handle.trigger('pointerdown', { button: 0, clientX: 100, pointerId: 1 })
+		window.dispatchEvent(new PointerEvent('pointermove', { clientX: 160 }))
+		window.dispatchEvent(new PointerEvent('pointerup', { clientX: 160 }))
+		await nextTick()
+
+		expect(wrapper.find('table').classes()).toContain('has-column-widths')
+		expect(headerCell.attributes('style')).toContain('width: 180px')
+		expect(cityHeader.attributes('style')).toContain('width: 160px')
+
+		await handle.trigger('dblclick')
+		await nextTick()
+
+		expect(headerCell.attributes('style') || '').not.toMatch(/(?:^|;)\s*width:/)
+		expect(cityHeader.attributes('style')).toContain('width: 160px')
+		expect(wrapper.find('table').classes()).toContain('has-column-widths')
+	})
+
+	it('clips overflowing cell content with ellipsis while columns are resized', async () => {
+		const wrapper = mountTable({
+			props: {
+				selectable: false,
+			},
+		})
+
+		const headerCell = wrapper.find('th[data-column-key="name"]')
+		const handle = headerCell.find('.column-resize-handle')
+		mockHeaderWidths(wrapper, { name: 120, city: 160 })
+
+		await handle.trigger('pointerdown', { button: 0, clientX: 100, pointerId: 1 })
+		window.dispatchEvent(new PointerEvent('pointerup', { clientX: 100 }))
+		await nextTick()
+
+		const cell = wrapper.find('tbody td')
+		const style = getComputedStyle(cell.element)
+		expect(style.overflow).toBe('hidden')
+		expect(style.textOverflow).toBe('ellipsis')
+		expect(style.whiteSpace).toBe('nowrap')
+	})
+})
+
+describe('Table aria and keyboard navigation', () => {
+	it('exposes aria-sort and related header/table hints', async () => {
+		const wrapper = mountTable({
+			props: {
+				selectable: false,
+				filterable: true,
+				headers: [
+					{ key: 'name', label: 'Name', sortable: true, filterable: true },
+					{ key: 'city', label: 'City', sortable: true },
+				],
+			},
+		})
+
+		const nameHeader = wrapper.find('th[data-column-key="name"]')
+		const cityHeader = wrapper.find('th[data-column-key="city"]')
+
+		expect(wrapper.find('table').attributes('aria-colcount')).toBe('2')
+		expect(nameHeader.attributes('scope')).toBe('col')
+		expect(nameHeader.attributes('aria-sort')).toBe('none')
+		expect(nameHeader.attributes('aria-haspopup')).toBe('dialog')
+		expect(nameHeader.attributes('aria-expanded')).toBe('false')
+
+		await nameHeader.trigger('click')
+		await nextTick()
+
+		expect(nameHeader.attributes('aria-sort')).toBe('ascending')
+		expect(cityHeader.attributes('aria-sort')).toBe('none')
+
+		await nameHeader.trigger('click')
+		await nextTick()
+
+		expect(nameHeader.attributes('aria-sort')).toBe('descending')
+	})
+
+	it('moves the active cell with arrow keys when one is set', async () => {
+		const wrapper = mountTable({
+			props: {
+				selectable: false,
+			},
+		})
+
+		const firstCell = wrapper.find('tbody td')
+		await firstCell.trigger('click')
+		await nextTick()
+
+		expect(wrapper.find('.table-active-cell').text()).toContain('Ada')
+		expect(document.activeElement).toBe(wrapper.find('.table-active-cell').element)
+
+		await wrapper.find('.table-active-cell').trigger('keydown', { key: 'ArrowRight' })
+		await nextTick()
+		expect(wrapper.emitted('update:activeCell')?.at(-1)?.[0]).toEqual({
+			rowKey: 'Ada',
+			columnKey: 'city',
+		})
+		expect(wrapper.find('.table-active-cell').text()).toContain('London')
+
+		await wrapper.find('.table-active-cell').trigger('keydown', { key: 'ArrowDown' })
+		await nextTick()
+		expect(wrapper.emitted('update:activeCell')?.at(-1)?.[0]).toEqual({
+			rowKey: 'Grace',
+			columnKey: 'city',
+		})
+
+		await wrapper.find('.table-active-cell').trigger('keydown', { key: 'ArrowLeft' })
+		await nextTick()
+		expect(wrapper.emitted('update:activeCell')?.at(-1)?.[0]).toEqual({
+			rowKey: 'Grace',
+			columnKey: 'name',
+		})
+
+		await wrapper.find('.table-active-cell').trigger('keydown', { key: 'ArrowUp' })
+		await nextTick()
+		expect(wrapper.emitted('update:activeCell')?.at(-1)?.[0]).toEqual({
+			rowKey: 'Ada',
+			columnKey: 'name',
+		})
+	})
+})
