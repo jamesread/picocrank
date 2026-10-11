@@ -7,6 +7,7 @@
 			Each block uses a karma type class for the key tint
 			(<code>.notification.info</code>, <code>.notification.warning</code>, …).
 			Add <code>clickable</code> when the whole notification is interactive.
+			Critical / error / bad blocks include a small copy-to-clipboard control for the body text.
 		</p>
 
 		<FormLayout class="notification-builder" @submit.prevent="addBuiltNotification">

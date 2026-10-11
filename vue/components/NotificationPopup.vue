@@ -73,6 +73,8 @@ const isExternalLink = computed(() =>
 
 .notification-popup :deep(.notification) {
 	margin: 0;
+	/* Room for the absolute dismiss control (and copy on error/critical). */
+	padding-right: 2rem;
 }
 
 .notification-popup-content {
