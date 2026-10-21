@@ -19,6 +19,7 @@ import { InformationCircleIcon } from '@hugeicons/core-free-icons';
 import { Loading03Icon } from '@hugeicons/core-free-icons';
 import { DragDropVerticalIcon } from '@hugeicons/core-free-icons';
 import { ArrowDown01Icon } from '@hugeicons/core-free-icons';
+import { LayoutTopIcon } from '@hugeicons/core-free-icons';
 
 import {
 	hubChildBreadcrumbs,
@@ -198,6 +199,16 @@ const routes = [
       title: 'Dialog',
       icon: InformationCircleIcon,
       breadcrumbs: hubChildBreadcrumbs('NavFeedbackStatusHub', 'DialogExample', 'Dialog'),
+    }
+  },
+  {
+    name: 'PageToolbarExample',
+    path: '/page-toolbar-example',
+    component: () => import('./vue/examples/PageToolbarExample.vue'),
+    meta: {
+      title: 'Page toolbar',
+      icon: LayoutTopIcon,
+      breadcrumbs: hubChildBreadcrumbs('NavLayoutsHub', 'PageToolbarExample', 'Page toolbar'),
     }
   },
   {

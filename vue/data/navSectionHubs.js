@@ -51,6 +51,11 @@ export const navSectionHubs = {
 				title: 'Accordion',
 				options: { description: 'Collapsible subsections' },
 			},
+			{
+				name: 'PageToolbarExample',
+				title: 'Page toolbar',
+				options: { description: 'Sticky page-level actions joined to the header' },
+			},
 		],
 	},
 	NavDataDisplayHub: {
