@@ -422,9 +422,9 @@
 	background-color: var(--input-bg-color, var(--section-bg-color));
 }
 
+/* No display here: it would undo display: contents on an app's wrapper element. */
 .header-actions :deep([role="toolbar"].toolbar-overflow-menu > *) {
 	align-self: stretch;
-	display: flex;
 	height: auto;
 }
 
