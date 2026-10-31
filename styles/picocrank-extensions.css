@@ -118,14 +118,14 @@ section .section-content {
  * Toolbar is a flex row beside the section title — buttons must not shrink when a
  * search or filter control shares the row (avoid width: 100% on flex siblings).
  */
-section .section-header [role="toolbar"] {
+section .section-header [role="toolbar"]:not(.toolbar-overflow-menu) {
 	flex: 1 1 auto;
 	min-width: 0;
 	justify-content: flex-end;
 }
 
-section .section-header [role="toolbar"] button,
-section .section-header [role="toolbar"] .button {
+section .section-header [role="toolbar"]:not(.toolbar-overflow-menu) button,
+section .section-header [role="toolbar"]:not(.toolbar-overflow-menu) .button {
 	padding-top: .4em;
 	padding-bottom: .4em;
 	padding-left: 1em;
@@ -136,12 +136,12 @@ section .section-header [role="toolbar"] .button {
 }
 
 /* Grow search/filter controls only — toolbar labels stay content-sized. */
-section .section-header [role="toolbar"] > :not(button):not(.button):not(label):not(span) {
+section .section-header [role="toolbar"]:not(.toolbar-overflow-menu) > :not(button):not(.button):not(label):not(span) {
 	flex: 1 1 auto;
 	min-width: 0;
 }
 
-section .section-header [role="toolbar"] > label {
+section .section-header [role="toolbar"]:not(.toolbar-overflow-menu) > label {
 	flex: 0 0 auto;
 	width: auto;
 	min-width: auto;
@@ -337,4 +337,159 @@ nav.menu.context-menu > ul div ul li[role="separator"] {
 	background: var(--menu-dropdown-border-color, var(--border-color));
 	border-radius: 0;
 	pointer-events: none;
+}
+
+/*
+ * Toolbar overflow menu (useToolbarOverflow): a toolbar that does not fit is
+ * shown as a dropdown under a toggle button, like a Femtocrank nav.menu
+ * dropdown. The host (positioned) anchors it. Used by Section and Header.
+ */
+.toolbar-overflow-host {
+	position: relative;
+}
+
+[role="toolbar"].toolbar-overflow-menu {
+	position: absolute;
+	top: calc(100% + .25em);
+	right: .4em;
+	z-index: 20;
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	gap: .25em;
+	min-width: 12em;
+	max-width: calc(100vw - 1em);
+	max-height: 70vh;
+	max-height: 70dvh;
+	overflow-y: auto;
+	margin: 0;
+	padding: var(--menu-dropdown-padding, .25em);
+	border-radius: var(--menu-dropdown-radius, .4em);
+	background-color: var(--menu-dropdown-background-color, var(--section-bg-color));
+	color: var(--text-color);
+	box-shadow: var(--menu-dropdown-shadow);
+	visibility: hidden;
+	pointer-events: none;
+}
+
+[role="toolbar"].toolbar-overflow-menu.toolbar-overflow-menu-open {
+	visibility: visible;
+	pointer-events: auto;
+}
+
+[role="toolbar"].toolbar-overflow-menu > :not(dialog) {
+	flex: none;
+	width: 100%;
+	min-width: 0;
+	margin: 0;
+}
+
+[role="toolbar"].toolbar-overflow-menu > button,
+[role="toolbar"].toolbar-overflow-menu > .button {
+	justify-content: flex-start;
+	text-align: left;
+}
+
+/*
+ * Icon-only buttons (only an icon inside, named by aria-label) would be a bare
+ * icon in the menu: show the label as text. Buttons with visible text should
+ * keep it in an element (e.g. <span>), as PicoCrank's button pattern does.
+ */
+[role="toolbar"].toolbar-overflow-menu button[aria-label]:not(:has(:not(svg, svg *)))::after {
+	content: attr(aria-label);
+	margin-left: .5em;
+}
+
+/*
+ * A toolbar control may own a dialog or popover (e.g. a "Views" button). It
+ * shows in the top layer, but would inherit the closed menu's hidden state.
+ */
+[role="toolbar"].toolbar-overflow-menu dialog[open] {
+	visibility: visible;
+	pointer-events: auto;
+}
+
+[role="toolbar"].toolbar-overflow-menu :popover-open {
+	visibility: visible;
+	pointer-events: auto;
+}
+
+/* Measuring pass (measureNaturalWidth): one row at natural width; beats the menu rules. */
+[role="toolbar"].toolbar-overflow-measuring,
+[role="toolbar"].toolbar-overflow-menu.toolbar-overflow-measuring {
+	position: absolute;
+	visibility: hidden;
+	display: flex;
+	flex: none;
+	flex-direction: row;
+	flex-wrap: nowrap;
+	width: max-content;
+	min-width: 0;
+	max-width: none;
+	max-height: none;
+	padding: 0;
+	box-shadow: none;
+}
+
+[role="toolbar"].toolbar-overflow-measuring > :not(dialog),
+[role="toolbar"].toolbar-overflow-menu.toolbar-overflow-measuring > :not(dialog) {
+	width: auto;
+}
+
+/*
+ * Narrow screens: PicoCrank's one breakpoint is 768px (NARROW_MAX_WIDTH in
+ * vue/composables/useBreakpoint.js). Media queries cannot use variables, so
+ * keep every narrow query in step with that value.
+ */
+@media (max-width: 768px) {
+	.hide-narrow {
+		display: none !important;
+	}
+}
+
+@media (min-width: 769px) {
+	.show-narrow {
+		display: none !important;
+	}
+}
+
+/*
+ * Action row: buttons for a dialog, form or empty state. Right-aligned and
+ * wrapping; stacked full width on narrow screens. Add .start or .center to
+ * change alignment, .no-stack to keep the row on narrow screens.
+ */
+.action-row {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: flex-end;
+	gap: .5em;
+}
+
+.action-row.start {
+	justify-content: flex-start;
+}
+
+.action-row.center {
+	justify-content: center;
+}
+
+.action-row > button,
+.action-row > .button {
+	margin: 0;
+}
+
+@media (max-width: 768px) {
+	.action-row:not(.no-stack) {
+		flex-direction: column;
+		align-items: stretch;
+	}
+
+	.action-row:not(.no-stack) > button,
+	.action-row:not(.no-stack) > .button {
+		width: 100%;
+		justify-content: center;
+		text-align: center;
+	}
 }

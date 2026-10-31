@@ -413,8 +413,11 @@ defineExpose({
 	 * Offset is 0 when no header.fixed is present (see picocrank-extensions).
 	 */
 	top: var(--picocrank-fixed-header-offset);
+	/* dvh tracks mobile browser toolbars; vh is the fallback for older browsers. */
 	height: calc(100vh - var(--picocrank-fixed-header-offset));
+	height: calc(100dvh - var(--picocrank-fixed-header-offset));
 	max-height: calc(100vh - var(--picocrank-fixed-header-offset));
+	max-height: calc(100dvh - var(--picocrank-fixed-header-offset));
 }
 
 /*
@@ -425,8 +428,11 @@ defineExpose({
 	align-self: flex-start;
 	position: sticky;
 	top: var(--picocrank-fixed-header-offset);
+	/* dvh tracks mobile browser toolbars; vh is the fallback for older browsers. */
 	height: calc(100vh - var(--picocrank-fixed-header-offset));
+	height: calc(100dvh - var(--picocrank-fixed-header-offset));
 	max-height: calc(100vh - var(--picocrank-fixed-header-offset));
+	max-height: calc(100dvh - var(--picocrank-fixed-header-offset));
 }
 
 h2 {

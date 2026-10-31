@@ -11,113 +11,96 @@
 		</p>
 	</Section>
 
-	<Section title="Modal dialog" subtitle="Opens with showModal() and closes on backdrop click">
-		<div role="toolbar" class="dialog-actions">
-			<button type="button" @click="openModal">Open modal</button>
+	<Section
+		title="Dialog component"
+		subtitle="Responsive modal: centred when wide, a bottom sheet or full screen when narrow"
+	>
+		<p>
+			<code>Dialog</code> wraps the native element with a title bar, a scrolling
+			body and an <code>actions</code> slot (an <code>.action-row</code> that
+			stacks on narrow screens). Open it with <code>v-model:open</code>. Narrow
+			the window to see <code>narrow-layout</code>.
+		</p>
+		<div class="action-row start no-stack">
+			<button type="button" class="neutral" @click="sheetOpen = true">Bottom sheet</button>
+			<button type="button" class="neutral" @click="fullscreenOpen = true">Full screen</button>
 		</div>
 
-		<dialog
-			ref="modalRef"
-			class="example-dialog"
-			@close="onModalClose"
-			@click="onBackdropClick($event, modalRef)"
+		<Dialog v-model:open="sheetOpen" title="Delete 3 rows?" size="small">
+			<p>The rows and their history are removed. This cannot be undone.</p>
+			<template #actions="{ close }">
+				<button type="button" class="bad" @click="close('delete')">Delete</button>
+			</template>
+		</Dialog>
+
+		<Dialog
+			v-model:open="fullscreenOpen"
+			title="Edit filters"
+			size="large"
+			narrow-layout="fullscreen"
 		>
-			<div class="dialog-panel" @click.stop>
-				<h3>Confirm action</h3>
-				<p>
-					This modal uses the native dialog API. Press Escape or click outside
-					to dismiss, or choose an action below.
-				</p>
-				<form method="dialog" class="dialog-form">
-					<div role="toolbar" class="dialog-actions">
-						<button type="submit" value="cancel" class="neutral">Cancel</button>
-						<button type="submit" value="confirm" class="good">Confirm</button>
-					</div>
-				</form>
-			</div>
-		</dialog>
+			<p v-for="n in 12" :key="n">
+				Filter {{ n }}: long dialog bodies scroll while the title bar and
+				actions stay in view.
+			</p>
+			<template #actions="{ close }">
+				<button type="button" class="good" @click="close('apply')">Apply</button>
+			</template>
+		</Dialog>
+	</Section>
+
+	<Section title="Modal dialog" subtitle="Dialog with the default modal: a backdrop, closed by Escape or a backdrop click">
+		<div class="action-row start no-stack">
+			<button type="button" @click="modalOpen = true">Open modal</button>
+		</div>
+
+		<Dialog v-model:open="modalOpen" title="Confirm action" size="small" @close="onModalClose">
+			<p>
+				This modal uses the native dialog API. Press Escape or click outside
+				to dismiss, or choose an action below.
+			</p>
+			<template #actions="{ close }">
+				<button type="button" class="good" @click="close('confirm')">Confirm</button>
+			</template>
+		</Dialog>
 
 		<p v-if="modalResult" class="subtle">{{ modalResult }}</p>
 	</Section>
 
-	<Section title="Non-modal dialog" subtitle="Stays open while the page remains interactive">
-		<div role="toolbar" class="dialog-actions">
-			<button type="button" class="neutral" @click="openPanel">Open panel</button>
-			<button type="button" class="bad" :disabled="!panelRef?.open" @click="closePanel">
+	<Section title="Non-modal dialog" subtitle="Dialog with :modal=&quot;false&quot; stays open while the page remains interactive">
+		<div class="action-row start no-stack">
+			<button type="button" class="neutral" @click="panelOpen = true">Open panel</button>
+			<button type="button" class="bad" :disabled="!panelOpen" @click="panelOpen = false">
 				Close panel
 			</button>
 		</div>
 
-		<dialog ref="panelRef" class="example-dialog example-dialog-panel">
-			<div class="dialog-panel">
-				<h3>Side note</h3>
-				<p>
-					Non-modal dialogs use <code>show()</code> instead of
-					<code>showModal()</code>. They do not trap focus or dim the page.
-				</p>
-				<button type="button" class="neutral" @click="closePanel">Dismiss</button>
-			</div>
-		</dialog>
+		<Dialog v-model:open="panelOpen" :modal="false" title="Side note" size="small">
+			<p>
+				Non-modal dialogs open with <code>show()</code> instead of
+				<code>showModal()</code>. They do not trap focus or dim the page.
+			</p>
+			<template #actions="{ close }">
+				<button type="button" class="neutral" @click="close()">Dismiss</button>
+			</template>
+		</Dialog>
 	</Section>
 </template>
 
 <script setup>
 import { ref } from 'vue'
 import Section from '../components/Section.vue'
+import Dialog from '../components/Dialog.vue'
 
-const modalRef = ref(null)
-const panelRef = ref(null)
+const sheetOpen = ref(false)
+const fullscreenOpen = ref(false)
+const modalOpen = ref(false)
+const panelOpen = ref(false)
 const modalResult = ref('')
 
-function openModal() {
-	modalRef.value?.showModal()
-}
-
-function onModalClose(event) {
-	const value = event.target?.returnValue
-	if (value === 'confirm') {
-		modalResult.value = 'Action confirmed.'
-	} else {
-		modalResult.value = 'Dialog closed without confirming.'
-	}
-}
-
-function onBackdropClick(event, dialog) {
-	if (event.target === dialog) {
-		dialog.close('cancel')
-	}
-}
-
-function openPanel() {
-	panelRef.value?.show()
-}
-
-function closePanel() {
-	panelRef.value?.close()
+function onModalClose(returnValue) {
+	modalResult.value = returnValue === 'confirm'
+		? 'Action confirmed.'
+		: 'Dialog closed without confirming.'
 }
 </script>
-
-<style scoped>
-.dialog-actions {
-	display: flex;
-	flex-wrap: wrap;
-	gap: 0.5rem;
-}
-
-.dialog-panel h3 {
-	margin: 0 0 0.5rem;
-}
-
-.dialog-panel p {
-	margin: 0 0 1rem;
-}
-
-.dialog-form {
-	margin: 0;
-}
-
-.example-dialog-panel {
-	margin-block-start: 1rem;
-	max-width: 24rem;
-}
-</style>

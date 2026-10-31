@@ -30,7 +30,7 @@
 
 		<div class = "fg1"></div>
 
-		<div class="header-actions flex-row">
+		<div ref="actionsRef" class="header-actions flex-row toolbar-overflow-host">
 			<button
 				v-if="themeToggleEnabled"
 				type="button"
@@ -42,7 +42,38 @@
 				<HugeiconsIcon :icon="themeToggleIcon" width="1em" height="1em" />
 			</button>
 
-			<slot name="toolbar" />
+			<button
+				v-if="toolbarCollapsed"
+				ref="toolbarToggleRef"
+				type="button"
+				class="header-toolbar-toggle neutral"
+				:aria-label="toolbarMenuLabel"
+				:title="toolbarMenuLabel"
+				:aria-expanded="toolbarMenuOpen ? 'true' : 'false'"
+				:aria-controls="toolbarId"
+				@click="toggleToolbarMenu"
+				@keydown="onToolbarKeydown"
+			>
+				<HugeiconsIcon :icon="MoreVerticalIcon" width="1em" height="1em" aria-hidden="true" />
+			</button>
+
+			<div
+				v-if="$slots.toolbar"
+				:id="toolbarId"
+				ref="toolbarRef"
+				role="toolbar"
+				class="header-toolbar"
+				:class="{
+					'toolbar-overflow-menu': toolbarCollapsed,
+					'toolbar-overflow-menu-open': toolbarCollapsed && toolbarMenuOpen,
+				}"
+				:aria-label="toolbarCollapsed ? toolbarMenuLabel : undefined"
+				:aria-orientation="toolbarCollapsed ? 'vertical' : undefined"
+				@click="onToolbarClick"
+				@keydown="onToolbarKeydown"
+			>
+				<slot name="toolbar" />
+			</div>
 
 			<slot name = "user-info">
 				<button
@@ -71,10 +102,10 @@
 </template>
 
 <script setup>
-	import { computed, nextTick, ref, watch } from "vue";
+	import { computed, nextTick, ref, useId, watch } from "vue";
 	import { RouterLink } from "vue-router";
 	import { HugeiconsIcon } from "@hugeicons/vue";
-	import { BulbIcon, Menu01Icon, Moon02Icon, Sun01Icon, UserIcon } from "@hugeicons/core-free-icons";
+	import { BulbIcon, Menu01Icon, Moon02Icon, MoreVerticalIcon, Sun01Icon, UserIcon } from "@hugeicons/core-free-icons";
 
 	import Breadcrumbs from "./Breadcrumbs.vue";
 	import TopBar from "./TopBar.vue";
@@ -82,6 +113,7 @@
 	import { useTheme } from '../composables/useTheme.js';
 	import { useHeaderTopBarFit } from '../composables/useHeaderTopBarFit.js';
 	import { useResponsiveNav } from '../composables/useResponsiveNav.js';
+	import { measureNaturalWidth, useToolbarOverflow } from '../composables/useToolbarOverflow.js';
 
 	const { theme, nextTheme, toggleTheme } = useTheme();
 
@@ -159,6 +191,16 @@
 			type: Object,
 			default: null,
 		},
+		/** Move the toolbar slot into a menu when the header has no room for it. */
+		collapseToolbar: {
+			type: Boolean,
+			default: true,
+		},
+		/** Accessible name of the toolbar menu button (and of the menu). */
+		toolbarMenuLabel: {
+			type: String,
+			default: "More actions",
+		},
 	});
 
 	const fallbackSidebar = ref(null);
@@ -187,6 +229,69 @@
 		() => props.topBarNavigation,
 		() => remeasureTopBar(),
 		{ deep: true },
+	);
+
+	const actionsRef = ref(null);
+	const toolbarRef = ref(null);
+	const toolbarToggleRef = ref(null);
+	const toolbarId = `header-toolbar-${useId()}`;
+
+	function px(value) {
+		const number = Number.parseFloat(value);
+		return Number.isFinite(number) ? number : 0;
+	}
+
+	/*
+	 * Whether the header's fixed-size parts (branding, actions with the toolbar
+	 * at its natural width) fit in one row. Breadcrumbs and the top bar are
+	 * left out: they shrink or hide themselves when crowded.
+	 */
+	function toolbarFits() {
+		const header = headerRoot.value;
+		const actions = actionsRef.value;
+		if (!header || !actions) return true;
+
+		const headerStyle = getComputedStyle(header);
+		let required = px(headerStyle.columnGap || headerStyle.gap) * Math.max(0, header.children.length - 1);
+		for (const child of header.children) {
+			if (child === actions || child.classList.contains("fg1")) continue;
+			if (child.matches("nav.topbar, nav.breadcrumbs")) continue;
+			required += child.getBoundingClientRect().width;
+		}
+
+		const actionsStyle = getComputedStyle(actions);
+		let actionItems = 0;
+		for (const child of actions.children) {
+			if (child === toolbarToggleRef.value) continue;
+			required += child === toolbarRef.value
+				? measureNaturalWidth(child)
+				: child.getBoundingClientRect().width;
+			actionItems += 1;
+		}
+		required += px(actionsStyle.columnGap || actionsStyle.gap) * Math.max(0, actionItems - 1);
+
+		const available = header.clientWidth - px(headerStyle.paddingLeft) - px(headerStyle.paddingRight);
+		return required <= available;
+	}
+
+	const {
+		collapsed: toolbarCollapsed,
+		menuOpen: toolbarMenuOpen,
+		scheduleUpdate: scheduleToolbarUpdate,
+		toggleMenu: toggleToolbarMenu,
+		onToolbarClick,
+		onKeydown: onToolbarKeydown,
+	} = useToolbarOverflow({
+		rootRef: actionsRef,
+		toolbarRef,
+		toggleRef: toolbarToggleRef,
+		fits: toolbarFits,
+		enabled: () => props.collapseToolbar,
+	});
+
+	watch(
+		() => [props.username, props.title, props.showBranding, props.themeToggleEnabled],
+		() => nextTick(scheduleToolbarUpdate),
 	);
 
 	const showBreadcrumbsBar = computed(
@@ -253,6 +358,13 @@
 	font-weight: normal;
 }
 
+/* Narrow screens: icon only (the button's aria-label still names the user). */
+@media (max-width: 768px) {
+	.user-info span {
+		display: none;
+	}
+}
+
 .header-actions {
 	align-self: stretch;
 	gap: 0.25rem;
@@ -261,6 +373,59 @@
 
 .theme-toggle {
 	margin-right: 0;
+}
+
+/* Inline toolbar: a row of header controls, full header height. */
+.header-toolbar:not(.toolbar-overflow-menu) {
+	display: flex;
+	align-items: stretch;
+	align-self: stretch;
+	gap: 0.25rem;
+	margin: 0;
+}
+
+/*
+ * Collapsed toolbar: menu items, not header chrome. [role="toolbar"] keeps
+ * these ahead of app styles aimed at header controls (e.g. "header
+ * .header-actions select").
+ */
+.header-actions :deep([role="toolbar"].toolbar-overflow-menu button),
+.header-actions :deep([role="toolbar"].toolbar-overflow-menu .button),
+.header-actions :deep([role="toolbar"].toolbar-overflow-menu a) {
+	align-self: auto;
+	justify-content: flex-start;
+	width: 100%;
+	height: auto;
+	padding: 0.5em 0.75em;
+	border: 0;
+	border-radius: var(--menu-dropdown-radius, .4em);
+	color: var(--text-color);
+	background-color: transparent;
+	text-align: left;
+}
+
+.header-actions :deep([role="toolbar"].toolbar-overflow-menu button:hover),
+.header-actions :deep([role="toolbar"].toolbar-overflow-menu .button:hover),
+.header-actions :deep([role="toolbar"].toolbar-overflow-menu a:hover) {
+	background-color: var(--menu-dropdown-link-hover-background-color, var(--hover-background-color));
+	color: var(--text-color);
+}
+
+.header-actions :deep([role="toolbar"].toolbar-overflow-menu select),
+.header-actions :deep([role="toolbar"].toolbar-overflow-menu input) {
+	width: 100%;
+	height: auto;
+	padding: 0.4em 0.6em;
+	border: 1px solid var(--border-color);
+	border-radius: var(--menu-dropdown-radius, .4em);
+	color: var(--input-fg-color, var(--text-color));
+	background-color: var(--input-bg-color, var(--section-bg-color));
+}
+
+.header-actions :deep([role="toolbar"].toolbar-overflow-menu > *) {
+	align-self: stretch;
+	display: flex;
+	height: auto;
 }
 
 /* Match Femtocrank header chrome (same idea as #sidebar-button:hover) */

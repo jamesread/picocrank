@@ -106,6 +106,69 @@
 			<button type="button" class="bad">Bad</button>
 		</div>
 	</Section>
+
+	<Section
+		id="action-rows"
+		title="Action rows"
+		subtitle="Button groups that stack on narrow screens"
+	>
+		<p>
+			<code>.action-row</code> lays out a group of actions, right-aligned. On
+			narrow screens (768px and below) the buttons stack at full width. Add
+			<code>.start</code> or <code>.center</code> to align differently, or
+			<code>.no-stack</code> to keep the row.
+		</p>
+		<div class="action-row">
+			<button type="button" class="neutral">Cancel</button>
+			<button type="button" class="neutral">Save draft</button>
+			<button type="button" class="good">Publish</button>
+		</div>
+
+		<p>
+			<code>.hide-narrow</code> hides an element on narrow screens and
+			<code>.show-narrow</code> shows it only there.
+		</p>
+		<div class="action-row start no-stack">
+			<button type="button" class="neutral hide-narrow">Shown on wide screens</button>
+			<button type="button" class="neutral show-narrow">Shown on narrow screens</button>
+		</div>
+	</Section>
+
+	<Section
+		id="overflowing-toolbar"
+		title="Overflowing toolbar"
+		subtitle="Toolbars that do not fit move into a menu"
+	>
+		<template #toolbar>
+			<button type="button" class="neutral inline-icon">
+				<HugeiconsIcon :icon="SearchIcon" width="1em" height="1em" aria-hidden="true" />
+				<span>Filter</span>
+			</button>
+			<button type="button" class="neutral inline-icon">
+				<HugeiconsIcon :icon="Copy01Icon" width="1em" height="1em" aria-hidden="true" />
+				<span>Duplicate</span>
+			</button>
+			<button type="button" class="neutral inline-icon" @click="overflowDialog?.showModal()">
+				<HugeiconsIcon :icon="Settings01Icon" width="1em" height="1em" aria-hidden="true" />
+				<span>Settings</span>
+			</button>
+			<button type="button" class="good inline-icon">
+				<HugeiconsIcon :icon="Add01Icon" width="1em" height="1em" aria-hidden="true" />
+				<span>Create</span>
+			</button>
+			<dialog ref="overflowDialog" class="dialog" aria-label="Settings">
+				<p>A dialog owned by a toolbar button still shows when the toolbar is in its menu.</p>
+				<button type="button" class="neutral" @click="overflowDialog?.close()">Close</button>
+			</dialog>
+		</template>
+
+		<p>
+			When a section's toolbar does not fit beside its title, <code>Section</code> shows a
+			button at the top right that opens the toolbar as a menu. Narrow the window to see it.
+			Set <code>:collapse-toolbar="false"</code> to keep a toolbar inline, and
+			<code>toolbar-menu-label</code> to name the button.
+		</p>
+	</Section>
 </template>
 
 <script setup>
@@ -123,6 +186,7 @@ import Section from '../components/Section.vue'
 import FormLayout from '../components/FormLayout.vue'
 
 const lastAction = ref('')
+const overflowDialog = ref(null)
 const iconStrokeWidth = 2.5
 
 function onSubmit() {

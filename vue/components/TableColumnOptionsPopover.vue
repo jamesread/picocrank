@@ -842,6 +842,7 @@ onBeforeUnmount(() => {
 	width: min(30rem, calc(100vw - 1rem));
 	min-width: min(30rem, calc(100vw - 1rem));
 	max-height: calc(100vh - 1rem);
+	max-height: calc(100dvh - 1rem);
 	padding: 0.75rem;
 	border: 1px solid var(--table-popover-border);
 	border-radius: 0.4rem;

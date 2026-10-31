@@ -1,8 +1,9 @@
 import { computed, toValue } from 'vue'
 import { useMediaQuery } from './useMediaQuery.js'
+import { NARROW_QUERY } from './useBreakpoint.js'
 
-/** Matches Sidebar mobile breakpoint. */
-export const MOBILE_NAV_QUERY = '(max-width: 768px)'
+/** Matches Sidebar mobile breakpoint (PicoCrank's shared narrow breakpoint). */
+export const MOBILE_NAV_QUERY = NARROW_QUERY
 
 /**
  * Mobile nav precedence:

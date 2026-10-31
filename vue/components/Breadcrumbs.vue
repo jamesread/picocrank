@@ -72,13 +72,35 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { HugeiconsIcon } from '@hugeicons/vue'
 import { ArrowRight01Icon } from '@hugeicons/core-free-icons'
 
 const route = useRoute()
-const links = ref([])
+
+const links = computed(() => {
+	const next = []
+	for (const record of route.matched) {
+		if (record.meta && record.meta.breadcrumbs) {
+			for (const item of record.meta.breadcrumbs(route)) {
+				next.push({
+					name: item.name,
+					to: item.to,
+					href: item.href || record.path || '/',
+					menu: item.menu,
+				})
+			}
+		} else if (record.name) {
+			next.push({
+				name: record.meta?.title || record.name,
+				to: { name: record.name, params: route.params, query: route.query },
+				href: route.fullPath || record.path || '/',
+			})
+		}
+	}
+	return next
+})
 
 function hasMenu(link) {
 	return Array.isArray(link.menu) && link.menu.length > 0
@@ -93,28 +115,6 @@ function isMenuItemActive(link, menuItem) {
 	const itemRoute = menuItem.to?.name
 	return activeRoute != null && activeRoute === itemRoute
 }
-
-watch(() => route.matched, (matched) => {
-	links.value = []
-	matched.forEach((record) => {
-		if (record.meta && record.meta.breadcrumbs) {
-			record.meta.breadcrumbs(route).forEach((item) => {
-				links.value.push({
-					name: item.name,
-					to: item.to,
-					href: item.href || record.path || '/',
-					menu: item.menu,
-				})
-			})
-		} else if (record.name) {
-			links.value.push({
-				name: record.meta?.title || record.name,
-				to: { name: record.name, params: route.params, query: route.query },
-				href: route.fullPath || record.path || '/',
-			})
-		}
-	})
-}, { immediate: true })
 </script>
 
 <style scoped>
