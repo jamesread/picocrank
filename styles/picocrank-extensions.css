@@ -370,6 +370,9 @@ nav.menu.context-menu > ul div ul li[role="separator"] {
 	box-shadow: var(--menu-dropdown-shadow);
 	visibility: hidden;
 	pointer-events: none;
+	/* Menu items' side padding, and the room an icon takes: 1em icon + .inline-icon gap. */
+	--toolbar-overflow-item-padding-x: .75em;
+	--toolbar-overflow-icon-space: 1.35em;
 }
 
 [role="toolbar"].toolbar-overflow-menu.toolbar-overflow-menu-open {
@@ -391,13 +394,43 @@ nav.menu.context-menu > ul div ul li[role="separator"] {
 }
 
 /*
- * Icon-only buttons (only an icon inside, named by aria-label) would be a bare
- * icon in the menu: show the label as text. Buttons with visible text should
- * keep it in an element (e.g. <span>), as PicoCrank's button pattern does.
+ * Every item's text starts at the same x: items with an icon have it in the
+ * padding-plus-icon space; items without one are indented by that space.
  */
+[role="toolbar"].toolbar-overflow-menu :is(button, .button) {
+	padding-left: var(--toolbar-overflow-item-padding-x);
+	padding-right: var(--toolbar-overflow-item-padding-x);
+}
+
+/* Femtocrank's coloured buttons have no border; give them an invisible one so their text lines up too. */
+[role="toolbar"].toolbar-overflow-menu :is(button, .button):is(.good, .bad, [type="submit"]):not(.neutral) {
+	border: 1px solid transparent;
+}
+
+[role="toolbar"].toolbar-overflow-menu :is(button, .button):not(:has(svg)) {
+	padding-left: calc(var(--toolbar-overflow-item-padding-x) + var(--toolbar-overflow-icon-space));
+}
+
+/*
+ * Icon-only buttons (only an icon inside, named by aria-label) would be a bare
+ * icon in the menu: show the label as text, where an icon button's text goes.
+ * Buttons with visible text should keep it in an element (e.g. <span>), as
+ * PicoCrank's button pattern does.
+ */
+[role="toolbar"].toolbar-overflow-menu button[aria-label]:not(:has(:not(svg, svg *))) {
+	display: inline-flex;
+	align-items: center;
+	gap: calc(var(--toolbar-overflow-icon-space) - 1em);
+}
+
 [role="toolbar"].toolbar-overflow-menu button[aria-label]:not(:has(:not(svg, svg *)))::after {
 	content: attr(aria-label);
-	margin-left: .5em;
+}
+
+[role="toolbar"].toolbar-overflow-menu :is(button, .button) svg {
+	flex: 0 0 auto;
+	width: 1em;
+	height: 1em;
 }
 
 /*

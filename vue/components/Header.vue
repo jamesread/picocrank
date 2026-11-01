@@ -396,7 +396,7 @@
 	justify-content: flex-start;
 	width: 100%;
 	height: auto;
-	padding: 0.5em 0.75em;
+	padding: 0.5em var(--toolbar-overflow-item-padding-x, 0.75em);
 	border: 0;
 	border-radius: var(--menu-dropdown-radius, .4em);
 	color: var(--text-color);
@@ -409,6 +409,11 @@
 .header-actions :deep([role="toolbar"].toolbar-overflow-menu a:hover) {
 	background-color: var(--menu-dropdown-link-hover-background-color, var(--hover-background-color));
 	color: var(--text-color);
+}
+
+/* Same text position for items with and without an icon (see picocrank-extensions.css). */
+.header-actions :deep([role="toolbar"].toolbar-overflow-menu :is(button, .button, a):not(:has(svg))) {
+	padding-left: calc(var(--toolbar-overflow-item-padding-x, 0.75em) + var(--toolbar-overflow-icon-space, 1.35em));
 }
 
 .header-actions :deep([role="toolbar"].toolbar-overflow-menu select),

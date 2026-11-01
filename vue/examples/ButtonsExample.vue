@@ -148,6 +148,7 @@
 				<HugeiconsIcon :icon="Copy01Icon" width="1em" height="1em" aria-hidden="true" />
 				<span>Duplicate</span>
 			</button>
+			<button type="button" class="neutral">Archive</button>
 			<button type="button" class="neutral inline-icon" @click="overflowDialog?.showModal()">
 				<HugeiconsIcon :icon="Settings01Icon" width="1em" height="1em" aria-hidden="true" />
 				<span>Settings</span>
