@@ -131,8 +131,14 @@
 		subtitle="Transient corner toasts via useNotificationPopups()"
 	>
 		<template #toolbar>
-			<button type="button" class="good" @click="showSuccessPopup">Success</button>
-			<button type="button" class="warning" @click="showWarningPopup">Warning</button>
+			<button type="button" class="good inline-icon" @click="showSuccessPopup">
+				<HugeiconsIcon :icon="CheckmarkCircle02Icon" width="1em" height="1em" aria-hidden="true" />
+				<span>Success</span>
+			</button>
+			<button type="button" class="warning inline-icon" @click="showWarningPopup">
+				<HugeiconsIcon :icon="Alert02Icon" width="1em" height="1em" aria-hidden="true" />
+				<span>Warning</span>
+			</button>
 			<button type="button" @click="showLinkedPopup">With link</button>
 			<button type="button" @click="showStackedPopups">Stack three</button>
 			<button type="button" class="bad" @click="dismissAllPopups">Dismiss all</button>
@@ -174,6 +180,8 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { HugeiconsIcon } from '@hugeicons/vue'
+import { Alert02Icon, CheckmarkCircle02Icon } from '@hugeicons/core-free-icons'
 import Section from '../components/Section.vue'
 import FormLayout from '../components/FormLayout.vue'
 import FormField from '../components/FormField.vue'
