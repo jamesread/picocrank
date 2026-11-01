@@ -60,6 +60,8 @@ Other toolbars can use the same behaviour with `useToolbarOverflow` and
 - It keeps Femtocrank's dialog look, including the thick border.
 - `narrow-layout`: `sheet` (default, docked to the bottom), `fullscreen` or `centered`.
 - The body scrolls; the title bar and actions stay in view.
+- The `toolbar` slot puts compact controls (a dropdown, a button) in the title bar beside the
+  close button, e.g. a view selector on narrow screens; name it with `toolbar-label`.
 - Escape, the close button and (unless `:close-on-backdrop="false"`) a backdrop click
   close it. `close` is emitted with the dialog's return value.
 

@@ -12,10 +12,13 @@
 		@click="onDialogClick"
 	>
 		<div class="dialog-panel">
-			<div v-if="hasTitle || showClose" class="dialog-header">
+			<div v-if="hasTitle || showClose || $slots.toolbar" class="dialog-header">
 				<h2 v-if="hasTitle" :id="titleId" class="dialog-title">
 					<slot name="title">{{ title }}</slot>
 				</h2>
+				<div v-if="$slots.toolbar" role="toolbar" class="dialog-toolbar" :aria-label="toolbarLabel">
+					<slot name="toolbar" :close="close" />
+				</div>
 				<button
 					v-if="showClose"
 					type="button"
@@ -48,7 +51,9 @@ import { Cancel01Icon } from '@hugeicons/core-free-icons'
  * Wide screens: a centred panel (`size`). Narrow screens (PicoCrank's 768px
  * breakpoint): `narrowLayout` "sheet" docks it to the bottom edge, "fullscreen"
  * fills the screen, "centered" keeps the wide-screen look. The body scrolls;
- * the title bar and `actions` (an .action-row, stacked when narrow) stay put.
+ * the title bar and `actions` (an .action-row, stacked when narrow) stay put. The
+ * `toolbar` slot puts compact controls (a filter dropdown, say) in the title bar, beside the
+ * close button.
  *
  * Open with `v-model:open` or the exposed `show()` / `close()`. With
  * `:modal="false"` it opens with show(): no backdrop, and the page stays usable.
@@ -95,6 +100,11 @@ const props = defineProps({
 	closeLabel: {
 		type: String,
 		default: 'Close',
+	},
+	/** Accessible name of the title bar's toolbar slot. */
+	toolbarLabel: {
+		type: String,
+		default: '',
 	},
 })
 
@@ -205,6 +215,34 @@ dialog.picocrank-dialog.dialog-size-large {
 	min-width: 0;
 	margin: 0;
 	font-size: 1.15em;
+}
+
+/* Title-bar controls: compact, beside the close button; the title gives way first. */
+.dialog-toolbar {
+	display: flex;
+	flex: 0 1 auto;
+	align-items: center;
+	gap: .5em;
+	min-width: 0;
+	margin: 0 0 0 auto;
+}
+
+.dialog-toolbar :slotted(select),
+.dialog-toolbar :slotted(input) {
+	min-width: 0;
+	max-width: 12em;
+	margin: 0;
+	padding: .35em .55em;
+}
+
+.dialog-toolbar :slotted(button),
+.dialog-toolbar :slotted(.button) {
+	margin: 0;
+	padding: .35em .55em;
+}
+
+.dialog-toolbar + .dialog-close {
+	margin-left: 0;
 }
 
 .dialog-close {

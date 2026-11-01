@@ -123,4 +123,23 @@ describe('Dialog', () => {
 		await dialog.trigger('click')
 		expect(dialog.attributes('open')).toBeDefined()
 	})
+
+	it('renders the toolbar slot in the title bar, before the close button', async () => {
+		const wrapper = mountDialog({ open: true, toolbarLabel: 'View options' }, {
+			toolbar: '<select class="view-select"><option>All</option></select>',
+		})
+		await nextTick()
+
+		const header = wrapper.find('.dialog-header')
+		const toolbar = header.find('.dialog-toolbar')
+		expect(toolbar.attributes('role')).toBe('toolbar')
+		expect(toolbar.attributes('aria-label')).toBe('View options')
+		expect(toolbar.find('.view-select').exists()).toBe(true)
+		const children = [...header.element.children].map((el) => el.className)
+		expect(children.indexOf('dialog-toolbar')).toBeLessThan(children.findIndex((c) => c.includes('dialog-close')))
+	})
+
+	it('has no toolbar without the slot', () => {
+		expect(mountDialog().find('.dialog-toolbar').exists()).toBe(false)
+	})
 })

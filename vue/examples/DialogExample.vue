@@ -38,7 +38,14 @@
 			title="Edit filters"
 			size="large"
 			narrow-layout="fullscreen"
+			toolbar-label="Filter set"
 		>
+			<template #toolbar>
+				<select v-model="filterSet" aria-label="Filter set">
+					<option value="all">All rows</option>
+					<option value="mine">My rows</option>
+				</select>
+			</template>
 			<p v-for="n in 12" :key="n">
 				Filter {{ n }}: long dialog bodies scroll while the title bar and
 				actions stay in view.
@@ -94,6 +101,7 @@ import Dialog from '../components/Dialog.vue'
 
 const sheetOpen = ref(false)
 const fullscreenOpen = ref(false)
+const filterSet = ref('all')
 const modalOpen = ref(false)
 const panelOpen = ref(false)
 const modalResult = ref('')
