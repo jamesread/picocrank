@@ -33,6 +33,7 @@ handlers and state keep working, and dialogs or popovers they own still show.
   (default "More actions"). Section also has `title-min-width-em` (default 8).
 - In the menu, an icon-only button (only an icon inside, named by `aria-label`)
   shows its label as text. Put visible button text in an element, such as a `<span>`.
+- Menu item text lines up at the left; a button's icon moves to the right-hand end.
 - Keep controls as direct children of the toolbar slot. A wrapper element becomes a
   single menu item; use `display: contents` on it if you need one.
 

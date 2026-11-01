@@ -411,11 +411,6 @@
 	color: var(--text-color);
 }
 
-/* Same text position for items with and without an icon (see picocrank-extensions.css). */
-.header-actions :deep([role="toolbar"].toolbar-overflow-menu :is(button, .button, a):not(:has(svg))) {
-	padding-left: calc(var(--toolbar-overflow-item-padding-x, 0.75em) + var(--toolbar-overflow-icon-space, 1.35em));
-}
-
 .header-actions :deep([role="toolbar"].toolbar-overflow-menu select),
 .header-actions :deep([role="toolbar"].toolbar-overflow-menu input) {
 	width: 100%;
