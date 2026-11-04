@@ -313,8 +313,12 @@ const routes = [
   }
 ];
 
+// BASE_URL is relative for portable builds (`--base ./`), where the deployment
+// path is unknown at build time, so only an absolute base can be used here.
+const baseUrl = import.meta.env.BASE_URL;
+
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHistory(baseUrl.startsWith('/') ? baseUrl : undefined),
   routes,
 });
 

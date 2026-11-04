@@ -7,6 +7,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build --base './'",
+    "build:pages": "vite build --base /picocrank/",
     "build:minimal": "VITE_INCLUDE_SUPPLEMENTAL_THEMES=false vite build --base './'",
     "preview": "vite preview",
     "lint": "eslint .",
