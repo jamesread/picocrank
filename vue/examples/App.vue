@@ -1,52 +1,61 @@
 <template>
 	<Navigation ref="navigation">
-		<Navigation ref="topBarNavigation">
-			<Header
-				:username="headerUsername"
-				:login-route="headerLoginRoute"
-				@toggleSidebar="toggleSidebar"
-				@logoClick="goToIndex"
-				@userClick="goToUserDetails"
-				title="PicoCrank"
-				:logoUrl="logoUrl"
-				:sidebarEnabled="sidebarEnabled"
-				:navigation="navigation"
-				:topBarNavigation="topBarNavigation"
-				:topBarEnabled="topBarEnabled"
-				:showBranding="brandingEnabled"
-				:breadcrumbs="breadcrumbsEnabled"
-				:themeToggleEnabled="themeToggleEnabled"
-			>
-			<template #toolbar>
-				<ExampleHeaderThemeSwitcher
-					v-if="themeSwitcherEnabled"
-					:include-supplemental-themes="includeSupplementalThemes"
-				/>
-				<QuickSearch
-					v-if="quickSearchEnabled"
-					ref="quickSearchRef"
-					placeholder="Search items..."
-					:search-fields="['title', 'name', 'description', 'category']"
-					:max-results="15"
-					:fetch-results="dummySearchFetchEnabled ? dummyFetchResults : null"
+		<AppSkeleton>
+			<template #header>
+				<Navigation ref="topBarNavigation">
+					<Header
+						:username="headerUsername"
+						:login-route="headerLoginRoute"
+						@toggleSidebar="toggleSidebar"
+						@logoClick="goToIndex"
+						@userClick="goToUserDetails"
+						title="PicoCrank"
+						:logoUrl="logoUrl"
+						:sidebarEnabled="sidebarEnabled"
+						:navigation="navigation"
+						:topBarNavigation="topBarNavigation"
+						:topBarEnabled="topBarEnabled"
+						:showBranding="brandingEnabled"
+						:breadcrumbs="breadcrumbsEnabled"
+						:themeToggleEnabled="themeToggleEnabled"
+					>
+						<template #toolbar>
+							<ExampleHeaderThemeSwitcher
+								v-if="themeSwitcherEnabled"
+								:include-supplemental-themes="includeSupplementalThemes"
+							/>
+							<QuickSearch
+								v-if="quickSearchEnabled"
+								ref="quickSearchRef"
+								placeholder="Search items..."
+								:search-fields="['title', 'name', 'description', 'category']"
+								:max-results="15"
+								:fetch-results="dummySearchFetchEnabled ? dummyFetchResults : null"
+							/>
+						</template>
+					</Header>
+				</Navigation>
+			</template>
+
+			<template #sidebar>
+				<Sidebar v-if="sidebarEnabled" ref="sidebar" />
+			</template>
+
+			<template #banners>
+				<NotificationBlock
+					v-if="bannerEnabled"
+					type="warning"
+					role="status"
+					message="An example application banner."
 				/>
 			</template>
-		</Header>
-		</Navigation>
 
-		<div id = "layout">
-			<Sidebar v-if="sidebarEnabled" ref = "sidebar" />
+			<router-view />
 
-			<div id = "content">
-				<main>
-					<router-view />
-				</main>
-
-				<footer>
-					<span><a href = "https://github.com/jamesread/picocrank">PicoCrank</a></span>
-				</footer>
-			</div>
-		</div>
+			<template #footer>
+				<span><a href="https://github.com/jamesread/picocrank">PicoCrank</a></span>
+			</template>
+		</AppSkeleton>
 	</Navigation>
 
 	<NotificationPopups />
@@ -57,9 +66,11 @@
 	import { useRouter } from 'vue-router';
 	import { UserIcon } from '@hugeicons/core-free-icons'
 
+	import AppSkeleton from './../components/AppSkeleton.vue'
 	import QuickSearch from './../components/QuickSearch.vue'
 	import ExampleHeaderThemeSwitcher from './ExampleHeaderThemeSwitcher.vue'
 	import Navigation from './../components/Navigation.vue'
+	import NotificationBlock from './../components/NotificationBlock.vue'
 	import NotificationPopups from './../components/NotificationPopups.vue'
 	import '../../styles.css'
 	import '../composables/useTheme.js'
@@ -79,6 +90,7 @@
 	const topBarNavigation = ref(null);
 	const sidebarEnabled = ref(true);
 	const brandingEnabled = ref(true);
+	const bannerEnabled = ref(false);
 	const quickSearchEnabled = ref(true);
 	const dummySearchFetchEnabled = ref(false);
 	const themeToggleEnabled = ref(true);
@@ -111,6 +123,10 @@
 
 	function toggleBrandingEnabled() {
 		brandingEnabled.value = !brandingEnabled.value;
+	}
+
+	function toggleBannerEnabled() {
+		bannerEnabled.value = !bannerEnabled.value;
 	}
 
 	function toggleQuickSearchEnabled() {
@@ -194,6 +210,8 @@
 	provide('toggleSidebarEnabled', toggleSidebarEnabled);
 	provide('brandingEnabled', brandingEnabled);
 	provide('toggleBrandingEnabled', toggleBrandingEnabled);
+	provide('bannerEnabled', bannerEnabled);
+	provide('toggleBannerEnabled', toggleBannerEnabled);
 
 	provide('quickSearchEnabled', quickSearchEnabled);
 	provide('toggleQuickSearchEnabled', toggleQuickSearchEnabled);
