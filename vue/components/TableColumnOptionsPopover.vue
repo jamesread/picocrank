@@ -654,16 +654,6 @@ async function submitSetDefaultPreset(presetId) {
 	}
 }
 
-function submitLoadDeveloperDefaults() {
-	loadError.value = ''
-	const result = props.loadDeveloperDefaults?.()
-	if (!result?.ok) {
-		loadError.value = result?.error || 'Unable to load defaults.'
-		return
-	}
-	resetDraft()
-}
-
 function resetDraft() {
 	draftOrder.value = [...props.columnKeys]
 	draftVisibleKeys.value = [...props.visibleKeys]

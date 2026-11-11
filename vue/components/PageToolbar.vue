@@ -22,7 +22,7 @@ defineProps({
 .page-toolbar {
 	--page-toolbar-pull: 1em;
 	position: sticky;
-	top: var(--picocrank-fixed-header-offset);
+	top: calc(var(--picocrank-fixed-header-offset) + var(--picocrank-app-banners-height, 0px));
 	/* Below header.fixed (5) so its drop shadow draws over the toolbar. */
 	z-index: 4;
 	display: flex;
