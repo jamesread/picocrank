@@ -32,7 +32,7 @@
 		<ul>
 			<li><strong>Connection lost</strong> uses <code>role="alert"</code> and has a fixed id, so pressing it again replaces the banner instead of adding another.</li>
 			<li><strong>Maintenance</strong> stays until the application removes it.</li>
-			<li><strong>New version</strong> includes a router link and is dismissible: use its × button to close it.</li>
+			<li><strong>New version</strong> includes a router link and is dismissible: click it, or its × button, to close it.</li>
 		</ul>
 
 		<p class="subtle">
@@ -189,7 +189,7 @@ function onReconnect() {
 	appBanners.dismiss('connection-lost')
 }
 
-// A dismissible banner has a × button the user can close it with.
+// The user can close a dismissible banner by clicking it or its × button.
 appBanners.show({
 	id: 'new-version',
 	type: 'note',

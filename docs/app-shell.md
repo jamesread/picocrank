@@ -128,7 +128,8 @@ appBanners.dismiss('connection-lost')
 
 Leave a banner non-dismissible when the application should decide when it goes,
 such as a lost connection. Set `dismissible: true` when the user may close it:
-the banner then ends with a × button that removes it:
+clicking the banner, or the × button at its end, removes it. Links inside it
+still work without dismissing it:
 
 ```js
 appBanners.show({

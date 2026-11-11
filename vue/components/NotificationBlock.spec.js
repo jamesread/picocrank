@@ -95,13 +95,25 @@ describe('NotificationBlock', () => {
 		expect(wrapper.emitted('click')).toBeUndefined()
 	})
 
-	it('does not dismiss when the body is clicked', async () => {
+	it('still dismisses when the body is clicked', async () => {
 		const wrapper = mountBlock({ message: 'Status update.', dismissible: true })
 
 		await wrapper.trigger('click')
 
 		expect(wrapper.emitted('click')).toHaveLength(1)
+		expect(wrapper.emitted('dismiss')).toHaveLength(1)
+		expect(wrapper.classes()).toContain('clickable')
+	})
+
+	it('does not dismiss when a link in the body is followed', async () => {
+		const wrapper = mountBlock({
+			dismissible: true,
+			linkLabel: 'Release notes',
+			linkHref: '#notes',
+		})
+
+		await wrapper.find('.notification-body a').trigger('click')
+
 		expect(wrapper.emitted('dismiss')).toBeUndefined()
-		expect(wrapper.classes()).not.toContain('clickable')
 	})
 })

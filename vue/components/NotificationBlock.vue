@@ -116,8 +116,9 @@ const props = defineProps({
 		default: false,
 	},
 	/**
-	 * Show a close (×) button after any copy button. Clicking it emits
-	 * `dismiss`; the parent removes the notification.
+	 * Clicking the notification, or the close (×) button shown after any copy
+	 * button, emits `dismiss`; the parent removes the notification. Links and
+	 * the copy button inside it do not dismiss.
 	 */
 	dismissible: {
 		type: Boolean,
@@ -161,11 +162,14 @@ const rootClasses = computed(() => ({
 	notification: true,
 	[props.type]: true,
 	'attached-below': props.attachedBelow,
-	clickable: props.clickable,
+	clickable: props.clickable || props.dismissible,
 }))
 
 function handleClick(event) {
 	emit('click', event)
+	if (props.dismissible) {
+		emit('dismiss', event)
+	}
 }
 
 function copyText() {
