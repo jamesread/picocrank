@@ -28,11 +28,11 @@
 			class="reorder-list-row"
 			:class="{
 				'is-dragging': draggingKey === keyOf(item, index),
-				'is-drag-whole-row': dragWholeRow && !disabled && !isItemReorderDisabled(item, index),
-				'is-reorder-disabled': isItemReorderDisabled(item, index),
+				'is-drag-whole-row': dragWholeRow && !disabled && !itemReorderDisabled(item, index),
+				'is-reorder-disabled': itemReorderDisabled(item, index),
 			}"
 			:data-reorder-key="keyOf(item, index)"
-			:draggable="dragWholeRow && !disabled && !isItemReorderDisabled(item, index) ? 'true' : 'false'"
+			:draggable="dragWholeRow && !disabled && !itemReorderDisabled(item, index) ? 'true' : 'false'"
 			:tabindex="rowTabIndex"
 			:aria-label="rowDragAriaLabel(item, index)"
 			@dragstart="onRowDragStart(item, index, $event)"
@@ -81,8 +81,8 @@
 				<span
 					v-if="showHandleGrip"
 					class="reorder-list-handle"
-					:class="{ 'is-disabled': disabled || isItemReorderDisabled(item, index) }"
-					:draggable="disabled || isItemReorderDisabled(item, index) ? 'false' : 'true'"
+					:class="{ 'is-disabled': disabled || itemReorderDisabled(item, index) }"
+					:draggable="disabled || itemReorderDisabled(item, index) ? 'false' : 'true'"
 					:aria-hidden="showMoveButtons ? 'true' : undefined"
 					:tabindex="handleTabIndex"
 					:aria-label="showMoveButtons ? undefined : `Reorder ${labelOf(item, index)}. Arrow up or arrow down to move.`"
@@ -256,13 +256,13 @@ function indexOfKey(key) {
 	return items.value.findIndex((item, index) => keyOf(item, index) === key)
 }
 
-function isItemReorderDisabled(item, index) {
+function itemReorderDisabled(item, index) {
 	return typeof props.isItemReorderDisabled === 'function'
 		&& props.isItemReorderDisabled(item, index)
 }
 
 function canMove(index, direction) {
-	if (props.disabled || isItemReorderDisabled(items.value[index], index)) {
+	if (props.disabled || itemReorderDisabled(items.value[index], index)) {
 		return false
 	}
 	const target = index + direction
@@ -350,7 +350,7 @@ function dragStartBlocked(event) {
 }
 
 function beginDrag(item, index, event) {
-	if (props.disabled || isItemReorderDisabled(item, index)) {
+	if (props.disabled || itemReorderDisabled(item, index)) {
 		event.preventDefault()
 		return
 	}

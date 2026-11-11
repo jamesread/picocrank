@@ -168,6 +168,24 @@ describe('ReorderList', () => {
 		expect(wrapper.classes()).toContain('is-disabled')
 	})
 
+	it('locks only the rows that isItemReorderDisabled returns true for', async () => {
+		const wrapper = mountList({
+			isItemReorderDisabled: (item) => item.id === 'a',
+		})
+		const rowsEl = wrapper.findAll('.reorder-list-row')
+		const handles = wrapper.findAll('.reorder-list-handle')
+
+		expect(rowsEl[0].classes()).toContain('is-reorder-disabled')
+		expect(handles[0].classes()).toContain('is-disabled')
+		expect(handles[0].attributes('draggable')).toBe('false')
+		expect(rowsEl[1].classes()).not.toContain('is-reorder-disabled')
+		expect(handles[1].attributes('draggable')).toBe('true')
+
+		await handles[0].trigger('dragstart', { dataTransfer: dataTransfer() })
+		await rowsEl[2].trigger('drop')
+		expect(wrapper.emitted('update:modelValue')).toBeUndefined()
+	})
+
 	it('moves with the arrow keys when move buttons are hidden', async () => {
 		const wrapper = mountList()
 		const handle = wrapper.findAll('.reorder-list-handle')[0]
