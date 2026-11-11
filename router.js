@@ -20,6 +20,7 @@ import { Loading03Icon } from '@hugeicons/core-free-icons';
 import { DragDropVerticalIcon } from '@hugeicons/core-free-icons';
 import { ArrowDown01Icon } from '@hugeicons/core-free-icons';
 import { LayoutTopIcon } from '@hugeicons/core-free-icons';
+import { Notification01Icon } from '@hugeicons/core-free-icons';
 
 import {
 	hubChildBreadcrumbs,
@@ -199,6 +200,16 @@ const routes = [
       title: 'Dialog',
       icon: InformationCircleIcon,
       breadcrumbs: hubChildBreadcrumbs('NavFeedbackStatusHub', 'DialogExample', 'Dialog'),
+    }
+  },
+  {
+    name: 'AppShellExample',
+    path: '/app-shell-example',
+    component: () => import('./vue/examples/AppShellExample.vue'),
+    meta: {
+      title: 'App shell banners',
+      icon: Notification01Icon,
+      breadcrumbs: hubChildBreadcrumbs('NavLayoutsHub', 'AppShellExample', 'App shell banners'),
     }
   },
   {

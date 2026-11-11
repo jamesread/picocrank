@@ -24,13 +24,28 @@
 		<button
 			v-if="showCopyButton"
 			type="button"
-			class="notification-copy"
+			class="notification-action notification-copy"
 			:title="copied ? 'Copied' : 'Copy to clipboard'"
 			:aria-label="copied ? 'Copied' : 'Copy to clipboard'"
 			@click.stop="copyToClipboard"
 		>
 			<HugeiconsIcon
 				:icon="copied ? CopyCheckIcon : Copy01Icon"
+				width="1em"
+				height="1em"
+				aria-hidden="true"
+			/>
+		</button>
+		<button
+			v-if="dismissible"
+			type="button"
+			class="notification-action notification-dismiss"
+			title="Dismiss"
+			aria-label="Dismiss"
+			@click.stop="emit('dismiss', $event)"
+		>
+			<HugeiconsIcon
+				:icon="Cancel01Icon"
 				width="1em"
 				height="1em"
 				aria-hidden="true"
@@ -43,7 +58,7 @@
 import { computed, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import { HugeiconsIcon } from '@hugeicons/vue'
-import { Copy01Icon, CopyCheckIcon } from '@hugeicons/core-free-icons'
+import { Cancel01Icon, Copy01Icon, CopyCheckIcon } from '@hugeicons/core-free-icons'
 
 const TYPE_LABELS = {
 	info: 'INFO:',
@@ -100,6 +115,10 @@ const props = defineProps({
 		type: Boolean,
 		default: false,
 	},
+	/**
+	 * Show a close (×) button after any copy button. Clicking it emits
+	 * `dismiss`; the parent removes the notification.
+	 */
 	dismissible: {
 		type: Boolean,
 		default: false,
@@ -142,14 +161,11 @@ const rootClasses = computed(() => ({
 	notification: true,
 	[props.type]: true,
 	'attached-below': props.attachedBelow,
-	clickable: props.clickable || props.dismissible,
+	clickable: props.clickable,
 }))
 
 function handleClick(event) {
 	emit('click', event)
-	if (props.dismissible) {
-		emit('dismiss', event)
-	}
 }
 
 function copyText() {
@@ -211,7 +227,7 @@ async function copyToClipboard() {
 	border-color: var(--karma-bad-border);
 }
 
-.notification-copy {
+.notification-action {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
@@ -229,7 +245,7 @@ async function copyToClipboard() {
 	opacity: 0.7;
 }
 
-.notification-copy:hover {
+.notification-action:hover {
 	opacity: 1;
 	background: var(--hover-background-color, color-mix(in srgb, var(--text-color) 10%, transparent));
 }

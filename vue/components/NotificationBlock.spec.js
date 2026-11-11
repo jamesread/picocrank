@@ -68,4 +68,40 @@ describe('NotificationBlock', () => {
 
 		expect(wrapper.emitted('dismiss')).toBeUndefined()
 	})
+
+	it('shows a dismiss button only when dismissible', () => {
+		const plain = mountBlock({ message: 'Status update.' })
+		expect(plain.find('.notification-dismiss').exists()).toBe(false)
+
+		const dismissible = mountBlock({ message: 'Status update.', dismissible: true })
+		expect(dismissible.find('.notification-dismiss').attributes('aria-label')).toBe('Dismiss')
+	})
+
+	it('puts the dismiss button after the copy button', () => {
+		const wrapper = mountBlock({ type: 'critical', message: 'Boom.', dismissible: true })
+		const classes = wrapper.findAll('button').map((button) => button.classes())
+
+		expect(classes).toHaveLength(2)
+		expect(classes[0]).toContain('notification-copy')
+		expect(classes[1]).toContain('notification-dismiss')
+	})
+
+	it('emits dismiss when the dismiss button is clicked, without a click event', async () => {
+		const wrapper = mountBlock({ message: 'Status update.', dismissible: true })
+
+		await wrapper.find('.notification-dismiss').trigger('click')
+
+		expect(wrapper.emitted('dismiss')).toHaveLength(1)
+		expect(wrapper.emitted('click')).toBeUndefined()
+	})
+
+	it('does not dismiss when the body is clicked', async () => {
+		const wrapper = mountBlock({ message: 'Status update.', dismissible: true })
+
+		await wrapper.trigger('click')
+
+		expect(wrapper.emitted('click')).toHaveLength(1)
+		expect(wrapper.emitted('dismiss')).toBeUndefined()
+		expect(wrapper.classes()).not.toContain('clickable')
+	})
 })
