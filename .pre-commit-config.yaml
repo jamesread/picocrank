@@ -1,0 +1,42 @@
+---
+# See https://pre-commit.com. Install the hooks, including the commit
+# message check, with:
+#   pre-commit install --hook-type pre-commit --hook-type commit-msg
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-json
+      - id: check-added-large-files
+      - id: check-merge-conflict
+      - id: check-case-conflict
+      - id: detect-private-key
+      - id: mixed-line-ending
+        args: ['--fix', 'lf']
+
+  # Conventional commits drive semantic-release (see .releaserc.yaml).
+  - repo: https://github.com/compilerla/conventional-pre-commit
+    rev: v3.4.0
+    hooks:
+      - id: conventional-pre-commit
+        stages: [commit-msg]
+        args: []
+
+  - repo: local
+    hooks:
+      - id: lint
+        name: eslint
+        entry: make lint
+        language: system
+        pass_filenames: false
+        files: \.(js|vue|mjs|cjs)$
+
+      - id: test
+        name: vitest
+        entry: make test
+        language: system
+        pass_filenames: false
+        files: \.(js|vue|mjs|cjs)$|^package(-lock)?\.json$
