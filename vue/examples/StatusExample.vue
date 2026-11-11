@@ -79,7 +79,7 @@
 		</FormLayout>
 
 		<p v-if="dismissibleNotifications" class="subtle">
-			Click a dismissible notification to remove it.
+			Use the × button on a dismissible notification to remove it.
 		</p>
 
 		<NotificationBlock
@@ -204,7 +204,7 @@ const notificationTypeOptions = [
 const builderFeatureOptions = [
 	{ value: 'link', label: 'Include inline link in body' },
 	{ value: 'clickable', label: 'Whole notification is clickable' },
-	{ value: 'dismissible', label: 'Dismiss on click' },
+	{ value: 'dismissible', label: 'Dismissible (× button)' },
 ]
 
 const referenceNotifications = [

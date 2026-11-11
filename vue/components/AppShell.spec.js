@@ -1,9 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { nextTick } from 'vue'
-import AppSkeleton from './AppSkeleton.vue'
+import AppShell from './AppShell.vue'
 
-describe('AppSkeleton', () => {
+describe('AppShell', () => {
 	let observedCallback
 
 	beforeEach(() => {
@@ -20,12 +20,12 @@ describe('AppSkeleton', () => {
 		vi.unstubAllGlobals()
 	})
 
-	function mountSkeleton(slots) {
-		return mount(AppSkeleton, { slots })
+	function mountShell(slots) {
+		return mount(AppShell, { slots })
 	}
 
 	it('places each slot in the application layout', () => {
-		const wrapper = mountSkeleton({
+		const wrapper = mountShell({
 			header: '<header class="test-header" />',
 			sidebar: '<aside class="test-sidebar" />',
 			banners: '<p class="test-banner" />',
@@ -33,15 +33,15 @@ describe('AppSkeleton', () => {
 			footer: '<p class="test-footer" />',
 		})
 
-		expect(wrapper.find('.app-skeleton > .test-header').exists()).toBe(true)
-		expect(wrapper.find('.app-skeleton > #layout > .test-sidebar').exists()).toBe(true)
-		expect(wrapper.find('#content > .app-skeleton-banners > .test-banner').exists()).toBe(true)
+		expect(wrapper.find('.app-shell > .test-header').exists()).toBe(true)
+		expect(wrapper.find('.app-shell > #layout > .test-sidebar').exists()).toBe(true)
+		expect(wrapper.find('#content > .app-shell-banners > .test-banner').exists()).toBe(true)
 		expect(wrapper.find('#content > main > .test-page').exists()).toBe(true)
 		expect(wrapper.find('#content > footer > .test-footer').exists()).toBe(true)
 	})
 
 	it('keeps banners out of the header', () => {
-		const wrapper = mountSkeleton({
+		const wrapper = mountShell({
 			header: '<header />',
 			banners: '<p class="test-banner" />',
 		})
@@ -50,20 +50,20 @@ describe('AppSkeleton', () => {
 	})
 
 	it('omits the footer element when the footer slot is not used', () => {
-		const wrapper = mountSkeleton({ default: '<p />' })
+		const wrapper = mountShell({ default: '<p />' })
 
 		expect(wrapper.find('footer').exists()).toBe(false)
 	})
 
 	it('publishes the banner height for other sticky elements', async () => {
-		const wrapper = mountSkeleton({ banners: '<p />' })
-		const banners = wrapper.find('.app-skeleton-banners').element
+		const wrapper = mountShell({ banners: '<p />' })
+		const banners = wrapper.find('.app-shell-banners').element
 		banners.getBoundingClientRect = () => ({ height: 42 })
 
 		observedCallback()
 		await nextTick()
 
-		expect(wrapper.find('.app-skeleton').attributes('style'))
+		expect(wrapper.find('.app-shell').attributes('style'))
 			.toContain('--picocrank-app-banners-height: 42px')
 	})
 })

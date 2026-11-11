@@ -1,6 +1,6 @@
 <template>
 	<Navigation ref="navigation">
-		<AppSkeleton>
+		<AppShell>
 			<template #header>
 				<Navigation ref="topBarNavigation">
 					<Header
@@ -48,6 +48,13 @@
 					role="status"
 					message="An example application banner."
 				/>
+				<NotificationBlock
+					v-for="banner in appBanners"
+					:key="banner.id"
+					v-bind="banner.props"
+					:dismissible="banner.dismissible"
+					@dismiss="dismissAppBanner(banner.id)"
+				/>
 			</template>
 
 			<router-view />
@@ -55,7 +62,7 @@
 			<template #footer>
 				<span><a href="https://github.com/jamesread/picocrank">PicoCrank</a></span>
 			</template>
-		</AppSkeleton>
+		</AppShell>
 	</Navigation>
 
 	<NotificationPopups />
@@ -66,7 +73,7 @@
 	import { useRouter } from 'vue-router';
 	import { UserIcon } from '@hugeicons/core-free-icons'
 
-	import AppSkeleton from './../components/AppSkeleton.vue'
+	import AppShell from './../components/AppShell.vue'
 	import QuickSearch from './../components/QuickSearch.vue'
 	import ExampleHeaderThemeSwitcher from './ExampleHeaderThemeSwitcher.vue'
 	import Navigation from './../components/Navigation.vue'
@@ -127,6 +134,43 @@
 
 	function toggleBannerEnabled() {
 		bannerEnabled.value = !bannerEnabled.value;
+	}
+
+	// Application banners shown in AppShell's banners slot. Pages add them through
+	// the injected 'appBanners' API; see AppShellExample.vue.
+	const appBanners = ref([]);
+	let nextAppBannerId = 1;
+
+	// Skip ids already in use, so a generated id never replaces a banner that was
+	// given that id explicitly.
+	function generateAppBannerId() {
+		let candidate;
+		do {
+			candidate = `app-banner-${nextAppBannerId++}`;
+		} while (appBanners.value.some((b) => b.id === candidate));
+		return candidate;
+	}
+
+	function showAppBanner({ id, dismissible = false, ...props }) {
+		const bannerId = id ?? generateAppBannerId();
+		const banner = { id: bannerId, dismissible, props };
+		const existing = appBanners.value.findIndex((b) => b.id === bannerId);
+
+		if (existing === -1) {
+			appBanners.value = [...appBanners.value, banner];
+		} else {
+			appBanners.value = appBanners.value.map((b, i) => (i === existing ? banner : b));
+		}
+
+		return bannerId;
+	}
+
+	function dismissAppBanner(id) {
+		appBanners.value = appBanners.value.filter((banner) => banner.id !== id);
+	}
+
+	function clearAppBanners() {
+		appBanners.value = [];
 	}
 
 	function toggleQuickSearchEnabled() {
@@ -212,6 +256,12 @@
 	provide('toggleBrandingEnabled', toggleBrandingEnabled);
 	provide('bannerEnabled', bannerEnabled);
 	provide('toggleBannerEnabled', toggleBannerEnabled);
+	provide('appBanners', {
+		banners: appBanners,
+		show: showAppBanner,
+		dismiss: dismissAppBanner,
+		clear: clearAppBanners,
+	});
 
 	provide('quickSearchEnabled', quickSearchEnabled);
 	provide('toggleQuickSearchEnabled', toggleQuickSearchEnabled);
