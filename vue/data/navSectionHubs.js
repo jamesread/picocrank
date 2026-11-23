@@ -52,6 +52,11 @@ export const navSectionHubs = {
 				options: { description: 'Collapsible subsections' },
 			},
 			{
+				name: 'AppShellExample',
+				title: 'App shell banners',
+				options: { description: 'Always-visible application notices' },
+			},
+			{
 				name: 'PageToolbarExample',
 				title: 'Page toolbar',
 				options: { description: 'Sticky page-level actions joined to the header' },

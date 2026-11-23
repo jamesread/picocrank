@@ -9,6 +9,21 @@
 		</p>
 	</Section>
 
+	<Section title="Banners" subtitle="Application notices shown below the header">
+		<FormLayout @submit.prevent>
+			<FormField label="Example banner" component-has-label>
+				<RadioGroup
+					name="ps-banner"
+					variant="boolean"
+					aria-label="Example banner"
+					:model-value="bannerEnabled"
+					:options="showHideOptions"
+					@update:model-value="setBannerEnabled"
+				/>
+			</FormField>
+		</FormLayout>
+	</Section>
+
 	<Section title="Header" subtitle="Branding, search, and top navigation">
 		<FormLayout @submit.prevent>
 			<FormField label="Logo and title" component-has-label>
@@ -200,6 +215,8 @@ const sidebarEnabled = inject('sidebarEnabled')
 const toggleSidebarEnabled = inject('toggleSidebarEnabled')
 const brandingEnabled = inject('brandingEnabled')
 const toggleBrandingEnabled = inject('toggleBrandingEnabled')
+const bannerEnabled = inject('bannerEnabled')
+const toggleBannerEnabled = inject('toggleBannerEnabled')
 const quickSearchEnabled = inject('quickSearchEnabled')
 const toggleQuickSearchEnabled = inject('toggleQuickSearchEnabled')
 const dummySearchFetchEnabled = inject('dummySearchFetchEnabled')
@@ -226,6 +243,10 @@ function setFlag(flag, toggle, want) {
 
 function setBrandingEnabled(want) {
 	setFlag(brandingEnabled, toggleBrandingEnabled, want)
+}
+
+function setBannerEnabled(want) {
+	setFlag(bannerEnabled, toggleBannerEnabled, want)
 }
 
 function setQuickSearchEnabled(want) {

@@ -1,5 +1,10 @@
 <template>
-	<div class="notification-popup" role="status">
+	<div
+		class="notification-popup"
+		role="status"
+		title="Click to dismiss"
+		@click="emit('dismiss', popup.id)"
+	>
 		<NotificationBlock
 			:type="notificationType"
 			:label="popup.label || ''"
@@ -11,7 +16,6 @@
 					v-if="popup.linkTo && !isExternalLink"
 					:to="popup.linkTo"
 					class="notification-popup-link"
-					@click="emit('dismiss', popup.id)"
 				>
 					{{ popup.linkLabel || 'View' }}
 				</RouterLink>
@@ -22,7 +26,6 @@
 					class="notification-popup-link"
 					target="_blank"
 					rel="noopener noreferrer"
-					@click="emit('dismiss', popup.id)"
 				>
 					{{ popup.linkLabel || 'View' }}
 				</a>
@@ -69,6 +72,8 @@ const isExternalLink = computed(() =>
 	width: min(22rem, calc(100vw - 2rem));
 	margin: 0;
 	box-shadow: 0 4px 12px color-mix(in srgb, var(--shadow-color) 60%, transparent);
+	/* Clicking anywhere on the popup dismisses it; links still navigate first. */
+	cursor: pointer;
 }
 
 .notification-popup :deep(.notification) {

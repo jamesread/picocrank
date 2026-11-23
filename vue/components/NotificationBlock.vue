@@ -24,13 +24,28 @@
 		<button
 			v-if="showCopyButton"
 			type="button"
-			class="notification-copy"
+			class="notification-action notification-copy"
 			:title="copied ? 'Copied' : 'Copy to clipboard'"
 			:aria-label="copied ? 'Copied' : 'Copy to clipboard'"
 			@click.stop="copyToClipboard"
 		>
 			<HugeiconsIcon
 				:icon="copied ? CopyCheckIcon : Copy01Icon"
+				width="1em"
+				height="1em"
+				aria-hidden="true"
+			/>
+		</button>
+		<button
+			v-if="dismissible"
+			type="button"
+			class="notification-action notification-dismiss"
+			title="Dismiss"
+			aria-label="Dismiss"
+			@click.stop="emit('dismiss', $event)"
+		>
+			<HugeiconsIcon
+				:icon="Cancel01Icon"
 				width="1em"
 				height="1em"
 				aria-hidden="true"
@@ -43,7 +58,7 @@
 import { computed, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import { HugeiconsIcon } from '@hugeicons/vue'
-import { Copy01Icon, CopyCheckIcon } from '@hugeicons/core-free-icons'
+import { Cancel01Icon, Copy01Icon, CopyCheckIcon } from '@hugeicons/core-free-icons'
 
 const TYPE_LABELS = {
 	info: 'INFO:',
@@ -100,6 +115,11 @@ const props = defineProps({
 		type: Boolean,
 		default: false,
 	},
+	/**
+	 * Clicking the notification, or the close (×) button shown after any copy
+	 * button, emits `dismiss`; the parent removes the notification. Links and
+	 * the copy button inside it do not dismiss.
+	 */
 	dismissible: {
 		type: Boolean,
 		default: false,
@@ -211,7 +231,7 @@ async function copyToClipboard() {
 	border-color: var(--karma-bad-border);
 }
 
-.notification-copy {
+.notification-action {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
@@ -229,7 +249,7 @@ async function copyToClipboard() {
 	opacity: 0.7;
 }
 
-.notification-copy:hover {
+.notification-action:hover {
 	opacity: 1;
 	background: var(--hover-background-color, color-mix(in srgb, var(--text-color) 10%, transparent));
 }

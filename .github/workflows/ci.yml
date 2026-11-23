@@ -1,0 +1,52 @@
+name: CI
+
+# Lint, test and build every change before it reaches main, where the Release
+# and Pages workflows run.
+on:
+  push:
+    branches: [ next ]
+  pull_request:
+    branches: [ main, next ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Lint, test and build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify registry signatures
+        run: npm audit signatures
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+      - name: Build (minimal)
+        run: npm run build:minimal
+
+      - name: Build (GitHub Pages)
+        run: npm run build:pages
