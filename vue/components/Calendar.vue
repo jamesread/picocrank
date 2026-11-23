@@ -1,6 +1,7 @@
 <script setup>
-import { ref, computed, watch, onUnmounted, nextTick } from 'vue'
+import { ref, computed, watch, onUnmounted } from 'vue'
 import { HugeiconsIcon } from '@hugeicons/vue'
+import ContextMenu from './ContextMenu.vue'
 
 const props = defineProps({
 	events: {
@@ -568,62 +569,21 @@ function handleContextMenu(event, mouseEvent) {
 
 // --- Day context menu ---
 
-const DAY_CONTEXT_MENU_MARGIN_PX = 8
 const dayContextMenuOpen = ref(false)
-const dayContextMenuStyle = ref({ top: '0px', left: '0px' })
+const dayContextMenuX = ref(0)
+const dayContextMenuY = ref(0)
 const dayContextMenuDate = ref(null)
-const dayContextMenuRef = ref(null)
 
-function positionDayContextMenu(clientX, clientY) {
-  const menu = dayContextMenuRef.value
-  if (!menu) return
-
-  const rect = menu.getBoundingClientRect()
-  const margin = DAY_CONTEXT_MENU_MARGIN_PX
-  let top = clientY
-  let left = clientX
-
-  if (left + rect.width > window.innerWidth - margin) {
-    left = window.innerWidth - rect.width - margin
-  }
-  if (top + rect.height > window.innerHeight - margin) {
-    top = window.innerHeight - rect.height - margin
-  }
-  if (left < margin) left = margin
-  if (top < margin) top = margin
-
-  dayContextMenuStyle.value = {
-    top: `${top}px`,
-    left: `${left}px`,
-  }
-}
+// The views other than the current one.
+const dayContextMenuItems = computed(() => [
+  { id: 'day', label: 'Show only this day' },
+  { id: 'week', label: 'Show only this week' },
+  { id: 'month', label: 'Show full month' },
+].filter(item => item.id !== internalViewMode.value))
 
 function closeDayContextMenu() {
   dayContextMenuOpen.value = false
   dayContextMenuDate.value = null
-}
-
-function onDocumentPointerDownForDayMenu(event) {
-  if (!dayContextMenuOpen.value) return
-  if (dayContextMenuRef.value?.contains(event.target)) return
-  closeDayContextMenu()
-}
-
-function onDocumentKeyDownForDayMenu(event) {
-  if (!dayContextMenuOpen.value) return
-  if (event.key === 'Escape') {
-    closeDayContextMenu()
-  }
-}
-
-function attachDayContextMenuListeners() {
-  window.addEventListener('pointerdown', onDocumentPointerDownForDayMenu, true)
-  window.addEventListener('keydown', onDocumentKeyDownForDayMenu)
-}
-
-function detachDayContextMenuListeners() {
-  window.removeEventListener('pointerdown', onDocumentPointerDownForDayMenu, true)
-  window.removeEventListener('keydown', onDocumentKeyDownForDayMenu)
 }
 
 function onDayContextMenu(date, mouseEvent) {
@@ -633,16 +593,15 @@ function onDayContextMenu(date, mouseEvent) {
   mouseEvent.stopPropagation()
 
   dayContextMenuDate.value = startOfDay(date)
+  dayContextMenuX.value = mouseEvent.clientX
+  dayContextMenuY.value = mouseEvent.clientY
   dayContextMenuOpen.value = true
-  dayContextMenuStyle.value = {
-    top: `${mouseEvent.clientY}px`,
-    left: `${mouseEvent.clientX}px`,
-  }
+}
 
-  nextTick(() => {
-    positionDayContextMenu(mouseEvent.clientX, mouseEvent.clientY)
-    dayContextMenuRef.value?.focus({ preventScroll: true })
-  })
+function onDayContextMenuSelect(item) {
+  if (item.id === 'day') showOnlyThisDay()
+  else if (item.id === 'week') showOnlyThisWeek()
+  else if (item.id === 'month') showFullMonth()
 }
 
 function showOnlyThisWeek() {
@@ -681,14 +640,6 @@ defineExpose({
   showMonthView: () => commitViewChange('month', currentDate.value),
   showWeekView: (date) => commitViewChange('week', date ?? gridStartDate.value),
   showDayView: (date) => commitViewChange('day', date ?? gridStartDate.value),
-})
-
-watch(dayContextMenuOpen, (open) => {
-  if (open) {
-    attachDayContextMenuListeners()
-  } else {
-    detachDayContextMenuListeners()
-  }
 })
 
 // --- Date range selection (click / drag) ---
@@ -810,7 +761,6 @@ function onDayPointerEnter(date) {
 
 onUnmounted(() => {
   detachRangePointerListeners()
-  detachDayContextMenuListeners()
 })
 
 // --- Calendar event drag and drop (HTML5) ---
@@ -1066,55 +1016,16 @@ watch([viewMonth, viewYear], () => {
       </div>
     </div>
 
-    <Teleport to="body">
-      <nav
-        v-if="dayContextMenuOpen"
-        ref="dayContextMenuRef"
-        class="menu context-menu calendar-day-context-menu"
-        role="menu"
-        tabindex="-1"
-        :style="dayContextMenuStyle"
-        aria-label="Day view options"
-        @click.stop
-        @contextmenu.prevent
-      >
-        <ul class="noListStyle">
-          <li>
-            <div>
-              <ul>
-                <li v-if="internalViewMode !== 'day'">
-                  <button
-                    type="button"
-                    role="menuitem"
-                    @click="showOnlyThisDay"
-                  >
-                    Show only this day
-                  </button>
-                </li>
-                <li v-if="internalViewMode !== 'week'">
-                  <button
-                    type="button"
-                    role="menuitem"
-                    @click="showOnlyThisWeek"
-                  >
-                    Show only this week
-                  </button>
-                </li>
-                <li v-if="internalViewMode !== 'month'">
-                  <button
-                    type="button"
-                    role="menuitem"
-                    @click="showFullMonth"
-                  >
-                    Show full month
-                  </button>
-                </li>
-              </ul>
-            </div>
-          </li>
-        </ul>
-      </nav>
-    </Teleport>
+    <ContextMenu
+      v-model:open="dayContextMenuOpen"
+      class="calendar-day-context-menu"
+      aria-label="Day view options"
+      :items="dayContextMenuItems"
+      :client-x="dayContextMenuX"
+      :client-y="dayContextMenuY"
+      @select="onDayContextMenuSelect"
+      @cancel="closeDayContextMenu"
+    />
   </div>
 </template>
 

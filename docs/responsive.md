@@ -36,10 +36,20 @@ handlers and state keep working, and dialogs or popovers they own still show.
 - Menu item text lines up at the left; a button's icon moves to the right-hand end.
 - Keep controls as direct children of the toolbar slot. A wrapper element becomes a
   single menu item; use `display: contents` on it if you need one.
+- Two wrappers have a set behaviour. A `role="group"` element (e.g. previous / Today /
+  next, named with `aria-label`) is content-sized beside the title and stays one compact
+  row in the menu (its icon-only buttons stay icons). A `.toolbar-split` element (e.g. a button and its companion) sits
+  together beside the title, but each of its controls becomes its own menu item.
 
 Other toolbars can use the same behaviour with `useToolbarOverflow` and
 `measureNaturalWidth` (`vue/composables/useToolbarOverflow.js`) and the global
 `.toolbar-overflow-*` classes.
+
+## Sections that fill their container
+
+`<Section fill>` fills the height it is given (as a flex item, or with a height of
+its own): the content area takes the height below the header, and its child can
+scroll inside it while the header stays put, as a calendar or a long table needs.
 
 ## Dialogs
 
@@ -65,6 +75,11 @@ Other toolbars can use the same behaviour with `useToolbarOverflow` and
   close button, e.g. a view selector on narrow screens; name it with `toolbar-label`.
 - Escape, the close button and (unless `:close-on-backdrop="false"`) a backdrop click
   close it. `close` is emitted with the dialog's return value.
+- A `Table` or `Calendar` inside a modal `Dialog` keeps its popovers and context menus usable
+  (column filters, column options, row and day menus): they are teleported into the open dialog
+  rather than `<body>`, which a modal dialog covers and makes inert
+  (`vue/composables/overlayTarget.js`). Escape in one closes it, not the dialog. New floating
+  overlays should use `useOverlayTarget` the same way.
 
 ## Action rows
 

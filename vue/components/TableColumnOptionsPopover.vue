@@ -1,5 +1,5 @@
 <template>
-	<Teleport to="body">
+	<Teleport :to="teleportTo">
 		<div
 			v-if="open"
 			ref="popoverRef"
@@ -38,7 +38,7 @@
 									:key="header.key"
 									:value="header.key"
 								>
-									{{ header.label || header.key }}
+									{{ headerAccessibleName(header) }}
 								</option>
 							</select>
 						</label>
@@ -235,6 +235,8 @@
 
 <script setup>
 import { computed, nextTick, onBeforeUnmount, ref, useId, watch } from 'vue'
+import { useOverlayTarget } from '../composables/overlayTarget.js'
+import { headerAccessibleName } from '../composables/tableHeaders.js'
 import {
 	isFilterEntryActive,
 	normalizeColumnFilterEntries,
@@ -341,6 +343,9 @@ const props = defineProps({
 	},
 })
 
+// Inside a modal Dialog, the popover goes into the dialog so it is not hidden beneath it.
+const teleportTo = useOverlayTarget(() => props.open, () => props.anchorEl)
+
 const emit = defineEmits(['update:open', 'apply', 'cancel'])
 
 const MIN_VISIBLE_OPTIONS = 8
@@ -373,7 +378,7 @@ const headerByKey = computed(() => new Map(
 const groupableColumnOptions = computed(() => groupableHeaders(props.headers, props.groupable))
 
 function columnLabel(key) {
-	return headerByKey.value.get(key)?.label || key
+	return headerAccessibleName(headerByKey.value.get(key)) || key
 }
 
 function columnKeyIdentity(key) {

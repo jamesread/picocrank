@@ -1,0 +1,15 @@
+---
+# semantic-release: conventional commits on main decide the next version.
+# This makes the previous implicit defaults explicit: publish to npm (via
+# OIDC trusted publishing in .github/workflows/release.yml), then create the
+# GitHub release and comment on the issues and PRs it resolves.
+branches:
+  - main
+plugins:
+  - '@semantic-release/commit-analyzer'
+  - '@semantic-release/release-notes-generator'
+  - '@semantic-release/npm'
+  - '@semantic-release/github'
+
+# Existing tags are v-prefixed (v1.41.0); keep that format.
+tagFormat: 'v${version}'

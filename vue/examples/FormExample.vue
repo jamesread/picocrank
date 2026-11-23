@@ -129,6 +129,20 @@
 				/>
 			</FormField>
 
+			<FormField
+				label="Country"
+				for="country"
+				description="A Combobox: type to filter, arrow keys and Enter to pick."
+			>
+				<Combobox
+					id="country"
+					v-model="formData.country"
+					:options="countryOptions"
+					placeholder="Search countries…"
+					clearable
+				/>
+			</FormField>
+
 			<FormField label="Favourite Food" for="favourite-food">
 				<input 
 					id="favourite-food"
@@ -238,6 +252,7 @@ import FormLayout from '../components/FormLayout.vue'
 import FormField from '../components/FormField.vue'
 import RadioGroup from '../components/RadioGroup.vue'
 import CheckGroup from '../components/CheckGroup.vue'
+import Combobox from '../components/Combobox.vue'
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const MIN_COMMENTS_LENGTH = 50
@@ -254,6 +269,7 @@ function createDefaultFormData() {
 		isAdmin: false,
 		website: '',
 		favouriteFood: '',
+		country: null,
 		favouriteColour: '#dee3e7',
 		favouriteNumber: 50,
 		newsletter1: false,
@@ -266,6 +282,17 @@ function createDefaultFormData() {
 }
 
 // From femtocrank/tests/simple.html — Role (default), Term (boolean), Compensation (list)
+const countryOptions = [
+	{ value: 'fr', label: 'France', description: 'Europe' },
+	{ value: 'de', label: 'Germany', description: 'Europe' },
+	{ value: 'jp', label: 'Japan', description: 'Asia' },
+	{ value: 'mx', label: 'Mexico', description: 'North America' },
+	{ value: 'nz', label: 'New Zealand', description: 'Oceania' },
+	{ value: 'za', label: 'South Africa', description: 'Africa' },
+	{ value: 'gb', label: 'United Kingdom', description: 'Europe' },
+	{ value: 'us', label: 'United States', description: 'North America' },
+]
+
 const roleOptions = [
 	{ label: 'Sales', value: 'sales' },
 	{ label: 'Engineering', value: 'engineering' },

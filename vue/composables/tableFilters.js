@@ -1,3 +1,5 @@
+import { headerAccessibleName } from './tableHeaders.js'
+
 const TEXT_OPERATORS = ['contains', 'equals', 'startsWith', 'empty']
 const NUMBER_OPERATORS = ['eq', 'gt', 'gte', 'lt', 'lte']
 
@@ -191,7 +193,7 @@ export function describeFilter(header, entry) {
 		return 'Filter'
 	}
 
-	const label = header?.label || header?.key || 'Column'
+	const label = headerAccessibleName(header) || 'Column'
 
 	switch (filter.type) {
 		case 'text':

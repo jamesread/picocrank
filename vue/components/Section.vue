@@ -1,5 +1,5 @@
 <template>
-	<section :class="'with-header-and-content ' + classes" :id="id">
+	<section :class="['with-header-and-content', classes, { 'section-fill': fill }]" :id="id">
 		<div
 			ref="headerRef"
 			class="section-header flex-row toolbar-overflow-host"
@@ -86,6 +86,15 @@ const props = defineProps({
 	icon: {
 		type: [Object, Array, Function],
 		default: null,
+	},
+	/**
+	 * Fill the height the section is given (as a flex item, or with a height of its own): the
+	 * content area takes the rest of the height below the header, and its child can scroll
+	 * inside it (e.g. a calendar or a long table) while the header stays put.
+	 */
+	fill: {
+		type: Boolean,
+		default: false,
 	},
 	/**
 	 * Move the toolbar into a menu behind a button at the top right of the

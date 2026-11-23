@@ -1,327 +1,330 @@
 <template>
-	<div
-		v-if="showTableChrome"
-		:class="needsTableWrapper ? tableWrapperClasses : undefined"
-		:style="needsTableWrapper ? undefined : { display: 'contents' }"
-	>
-		<table
-			ref="tableElementRef"
-			class="row-hover"
-			:class="{
-				loading: isLoading,
-				'has-column-widths': hasResizedColumns,
-				'is-column-resizing': activeResizeKey != null,
-			}"
-			:aria-busy="isLoading ? 'true' : undefined"
-			:aria-colcount="ariaColCount"
+	<div class="table-root" v-bind="rootAttrs">
+		<div
+			v-if="showTableChrome"
+			:class="needsTableWrapper ? tableWrapperClasses : undefined"
+			:style="needsTableWrapper ? undefined : { display: 'contents' }"
 		>
-			<colgroup>
-				<col v-if="selectable" class="table-select-col-width" />
-				<col
-					v-for="(header, index) in visibleHeaders"
-					:key="header.key || index"
-					:style="columnWidthStyle(header)"
-				/>
-				<col v-if="showColumnOptionsButton" class="table-column-options-col-width" />
-			</colgroup>
-			<thead>
-				<tr>
-					<th
-						v-if="selectable"
-						scope="col"
-						class="table-select-col"
-						@click.stop
-					>
-						<label class="table-select-label">
-							<input
-								type="checkbox"
-								:checked="allDisplayRowsSelected"
-								:indeterminate="someDisplayRowsSelected"
-								:aria-label="allDisplayRowsSelected ? 'Deselect all rows on this page' : 'Select all rows on this page'"
-								@change="toggleSelectAllDisplayRows"
-							>
-						</label>
-					</th>
-					<th
+			<table
+				ref="tableElementRef"
+				class="row-hover"
+				:class="{
+					loading: isLoading,
+					'has-column-widths': hasResizedColumns,
+					'is-column-resizing': activeResizeKey != null,
+				}"
+				:aria-busy="isLoading ? 'true' : undefined"
+				:aria-colcount="ariaColCount"
+			>
+				<colgroup>
+					<col v-if="selectable" class="table-select-col-width" />
+					<col
 						v-for="(header, index) in visibleHeaders"
 						:key="header.key || index"
-						scope="col"
-						:data-column-key="header.key"
-						:class="[headerClasses(header), header.class, { 'is-resizing': activeResizeKey === header.key }]"
-						:style="[columnWidthStyle(header), columnOverflowStyle()]"
-						:aria-sort="headerAriaSort(header)"
-						:aria-haspopup="isHeaderFilterable(header) ? 'dialog' : undefined"
-						:aria-expanded="headerFilterExpanded(header)"
-						@click="onHeaderClick(header, $event)"
-						@contextmenu.prevent="openFilter(header, $event)"
-						@pointerdown="onHeaderPointerDown(header, $event)"
-						@pointermove="longPress.onPointerMove"
-						@pointerup="longPress.onPointerUp"
-						@pointercancel="longPress.onPointerCancel"
-						@pointerleave="longPress.onPointerLeave"
-					>
-						<span class="header-label">
-							{{ header.label || header.key }}<template v-if="headerFilterCount(header)"> ({{ headerFilterCount(header) }})</template>
-						</span>
-
-						<span v-if="filterable && isHeaderFiltered(header)" class="filter-indicator" title="Filtered" aria-hidden="true">⧩</span>
-
-						<span
-							v-if="isHeaderGrouped(header)"
-							class="group-indicator"
-							title="Grouped"
-							aria-hidden="true"
-						>
-							<HugeiconsIcon
-								:icon="Group01Icon"
-								width="0.95em"
-								height="0.95em"
-								:strokeWidth="2"
-								aria-hidden="true"
-							/>
-						</span>
-
-						<span v-if="header.sortable" class="sort-indicator" aria-hidden="true">
-							<HugeiconsIcon
-								v-if="sortBy === header.key && sortDir === 'asc'"
-								:icon="SortByUp02Icon"
-								width="0.95em"
-								height="0.95em"
-								:strokeWidth="2"
-								aria-hidden="true"
-							/>
-							<HugeiconsIcon
-								v-else-if="sortBy === header.key && sortDir === 'desc'"
-								:icon="SortByDown02Icon"
-								width="0.95em"
-								height="0.95em"
-								:strokeWidth="2"
-								aria-hidden="true"
-							/>
-						</span>
-
-						<span
-							v-if="isHeaderResizable(header)"
-							class="column-resize-handle"
-							role="separator"
-							aria-orientation="vertical"
-							:aria-label="`Resize ${header.label || header.key} column`"
-							:aria-valuemin="MIN_COLUMN_WIDTH"
-							:aria-valuenow="columnResizeValueNow(header)"
-							:class="{ 'is-active': activeResizeKey === header.key }"
-							@pointerdown.stop="onResizePointerDown(header, $event)"
-							@dblclick.stop="onResizeDoubleClick(header, $event)"
-							@click.stop
-							@contextmenu.stop.prevent
-						/>
-					</th>
-					<th
-						v-if="showColumnOptionsButton"
-						scope="col"
-						class="actions table-column-options-header"
-					>
-						<span class="actions-menu-trigger">
-							<button
-								ref="columnOptionsButtonRef"
-								type="button"
-								aria-haspopup="dialog"
-								aria-label="Column options"
-								:aria-expanded="columnOptionsOpen ? 'true' : 'false'"
-								@click.stop="openColumnOptions"
-							>
-								<HugeiconsIcon
-									:icon="LayoutGridIcon"
-									width="0.95em"
-									height="0.95em"
-									:strokeWidth="2"
-									aria-hidden="true"
-								/>
-							</button>
-						</span>
-					</th>
-				</tr>
-			</thead>
-			<tbody v-if="hasRows">
-				<template v-for="(item, itemIndex) in displayBodyItems" :key="bodyItemKey(item, itemIndex)">
-					<tr
-						v-if="item.kind === 'group'"
-						class="table-group-row"
-						:class="{ 'table-group-row-collapsed': item.collapsed }"
-					>
-						<td
+						:style="columnWidthStyle(header)"
+					/>
+					<col v-if="showColumnOptionsButton" class="table-column-options-col-width" />
+				</colgroup>
+				<thead>
+					<tr>
+						<th
 							v-if="selectable"
-							class="table-select-col table-group-cell"
-							data-row-click-ignore
-						/>
-						<td
-							:colspan="bodyGroupColspan"
-							class="table-group-cell"
-						>
-							<button
-								type="button"
-								class="table-group-toggle neutral"
-								:aria-expanded="item.collapsed ? 'false' : 'true'"
-								:aria-label="item.collapsed ? 'Expand group' : 'Collapse group'"
-								data-row-click-ignore
-								@click.stop="toggleGroupCollapsed(item.groupId)"
-							>
-								<HugeiconsIcon
-									class="table-group-chevron"
-									:icon="ArrowDown01Icon"
-									width="1em"
-									height="1em"
-									aria-hidden="true"
-								/>
-							</button>
-							<span class="table-group-label">{{ formatGroupValue(item.value) }}</span>
-							<span class="table-group-count subtle">({{ item.count }})</span>
-						</td>
-					</tr>
-					<tr
-						v-else
-						:class="[
-							{
-								'row-clickable': rowClickable,
-								'row-selected': selectable && isRowSelected(item.row, item.displayIndex),
-								'row-context-menu-active': isRowContextMenuTarget(item.row, item.displayIndex),
-							},
-							resolveRowClass(item.row, item.displayIndex),
-						]"
-						:style="resolveRowStyle(item.row, item.displayIndex)"
-						@click="onRowClick(item.row, item.displayIndex, $event)"
-						@contextmenu="onRowContextMenu(item.row, item.displayIndex, $event)"
-					>
-						<td
-							v-if="selectable"
+							scope="col"
 							class="table-select-col"
-							data-row-click-ignore
 							@click.stop
 						>
 							<label class="table-select-label">
 								<input
 									type="checkbox"
-									:checked="isRowSelected(item.row, item.displayIndex)"
-									:aria-label="`Select row ${resolveRowKey(item.row, item.displayIndex)}`"
-									@click.stop="rememberSelectionCheckboxClick(item.row, item.displayIndex, $event)"
-									@change="onSelectionCheckboxChange(item.row, item.displayIndex)"
+									:checked="allDisplayRowsSelected"
+									:indeterminate="someDisplayRowsSelected"
+									:aria-label="allDisplayRowsSelected ? 'Deselect all rows on this page' : 'Select all rows on this page'"
+									@change="toggleSelectAllDisplayRows"
 								>
 							</label>
-						</td>
-						<td
-							v-for="(header, cellIndex) in visibleHeaders"
-							:key="header.key || cellIndex"
-							:ref="(element) => registerCellElement(element, item.row, header, item.displayIndex)"
-							v-bind="resolveCellAttrs(item.row, header, item.displayIndex)"
-							:colspan="bodyColumnColspan(cellIndex) || undefined"
-							:class="[
-								cellClasses(header),
-								header.class,
-								resolveCellClass(item.row, header, item.displayIndex),
-								{ 'table-active-cell': isActiveCell(item.row, header, item.displayIndex) },
-								isLastColumnWithOptions(cellIndex) ? 'table-last-column-with-options' : null,
-							]"
-							:style="[resolveCellStyle(item.row, header, item.displayIndex), columnOverflowStyle()]"
-							:tabindex="isActiveCell(item.row, header, item.displayIndex) ? 0 : -1"
-							@click="onCellClick(item.row, header, item.displayIndex, $event)"
-							@keydown="onCellKeydown(item.row, header, item.displayIndex, $event)"
+						</th>
+						<th
+							v-for="(header, index) in visibleHeaders"
+							:key="header.key || index"
+							scope="col"
+							:data-column-key="header.key"
+							:class="[headerClasses(header), header.class, { 'is-resizing': activeResizeKey === header.key }]"
+							:style="[columnWidthStyle(header), columnOverflowStyle()]"
+							:aria-sort="headerAriaSort(header)"
+							:aria-haspopup="isHeaderFilterable(header) ? 'dialog' : undefined"
+							:aria-expanded="headerFilterExpanded(header)"
+							:aria-label="headerDisplayLabel(header) ? undefined : headerAccessibleName(header)"
+							@click="onHeaderClick(header, $event)"
+							@contextmenu.prevent="openFilter(header, $event)"
+							@pointerdown="onHeaderPointerDown(header, $event)"
+							@pointermove="longPress.onPointerMove"
+							@pointerup="longPress.onPointerUp"
+							@pointercancel="longPress.onPointerCancel"
+							@pointerleave="longPress.onPointerLeave"
 						>
-							<slot
-								v-if="slots[`cell-${header.key}`]"
-								:name="`cell-${header.key}`"
-								:row="item.row"
-								:value="item.row[header.key]"
-								:header="header"
-								:row-index="item.displayIndex"
-								:source-index="sourceRowIndex(item.row, item.displayIndex)"
-							/>
-							<slot
-								v-else-if="slots.cell"
-								name="cell"
-								:row="item.row"
-								:value="item.row[header.key]"
-								:header="header"
-								:row-index="item.displayIndex"
-								:source-index="sourceRowIndex(item.row, item.displayIndex)"
-							/>
-							<span v-else>
-								{{ item.row[header.key] }}
+							<span class="header-label">
+								{{ headerDisplayLabel(header) }}<template v-if="headerFilterCount(header)"> ({{ headerFilterCount(header) }})</template>
 							</span>
-						</td>
-					</tr>
-				</template>
-			</tbody>
-		</table>
 
-		<div v-if="isFilteredEmpty" class="table-filtered-empty-state">
-			<slot name="filtered-empty" :clear-filters="clearAllFilters">
-				<p class="table-filtered-empty-message">No rows match the current filters.</p>
-				<button type="button" class="neutral" @click="clearAllFilters">Clear filters</button>
+							<span v-if="filterable && isHeaderFiltered(header)" class="filter-indicator" title="Filtered" aria-hidden="true">⧩</span>
+
+							<span
+								v-if="isHeaderGrouped(header)"
+								class="group-indicator"
+								title="Grouped"
+								aria-hidden="true"
+							>
+								<HugeiconsIcon
+									:icon="Group01Icon"
+									width="0.95em"
+									height="0.95em"
+									:strokeWidth="2"
+									aria-hidden="true"
+								/>
+							</span>
+
+							<span v-if="header.sortable" class="sort-indicator" aria-hidden="true">
+								<HugeiconsIcon
+									v-if="sortBy === header.key && sortDir === 'asc'"
+									:icon="SortByUp02Icon"
+									width="0.95em"
+									height="0.95em"
+									:strokeWidth="2"
+									aria-hidden="true"
+								/>
+								<HugeiconsIcon
+									v-else-if="sortBy === header.key && sortDir === 'desc'"
+									:icon="SortByDown02Icon"
+									width="0.95em"
+									height="0.95em"
+									:strokeWidth="2"
+									aria-hidden="true"
+								/>
+							</span>
+
+							<span
+								v-if="isHeaderResizable(header)"
+								class="column-resize-handle"
+								role="separator"
+								aria-orientation="vertical"
+								:aria-label="`Resize ${headerAccessibleName(header)} column`"
+								:aria-valuemin="MIN_COLUMN_WIDTH"
+								:aria-valuenow="columnResizeValueNow(header)"
+								:class="{ 'is-active': activeResizeKey === header.key }"
+								@pointerdown.stop="onResizePointerDown(header, $event)"
+								@dblclick.stop="onResizeDoubleClick(header, $event)"
+								@click.stop
+								@contextmenu.stop.prevent
+							/>
+						</th>
+						<th
+							v-if="showColumnOptionsButton"
+							scope="col"
+							class="actions table-column-options-header"
+						>
+							<span class="actions-menu-trigger">
+								<button
+									ref="columnOptionsButtonRef"
+									type="button"
+									aria-haspopup="dialog"
+									aria-label="Column options"
+									:aria-expanded="columnOptionsOpen ? 'true' : 'false'"
+									@click.stop="openColumnOptions"
+								>
+									<HugeiconsIcon
+										:icon="LayoutGridIcon"
+										width="0.95em"
+										height="0.95em"
+										:strokeWidth="2"
+										aria-hidden="true"
+									/>
+								</button>
+							</span>
+						</th>
+					</tr>
+				</thead>
+				<tbody v-if="hasRows">
+					<template v-for="(item, itemIndex) in displayBodyItems" :key="bodyItemKey(item, itemIndex)">
+						<tr
+							v-if="item.kind === 'group'"
+							class="table-group-row"
+							:class="{ 'table-group-row-collapsed': item.collapsed }"
+						>
+							<td
+								v-if="selectable"
+								class="table-select-col table-group-cell"
+								data-row-click-ignore
+							/>
+							<td
+								:colspan="bodyGroupColspan"
+								class="table-group-cell"
+							>
+								<button
+									type="button"
+									class="table-group-toggle neutral"
+									:aria-expanded="item.collapsed ? 'false' : 'true'"
+									:aria-label="item.collapsed ? 'Expand group' : 'Collapse group'"
+									data-row-click-ignore
+									@click.stop="toggleGroupCollapsed(item.groupId)"
+								>
+									<HugeiconsIcon
+										class="table-group-chevron"
+										:icon="ArrowDown01Icon"
+										width="1em"
+										height="1em"
+										aria-hidden="true"
+									/>
+								</button>
+								<span class="table-group-label">{{ formatGroupValue(item.value) }}</span>
+								<span class="table-group-count subtle">({{ item.count }})</span>
+							</td>
+						</tr>
+						<tr
+							v-else
+							:class="[
+								{
+									'row-clickable': rowClickable,
+									'row-selected': selectable && isRowSelected(item.row, item.displayIndex),
+									'row-context-menu-active': isRowContextMenuTarget(item.row, item.displayIndex),
+								},
+								resolveRowClass(item.row, item.displayIndex),
+							]"
+							:style="resolveRowStyle(item.row, item.displayIndex)"
+							@click="onRowClick(item.row, item.displayIndex, $event)"
+							@contextmenu="onRowContextMenu(item.row, item.displayIndex, $event)"
+						>
+							<td
+								v-if="selectable"
+								class="table-select-col"
+								data-row-click-ignore
+								@click.stop
+							>
+								<label class="table-select-label">
+									<input
+										type="checkbox"
+										:checked="isRowSelected(item.row, item.displayIndex)"
+										:aria-label="`Select row ${resolveRowKey(item.row, item.displayIndex)}`"
+										@click.stop="rememberSelectionCheckboxClick(item.row, item.displayIndex, $event)"
+										@change="onSelectionCheckboxChange(item.row, item.displayIndex)"
+									>
+								</label>
+							</td>
+							<td
+								v-for="(header, cellIndex) in visibleHeaders"
+								:key="header.key || cellIndex"
+								:ref="(element) => registerCellElement(element, item.row, header, item.displayIndex)"
+								v-bind="resolveCellAttrs(item.row, header, item.displayIndex)"
+								:colspan="bodyColumnColspan(cellIndex) || undefined"
+								:class="[
+									cellClasses(header),
+									header.class,
+									resolveCellClass(item.row, header, item.displayIndex),
+									{ 'table-active-cell': isActiveCell(item.row, header, item.displayIndex) },
+									isLastColumnWithOptions(cellIndex) ? 'table-last-column-with-options' : null,
+								]"
+								:style="[resolveCellStyle(item.row, header, item.displayIndex), columnOverflowStyle()]"
+								:tabindex="isActiveCell(item.row, header, item.displayIndex) ? 0 : -1"
+								@click="onCellClick(item.row, header, item.displayIndex, $event)"
+								@keydown="onCellKeydown(item.row, header, item.displayIndex, $event)"
+							>
+								<slot
+									v-if="slots[`cell-${header.key}`]"
+									:name="`cell-${header.key}`"
+									:row="item.row"
+									:value="item.row[header.key]"
+									:header="header"
+									:row-index="item.displayIndex"
+									:source-index="sourceRowIndex(item.row, item.displayIndex)"
+								/>
+								<slot
+									v-else-if="slots.cell"
+									name="cell"
+									:row="item.row"
+									:value="item.row[header.key]"
+									:header="header"
+									:row-index="item.displayIndex"
+									:source-index="sourceRowIndex(item.row, item.displayIndex)"
+								/>
+								<span v-else>
+									{{ item.row[header.key] }}
+								</span>
+							</td>
+						</tr>
+					</template>
+				</tbody>
+			</table>
+
+			<div v-if="isFilteredEmpty" class="table-filtered-empty-state">
+				<slot name="filtered-empty" :clear-filters="clearAllFilters">
+					<p class="table-filtered-empty-message">No rows match the current filters.</p>
+					<button type="button" class="neutral" @click="clearAllFilters">Clear filters</button>
+				</slot>
+			</div>
+		</div>
+		<div v-else class="table-empty-state" :class="{ loading: isLoading }">
+			<span v-if="isLoading">Loading…</span>
+			<slot v-else name="empty">
+				<div class="table-empty">There are 0 items to show</div>
 			</slot>
 		</div>
-	</div>
-	<div v-else class="table-empty-state" :class="{ loading: isLoading }">
-		<span v-if="isLoading">Loading…</span>
-		<slot v-else name="empty">
-			<div class="table-empty">There are 0 items to show</div>
-		</slot>
-	</div>
-	<div v-if="showPagination && showTableChrome" class="padding">
-		<Pagination :total="totalCount" v-model:page="page" v-model:page-size="pageSize" />
-	</div>
+		<div v-if="showPagination && showTableChrome" class="padding">
+			<Pagination :total="totalCount" v-model:page="page" v-model:page-size="pageSize" />
+		</div>
 
-	<TableColumnFilterPopover
-		v-if="filterable"
-		v-model:open="filterPopoverOpen"
-		:header="activeFilterHeader"
-		:anchor-el="activeFilterAnchor"
-		:value="activeFilterValue"
-		:rows="props.data"
-		:select-options="activeSelectOptions"
-		:can-hide="canHideActiveFilterColumn"
-		:can-group-by="canGroupByActiveFilterColumn"
-		:is-grouped-column="isActiveFilterHeaderGrouped"
-		@apply="onFilterApply"
-		@clear="onFilterClear"
-		@cancel="onFilterCancel"
-		@hide="onFilterHideColumn"
-		@group-by="onFilterGroupBy"
-	/>
+		<TableColumnFilterPopover
+			v-if="filterable"
+			v-model:open="filterPopoverOpen"
+			:header="activeFilterHeader"
+			:anchor-el="activeFilterAnchor"
+			:value="activeFilterValue"
+			:rows="props.data"
+			:select-options="activeSelectOptions"
+			:can-hide="canHideActiveFilterColumn"
+			:can-group-by="canGroupByActiveFilterColumn"
+			:is-grouped-column="isActiveFilterHeaderGrouped"
+			@apply="onFilterApply"
+			@clear="onFilterClear"
+			@cancel="onFilterCancel"
+			@hide="onFilterHideColumn"
+			@group-by="onFilterGroupBy"
+		/>
 
-	<TableColumnOptionsPopover
-		v-if="showColumnOptionsButton"
-		v-model:open="columnOptionsOpen"
-		:headers="props.headers"
-		:column-keys="resolvedColumnOrder"
-		:visible-keys="visibleColumnKeys"
-		:column-priorities="resolvedColumnPriorities"
-		:default-column-priorities="defaultColumnPriorities"
-		:filters="activeFilters"
-		:rows="props.data"
-		:table-id="props.tableId"
-		:layout-presets-enabled="layoutPresetsAvailable"
-		:presets="savedPresets"
-		:default-preset-id="defaultPresetId"
-		:save-layout-preset="onSavePreset"
-		:overwrite-layout-preset="onOverwritePreset"
-		:load-layout-preset="onLoadPreset"
-		:delete-layout-preset="onDeletePreset"
-		:set-default-layout-preset="onSetDefaultPreset"
-		:load-developer-defaults="loadDeveloperDefaults"
-		:group-by="activeGroupBy"
-		:groupable="props.groupable"
-		:anchor-el="columnOptionsButtonRef"
-		@apply="onColumnOptionsApply"
-		@cancel="onColumnOptionsCancel"
-	/>
+		<TableColumnOptionsPopover
+			v-if="showColumnOptionsButton"
+			v-model:open="columnOptionsOpen"
+			:headers="props.headers"
+			:column-keys="resolvedColumnOrder"
+			:visible-keys="visibleColumnKeys"
+			:column-priorities="resolvedColumnPriorities"
+			:default-column-priorities="defaultColumnPriorities"
+			:filters="activeFilters"
+			:rows="props.data"
+			:table-id="props.tableId"
+			:layout-presets-enabled="layoutPresetsAvailable"
+			:presets="savedPresets"
+			:default-preset-id="defaultPresetId"
+			:save-layout-preset="onSavePreset"
+			:overwrite-layout-preset="onOverwritePreset"
+			:load-layout-preset="onLoadPreset"
+			:delete-layout-preset="onDeletePreset"
+			:set-default-layout-preset="onSetDefaultPreset"
+			:load-developer-defaults="loadDeveloperDefaults"
+			:group-by="activeGroupBy"
+			:groupable="props.groupable"
+			:anchor-el="columnOptionsButtonRef"
+			@apply="onColumnOptionsApply"
+			@cancel="onColumnOptionsCancel"
+		/>
 
-	<TableRowContextMenu
-		v-model:open="rowContextMenuOpen"
-		:items="rowContextMenuItems"
-		:client-x="rowContextMenuX"
-		:client-y="rowContextMenuY"
-		:target-count="rowContextMenuTargetKeys.length"
-		@select="onRowContextMenuSelect"
-	/>
+		<TableRowContextMenu
+			v-model:open="rowContextMenuOpen"
+			:items="rowContextMenuItems"
+			:client-x="rowContextMenuX"
+			:client-y="rowContextMenuY"
+			:target-count="rowContextMenuTargetKeys.length"
+			@select="onRowContextMenuSelect"
+		/>
+	</div>
 </template>
 
 <script setup>
@@ -339,6 +342,7 @@ import TableColumnFilterPopover from './TableColumnFilterPopover.vue'
 import TableColumnOptionsPopover from './TableColumnOptionsPopover.vue'
 import TableRowContextMenu from './TableRowContextMenu.vue'
 import { useLongPress } from '../composables/useLongPress.js'
+import { headerAccessibleName, headerDisplayLabel } from '../composables/tableHeaders.js'
 import {
 	buildSelectOptions,
 	cloneColumnFilterEntries,
@@ -378,6 +382,10 @@ import {
 	formatGroupValue,
 	isHeaderGroupable,
 } from '../composables/tableGroupBy.js'
+
+
+// Attributes go on the root element (rootAttrs), not onto every root node.
+defineOptions({ inheritAttrs: false })
 
 const DEFAULT_PAGE_SIZE = 10
 const MIN_COLUMN_WIDTH = 48
@@ -586,9 +594,16 @@ const emit = defineEmits([
 	'layout-label-change',
 	'update:groupBy',
 	'group-by-change',
+	'filtered-rows-change',
 ])
 
 const attrs = useAttrs()
+// Table has one root, .table-root, laid out as if it were not there (display: contents), so a
+// class, style or other attribute given to Table lands on it and styles what is inside (e.g.
+// `.my-table td`). Listeners are Table's own events, so they stay off it.
+const rootAttrs = computed(() => Object.fromEntries(
+	Object.entries(attrs).filter(([name]) => !/^on[A-Z]/.test(name)),
+))
 const slots = useSlots()
 
 function normalizePage(value) {
@@ -1182,6 +1197,14 @@ const hasRows = computed(() => displayBodyItems.value.length > 0)
 const hasActiveFilters = computed(() =>
 	isFilterQueryActive(activeFilterQuery.value, props.headers, props.data),
 )
+
+/**
+ * Reports the rows the filters leave, in display order and across every page (with remote
+ * fetchRows, the rows of the current fetch), and whether any filter is active.
+ */
+watch([sortedItems, hasActiveFilters], ([rows, filtersActive]) => {
+	emit('filtered-rows-change', rows, { filtersActive })
+}, { immediate: true })
 
 const hasSourceData = computed(() => {
 	if (isRemote.value) {
@@ -2869,6 +2892,8 @@ onBeforeUnmount(() => {
 
 defineExpose({
 	layoutLabel: activeLayoutLabel,
+	/** The rows the filters leave, in display order, across every page. */
+	filteredRows: sortedItems,
 	loadDeveloperDefaults,
 	clearFilters: clearAllFilters,
 	focusActiveCell,
@@ -2880,6 +2905,10 @@ defineExpose({
 </script>
 
 <style scoped>
+.table-root {
+	display: contents;
+}
+
 table.has-column-widths {
 	table-layout: fixed;
 	width: 100%;

@@ -1,5 +1,5 @@
 <template>
-	<Teleport to="body">
+	<Teleport :to="teleportTo">
 		<div
 			v-if="open"
 			ref="popoverRef"
@@ -90,7 +90,7 @@
 						v-model="booleanValue"
 						:options="booleanOptions"
 						variant="list"
-						:aria-label="`Filter ${header?.label || header?.key} by boolean value`"
+						:aria-label="`Filter ${columnLabel} by boolean value`"
 					/>
 				</div>
 
@@ -103,7 +103,7 @@
 						<CheckGroup
 							v-model="draft.values"
 							:options="selectOptions"
-							:aria-label="`Filter ${header?.label || header?.key} by selected values`"
+							:aria-label="`Filter ${columnLabel} by selected values`"
 						/>
 					</div>
 					<p v-if="selectOptions.length === 0" class="subtle">No options available.</p>
@@ -185,6 +185,8 @@
 
 <script setup>
 import { computed, nextTick, onBeforeUnmount, ref, useId, watch } from 'vue'
+import { useOverlayTarget } from '../composables/overlayTarget.js'
+import { headerAccessibleName } from '../composables/tableHeaders.js'
 import { HugeiconsIcon } from '@hugeicons/vue'
 import { Delete02Icon, EyeOffIcon, Group01Icon } from '@hugeicons/core-free-icons'
 import CheckGroup from './CheckGroup.vue'
@@ -238,6 +240,9 @@ const props = defineProps({
 	},
 })
 
+// Inside a modal Dialog, the popover goes into the dialog so it is not hidden beneath it.
+const teleportTo = useOverlayTarget(() => props.open, () => props.anchorEl)
+
 const emit = defineEmits(['update:open', 'apply', 'clear', 'cancel', 'hide', 'group-by'])
 
 const MIN_VISIBLE_OPTIONS = 3
@@ -262,7 +267,7 @@ const filterType = computed(() => {
 	return inferFilterType(props.header, props.rows)
 })
 
-const columnLabel = computed(() => props.header?.label || props.header?.key || '')
+const columnLabel = computed(() => headerAccessibleName(props.header))
 
 const activeSavedCount = computed(() =>
 	savedFilters.value.filter((entry) => isFilterEntryActive(entry)).length,
