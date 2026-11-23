@@ -906,3 +906,61 @@ describe('Table aria and keyboard navigation', () => {
 		})
 	})
 })
+
+describe('Table filtered rows', () => {
+	it('reports the rows the filters leave across every page, and whether a filter is active', async () => {
+		const wrapper = mountTable({ props: { filterable: true, selectable: false } })
+		expect(wrapper.emitted('filtered-rows-change')?.at(-1)).toEqual([rows, { filtersActive: false }])
+
+		await wrapper.setProps({ filters: { city: [{ type: 'text', operator: 'startsWith', value: 'New' }] } })
+		const [filtered, state] = wrapper.emitted('filtered-rows-change').at(-1)
+		expect(filtered.map(row => row.name)).toEqual(['Grace', 'Katherine'])
+		expect(state).toEqual({ filtersActive: true })
+		expect(wrapper.vm.filteredRows.map(row => row.name)).toEqual(['Grace', 'Katherine'])
+	})
+
+	it('includes rows beyond the current page', async () => {
+		const wrapper = mountTable({ props: { selectable: false, showPagination: true, pageSize: 1 } })
+		expect(wrapper.findAll('tbody tr')).toHaveLength(1)
+		expect(wrapper.emitted('filtered-rows-change').at(-1)[0]).toHaveLength(rows.length)
+	})
+})
+
+describe('Table header labels', () => {
+	it('shows the key without a label, nothing for an empty label, and names blank columns', () => {
+		const wrapper = mountTable({
+			props: {
+				selectable: false,
+				headers: [
+					{ key: 'name' },
+					{ key: 'city', label: '', ariaLabel: 'Home city' },
+				],
+			},
+		})
+		const cells = wrapper.findAll('thead th')
+		expect(cells[0].find('.header-label').text()).toBe('name')
+		expect(cells[0].attributes('aria-label')).toBeUndefined()
+		expect(cells[1].find('.header-label').text()).toBe('')
+		expect(cells[1].attributes('aria-label')).toBe('Home city')
+	})
+})
+
+describe('Table root attributes', () => {
+	it('puts a class and attributes on one root without changing layout, keeping listeners as events', async () => {
+		const onRowClick = vi.fn()
+		const wrapper = mount(Table, {
+			attachTo: document.body,
+			props: { headers, data: rows, rowKey: 'name', showPagination: false, filterable: false, columnOptions: false },
+			attrs: { class: 'picker-list', 'data-test': 'rows', onRowClick },
+			global: { stubs: globalStubs },
+		})
+		const root = wrapper.element
+		expect(root.classList.contains('table-root')).toBe(true)
+		expect(root.classList.contains('picker-list')).toBe(true)
+		expect(root.getAttribute('data-test')).toBe('rows')
+		expect(root.querySelector('table')).toBeTruthy()
+		expect(root.hasAttribute('onrowclick')).toBe(false)
+		await wrapper.findAll('tbody tr')[0].trigger('click')
+		expect(onRowClick).toHaveBeenCalledTimes(1)
+	})
+})

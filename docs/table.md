@@ -116,3 +116,42 @@ which is suitable for Tab/Shift+Tab. Pass `{ focus: true, focusOptions? }` to
 activation or movement methods to focus the destination after Vue renders.
 `getActiveCellContext()` returns the cell slot context plus `rowKey`,
 `columnKey`, and `columnIndex`, or `null` when the active cell is not displayed.
+
+## Classes and attributes
+
+A `class`, `style` or other attribute given to `Table` goes on its root element,
+`.table-root`, which is laid out as if it were not there (`display: contents`): use it
+to style what is inside (`.my-table td { … }`). To give the table a box of its own
+(margins, a border), wrap it in an element.
+
+## Header labels
+
+A header without a `label` shows its `key`. An empty `label` (`label: ''`) shows
+nothing, for a column such as row actions; give it an `ariaLabel` to name it for
+assistive technology and in the filter and column options menus. `ariaLabel` also
+names a column whose visible label is not descriptive on its own.
+
+```js
+{ key: 'actions', label: '', ariaLabel: 'Row actions', sortable: false, filterable: false }
+```
+
+## Filtered rows
+
+`filtered-rows-change` reports the rows the column filters leave, in display order
+and across every page (with `fetchRows`, the rows of the current fetch), with
+`{ filtersActive }`. It fires on mount and whenever the data, filters or sort
+change. The same rows are exposed as `filteredRows` on the component instance.
+
+```vue
+<Table :data="rows" :headers="headers" @filtered-rows-change="(rows, { filtersActive }) => …" />
+```
+
+Use it for actions on "the rows shown" (export, bulk edit) instead of repeating the
+filter matching.
+
+## Inside a Dialog
+
+The column filter and column options popovers and the row context menu work in a
+Table inside a modal `Dialog`: they are rendered into the dialog (see
+[Responsive layouts](responsive.md#dialogs)).
+
