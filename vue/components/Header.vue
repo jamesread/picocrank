@@ -516,4 +516,55 @@ header .user-info {
 header .login-link {
 	font-weight: normal;
 }
+
+/*
+ * Compact ThemeSwitcher in the toolbar slot: header chrome instead of a form
+ * control. :has() keeps the ordering from affecting headers without a switcher,
+ * where it would push the theme toggle after other toolbar content.
+ */
+header .header-actions .theme-switcher--compact {
+	order: 1;
+	align-self: stretch;
+	display: inline-flex;
+	align-items: center;
+	margin: 0;
+}
+
+header .header-actions:has(.theme-switcher--compact) .theme-toggle {
+	order: 2;
+}
+
+header .header-actions:has(.theme-switcher--compact) .quick-search {
+	order: 3;
+}
+
+header .header-actions:has(.theme-switcher--compact) .user-info {
+	order: 4;
+}
+
+header .header-actions .theme-switcher--compact select {
+	align-self: stretch;
+	height: 100%;
+	border: 0;
+	border-radius: 0;
+	background-color: transparent;
+	color: var(--header-fg-color);
+	padding-top: 0;
+	padding-bottom: 0;
+	padding-left: 0.6em;
+	padding-right: 0.6em;
+	font-size: small;
+	font-family: inherit;
+	cursor: pointer;
+}
+
+header .header-actions .theme-switcher--compact select:hover {
+	background-color: var(--header-hover-background-color);
+	color: var(--header-hover-text-color);
+}
+
+header .header-actions .theme-switcher--compact select:focus-visible {
+	outline: 2px solid var(--header-hover-text-color, #fff);
+	outline-offset: -2px;
+}
 </style>
