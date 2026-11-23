@@ -160,4 +160,10 @@ describe('Section', () => {
 
 		expect(wrapper.find('.section-toolbar-toggle').attributes('aria-label')).toBe('Table actions')
 	})
+
+	it('fills its container only when asked', () => {
+		expect(mountSection().find('section').classes()).not.toContain('section-fill')
+		const filled = mountSection({ props: { fill: true, classes: 'calendar' } })
+		expect(filled.find('section').classes()).toEqual(expect.arrayContaining(['with-header-and-content', 'calendar', 'section-fill']))
+	})
 })

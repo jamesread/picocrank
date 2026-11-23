@@ -135,8 +135,8 @@ section .section-header [role="toolbar"]:not(.toolbar-overflow-menu) .button {
 	flex-shrink: 0;
 }
 
-/* Grow search/filter controls only — toolbar labels stay content-sized. */
-section .section-header [role="toolbar"]:not(.toolbar-overflow-menu) > :not(button):not(.button):not(label):not(span) {
+/* Grow search/filter controls only — toolbar labels and groups stay content-sized. */
+section .section-header [role="toolbar"]:not(.toolbar-overflow-menu) > :not(button, .button, label, span, [role="group"], .toolbar-split) {
 	flex: 1 1 auto;
 	min-width: 0;
 }
@@ -145,6 +145,51 @@ section .section-header [role="toolbar"]:not(.toolbar-overflow-menu) > label {
 	flex: 0 0 auto;
 	width: auto;
 	min-width: auto;
+}
+
+/*
+ * Toolbar groups. A role="group" child (e.g. previous / today / next) is content-sized beside the
+ * title, and stays one compact row in the overflow menu. A .toolbar-split child (e.g. a button with
+ * a companion button) sits together beside the title, but each of its controls becomes its own
+ * item in the overflow menu.
+ */
+section .section-header [role="toolbar"]:not(.toolbar-overflow-menu) > :is([role="group"], .toolbar-split) {
+	display: flex;
+	flex: 0 0 auto;
+	align-items: center;
+	gap: .25em;
+	width: auto;
+}
+
+[role="toolbar"].toolbar-overflow-menu > [role="group"] {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: .25em;
+}
+
+[role="toolbar"].toolbar-overflow-menu > [role="group"] > :is(button, .button) {
+	width: auto;
+	flex: 0 0 auto;
+}
+
+[role="toolbar"].toolbar-overflow-menu > .toolbar-split {
+	display: contents;
+}
+
+/* Section fill: the content takes the height below the header; its child scrolls inside it. */
+section.section-fill {
+	display: flex;
+	flex-direction: column;
+	min-height: 0;
+}
+
+section.section-fill > .section-content {
+	display: flex;
+	flex: 1 1 auto;
+	flex-direction: column;
+	min-height: 0;
+	overflow: hidden;
 }
 
 section.narrow {
@@ -414,11 +459,12 @@ nav.menu.context-menu > ul div ul li[role="separator"] {
 
 /*
  * Icon-only buttons (only an icon inside, named by aria-label) would be a bare
- * icon in the menu: show the label as text, with the icon after it.
+ * icon in the menu: show the label as text, with the icon after it. Buttons in a
+ * role="group" row (e.g. ‹ and ›) stay compact.
  * Buttons with visible text should keep it in an element (e.g. <span>), as
  * PicoCrank's button pattern does.
  */
-[role="toolbar"].toolbar-overflow-menu button[aria-label]:not(:has(:not(svg, svg *)))::after {
+[role="toolbar"].toolbar-overflow-menu button[aria-label]:not([role="group"] button):not(:has(:not(svg, svg *)))::after {
 	content: attr(aria-label);
 }
 
