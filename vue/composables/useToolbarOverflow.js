@@ -11,16 +11,25 @@ const FOCUSABLE = [
 	'[tabindex]:not([tabindex="-1"])',
 ].join(', ')
 
+const MENU_CLASSES = ['toolbar-overflow-menu', 'toolbar-overflow-menu-open']
+
 /**
  * Width of a toolbar laid out in one row at its natural size, whether it is
- * currently inline or collapsed into its menu. The measuring class is removed
- * again synchronously, so the browser never paints it.
+ * currently inline or collapsed into its menu. The menu classes are lifted
+ * while measuring, so a collapsed toolbar is measured with its inline styles
+ * (button padding, gaps, icon-only labels): measuring it with the menu styles
+ * gives a different width, and at some widths the toolbar then flips between
+ * inline and collapsed on every frame. The classes are restored synchronously,
+ * so the browser never paints the measuring state.
  */
 export function measureNaturalWidth(element) {
 	if (!element) return 0
+	const lifted = MENU_CLASSES.filter((name) => element.classList.contains(name))
+	element.classList.remove(...lifted)
 	element.classList.add(MEASURING_CLASS)
 	const width = element.offsetWidth
 	element.classList.remove(MEASURING_CLASS)
+	element.classList.add(...lifted)
 	return width
 }
 

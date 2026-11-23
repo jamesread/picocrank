@@ -34,7 +34,7 @@ beforeEach(() => {
 })
 
 afterEach(() => {
-	restore.forEach(fn => fn())
+	restore.reverse().forEach(fn => fn())
 	widths.header = 400
 	widths.toolbar = 200
 	widths.title = 100
@@ -141,6 +141,23 @@ describe('Section', () => {
 		wrapper.vm.update()
 		await nextTick()
 		expect(wrapper.find('.section-toolbar-toggle').exists()).toBe(false)
+	})
+
+	it('measures a collapsed toolbar with its inline styles, so it stays collapsed', async () => {
+		// The menu styles make the toolbar narrower; measuring with them on
+		// made it flip between inline and collapsed on every frame.
+		restore.push(stubWidth('offsetWidth', (el) => {
+			if (el.getAttribute('role') !== 'toolbar') return undefined
+			return el.classList.contains('toolbar-overflow-menu') ? 250 : 450
+		}))
+		const wrapper = mountSection()
+		await nextTick()
+		expect(wrapper.find('.section-toolbar-toggle').exists()).toBe(true)
+
+		wrapper.vm.update()
+		await nextTick()
+		expect(wrapper.find('.section-toolbar-toggle').exists()).toBe(true)
+		expect(wrapper.find('[role="toolbar"]').classes()).toContain('toolbar-overflow-menu')
 	})
 
 	it('never collapses when collapseToolbar is false or the toolbar is empty', async () => {
